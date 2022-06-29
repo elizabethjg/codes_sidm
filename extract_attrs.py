@@ -20,6 +20,6 @@ for j in range(nhalos):
     for i in range(len(cols)):
         props[j,i] = f.attrs[cols[i]]
     
-out_file = '/home/elizabeth/SIDM/halo_props/halo_props_rock_sidm1.csv.bz2'
+out_file = '/home/elizabeth/SIDM/halo_props/halo_props_sidm1_z0_rock.csv.bz2'
 
 np.savetxt(out_file,props,fmt='%12.6f',header=head,comments='',delimiter=',')
