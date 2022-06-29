@@ -1,11 +1,11 @@
 import numpy as np
 import pandas as pd
 
-rock     = pd.read_csv('../halo_props/halo_props_rock.csv.bz2')
-main     = pd.read_csv('../halo_props/halo_props_main.csv.bz2')
+rock     = pd.read_csv('../halo_props/halo_props_cdm_z0_rock.csv.bz2')
+main     = pd.read_csv('../halo_props/halo_props_cdm_z0_main.csv.bz2')
 
-rock1    = pd.read_csv('../halo_props/halo_props_rock_sidm1.csv.bz2')
-main1    = pd.read_csv('../halo_props/halo_props_sidm1_main.csv.bz2')
+rock1    = pd.read_csv('../halo_props/halo_props_sidm1_z0_rock.csv.bz2')
+main1    = pd.read_csv('../halo_props/halo_props_sidm1_z0_main.csv.bz2')
 
 # LOAD PARAMS
 
