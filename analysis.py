@@ -3,10 +3,12 @@ import pandas as pd
 from scipy import stats
 from astropy.io import fits
 
-halos = fits.open('/home/elizabeth/Documentos/Astronomia/proyectos/HALO-SHAPE/MICE/HS-lensing/HALO_Props_MICE.fits')[1].data        
+# halos = fits.open('/home/elizabeth/Documentos/Astronomia/proyectos/HALO-SHAPE/MICE/HS-lensing/HALO_Props_MICE.fits')[1].data        
+halos = fits.open('/home/elizabeth/Documentos/proyectos/HALO-SHAPE/MICE/HS-lensing/HALO_Props_MICE.fits')[1].data        
 
 z = 'z0'
-z = 'z96'
+# z = 'z96'
+# z = 'z51'
 mask = (halos.z < 0.1)
 
 def q_75(y):
@@ -134,7 +136,7 @@ make_plot2(main.lgM,q,nbins=4,color='C0',error=True,label='CDM')
 plt.legend()
 plt.xlabel('$\log(M_{vir})$')
 plt.ylabel('$q_{2D}$')
-plt.savefig('../mass_q2d.png')
+plt.savefig('../mass_q2d_'+z+'.png')
 
 plt.figure()
 make_plot2(main.lgM,S_rock,nbins=4,color='C1',error=True,label='SIDM')
@@ -143,7 +145,7 @@ make_plot2(main.lgM,S_rock1,nbins=4,color='C0',error=True,label='CDM')
 plt.legend()
 plt.xlabel('$\log(M_{vir})$')
 plt.ylabel('$c/a$')
-plt.savefig('../mass_Srock.png')
+plt.savefig('../mass_Srock_'+z+'.png')
 
 plt.figure()
 make_plot2(main.lgM,S,nbins=4,color='C1',error=True,label='SIDM')
@@ -152,4 +154,4 @@ make_plot2(main.lgM,S1,nbins=4,color='C0',error=True,label='CDM')
 plt.legend()
 plt.xlabel('$\log(M_{vir})$')
 plt.ylabel('$c/a$')
-plt.savefig('../mass_S.png')
+plt.savefig('../mass_S_'+z+'.png')
