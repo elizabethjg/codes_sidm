@@ -1,7 +1,10 @@
+import sys
+sys.path.append('/home/elizabeth/lens_codes_v3.7')
 import numpy as np
 import pandas as pd
 from scipy import stats
 from astropy.io import fits
+from binned_plots import make_plot2
 
 # halos = fits.open('/home/elizabeth/Documentos/Astronomia/proyectos/HALO-SHAPE/MICE/HS-lensing/HALO_Props_MICE.fits')[1].data        
 halos = fits.open('/home/elizabeth/Documentos/proyectos/HALO-SHAPE/MICE/HS-lensing/HALO_Props_MICE.fits')[1].data        
@@ -11,53 +14,6 @@ z = 'z0'
 # z = 'z51'
 mask = (halos.z < 0.1)
 
-def q_75(y):
-    return np.quantile(y, 0.75)
-
-def q_25(y):
-    return np.quantile(y, 0.25)
-
-
-def binned(x,y,nbins=10):
-    
-    
-    bined = stats.binned_statistic(x,y,statistic='mean', bins=nbins)
-    x_b = 0.5*(bined.bin_edges[:-1] + bined.bin_edges[1:])
-    ymean     = bined.statistic
-
-    bined = stats.binned_statistic(x,y,statistic='median', bins=nbins)
-    x_b = 0.5*(bined.bin_edges[:-1] + bined.bin_edges[1:])
-    q50     = bined.statistic
-    
-    bined = stats.binned_statistic(x,y,statistic=q_25, bins=nbins)
-    q25     = bined.statistic
-
-    bined = stats.binned_statistic(x,y,statistic=q_75, bins=nbins)
-    q75     = bined.statistic
-
-    bined = stats.binned_statistic(x,y,statistic='count', bins=nbins)
-    N     = bined.statistic
-
-    bined = stats.binned_statistic(x,y,statistic='std', bins=nbins)
-    sigma = bined.statistic
-    
-    dig   = np.digitize(x,bined.bin_edges)
-    mz    = np.ones(len(x))
-    for j in range(nbins):
-        mbin = dig == (j+1)
-        mz[mbin] = y[mbin] >= q50[j]   
-    mz = mz.astype(bool)
-    return x_b,q50,q25,q75,mz,ymean,sigma/np.sqrt(N)
-            
-
-def make_plot2(X,Y,color='C0',nbins=20,plt=plt,label='',error = False,lw=1,lt='-'):
-    x,q50,q25,q75,nada,ymean,ers = binned(X,Y,nbins)
-    if error:
-        plt.plot(x,ymean,lt,color=color,label=label,lw=lw)
-        plt.fill_between(x,ymean+ers,ymean-ers,color=color,alpha=0.2)
-    else:
-        plt.plot(x,q50,lt,color=color,label=label,lw=lw)
-        plt.fill_between(x,q75,q25,color=color,alpha=0.2)
 
 
 rock     = pd.read_csv('../halo_props/halo_props_cdm_'+z+'_rock.csv.bz2')
@@ -109,7 +65,7 @@ plt.plot([0,1],[0,1],'C7--')
 plt.xlabel('c/a - CDM')
 plt.ylabel('c/a - SIDM')
 plt.legend()
-plt.savefig('../q_cdm_sidm_'+z+'.png')
+plt.savefig('../s_cdm_sidm_'+z+'.png')
 
 plt.figure()
 plt.plot(Q_rock,Q,'.',label='CDM')
@@ -118,7 +74,7 @@ plt.plot([0,1],[0,1],'C7--')
 plt.xlabel('b/a - ROCKSTAR')
 plt.ylabel('b/a - new params')
 plt.legend()
-plt.savefig('../s_rock_new_'+z+'.png')
+plt.savefig('../q_rock_new_'+z+'.png')
 
 plt.figure()
 plt.plot(Q_rock,Q_rock1,'.',label='rock')
@@ -155,3 +111,31 @@ plt.legend()
 plt.xlabel('$\log(M_{vir})$')
 plt.ylabel('$c/a$')
 plt.savefig('../mass_S_'+z+'.png')
+
+plt.figure()
+plt.plot(offset,offset1,'.')
+plt.plot([0,1.],[0,1],'C7--')
+plt.xlabel('$r_c/r_{MAX}$ - CDM')
+plt.ylabel('$r_c/r_{MAX}$ - SIDM')
+plt.loglog()
+plt.savefig('../offset_'+z+'.png')
+
+plt.figure()
+plt.plot(Eratio,Eratio1,'C3.')
+plt.plot([0,6],[0,6],'C7--')
+plt.axvline(1.35)
+plt.axhline(1.35)
+plt.xlabel('$2K/U$ - CDM')
+plt.ylabel('$2K/U$ - SIDM')
+plt.axis([1,2,0.,4])
+plt.savefig('../Eratio_'+z+'.png')
+
+plt.figure()
+plt.scatter(S_rock,S,c=offset,vmax=0.1)
+plt.plot([0,1],[0,1],'C7--')
+plt.xlabel('c/a - ROCKSTAR')
+plt.ylabel('c/a - new params')
+cbar = plt.colorbar()
+cbar.set_label('$r_c/r_{MAX}$')
+plt.legend()
+plt.savefig('../s_rock_new_offset_'+z+'.png')
