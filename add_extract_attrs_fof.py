@@ -18,14 +18,13 @@ head += cols[-1]
 props = np.zeros((nhalos,len(cols)))
 
 for j in range(nhalos):
-    j = 0
     
-    f = h5py.File(path+'halo_'+str(j)+'.hdf5','w')   
+    data = h5py.File(path+'halo_'+str(j)+'.hdf5','a')       
     
     for i in range(len(cols)):
-        f.attrs.create(cols[i],atri[cols[i]][j])
-        props[j,i] = f.attrs[cols[i]]
-    f.close()
+        data.attrs.create(cols[i],atri[cols[i]][j])
+        props[j,i] = data.attrs[cols[i]]
+    data.close()
         
     
 out_file = '/home/elizabeth/SIDM/halo_props/halo_props_cdm_z0_fof.csv.bz2'
