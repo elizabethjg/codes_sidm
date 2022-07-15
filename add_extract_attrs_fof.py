@@ -2,8 +2,8 @@ import h5py
 import numpy as np
 
 
-# path = '/mnt/simulations/SIDM_simus/Lentes/Eli_Agus/snapshot_050/CDM/'
-path = '/home/elizabeth/CDM/'
+path = '/mnt/projects/lensing/SIDM_project/Lentes/Eli_Agus/snapshot_050/CDM/'
+# path = '/home/elizabeth/CDM/'
 
 atri = h5py.File(path+'all_halos.hdf5','r')
 
