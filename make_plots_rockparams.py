@@ -14,57 +14,72 @@ zs = ['z0','z51','z96']
 # z = 'z51'
 mask = (halos.z < 0.1)
 
+f1, ax1 = plt.subplots(1,3, figsize=(14,4),sharex=True,sharey=True)
+f1.subplots_adjust(wspace=0)
 
-z = zs[j]
+f2, ax2 = plt.subplots(1,3, figsize=(14,4),sharex=True,sharey=True)
+f2.subplots_adjust(wspace=0)
+
+f3, ax3 = plt.subplots(1,3, figsize=(14,4),sharex=True,sharey=True)
+f3.subplots_adjust(wspace=0)
+
+f4, ax4 = plt.subplots(1,3, figsize=(14,4),sharex=True,sharey=True)
+f4.subplots_adjust(wspace=0)
+
+f5, ax5 = plt.subplots(1,3, figsize=(14,4),sharex=True,sharey=True)
+f5.subplots_adjust(wspace=0)
+
+f6, ax6 = plt.subplots(1,3, figsize=(14,4),sharex=True,sharey=True)
+f6.subplots_adjust(wspace=0)
+
+f7, ax7 = plt.subplots(1,3, figsize=(14,4),sharex=True,sharey=True)
+f7.subplots_adjust(wspace=0)
+
+f8, ax8 = plt.subplots(1,3, figsize=(14,4),sharex=True,sharey=True)
+f8.subplots_adjust(wspace=0)
+
+f9, ax9 = plt.subplots(1,3, figsize=(14,4),sharex=True,sharey=True)
+f9.subplots_adjust(wspace=0)
+
+f10, ax10 = plt.subplots(1,3, figsize=(14,4),sharex=True,sharey=True)
+f10.subplots_adjust(wspace=0)
+
+
+for j in range(3):
+
+    z = zs[j]
     
 
-rock     = pd.read_csv('../halo_props/halo_props_cdm_'+z+'_rock.csv.bz2')
-main     = pd.read_csv('../halo_props/halo_props_cdm_'+z+'_main.csv.bz2')
-main_fof = pd.read_csv('../halo_props/halo_props_fof_cdm_'+z+'_main.csv.bz2')
-
-rock1     = pd.read_csv('../halo_props/halo_props_sidm1_'+z+'_rock.csv.bz2')
-main1     = pd.read_csv('../halo_props/halo_props_sidm1_'+z+'_main.csv.bz2')
-main1_fof = pd.read_csv('../halo_props/halo_props_fof_sidm1_'+z+'_main.csv.bz2')
-
+    rock     = pd.read_csv('../halo_props/halo_props_cdm_'+z+'_rock.csv.bz2')
+    main     = pd.read_csv('../halo_props/halo_props_cdm_'+z+'_main.csv.bz2')
+    
+    rock1    = pd.read_csv('../halo_props/halo_props_sidm1_'+z+'_rock.csv.bz2')
+    main1    = pd.read_csv('../halo_props/halo_props_sidm1_'+z+'_main.csv.bz2')
     
     # LOAD PARAMS
     
-S_rock = rock['c to a']
-Q_rock = rock['b to a']
-S_rock1 = rock1['c to a']
-Q_rock1 = rock1['b to a']
-
-S = main.c3D/main.a3D
-Q = main.c3D/main.a3D
-q = main.b2D/main.a2D
-S1 = main1.c3D/main1.a3D
-Q1 = main1.c3D/main1.a3D
-q1 = main1.b2D/main1.a2D
-
-S_fof  = main_fof.c3D/main_fof.a3D
-Q_fof  = main_fof.c3D/main_fof.a3D
-q_fof  = main_fof.b2D/main_fof.a2D
-S1_fof = main1_fof.c3D/main1_fof.a3D
-Q1_fof = main1_fof.c3D/main1_fof.a3D
-q1_fof = main1_fof.b2D/main1_fof.a2D
+    S_rock = rock['c to a']
+    Q_rock = rock['b to a']
+    S_rock1 = rock1['c to a']
+    Q_rock1 = rock1['b to a']
     
-Eratio  = (2.*main.EKin/abs(main.EPot))
-Eratio1 = (2.*main1.EKin/abs(main1.EPot))
-
-Eratio  = (2.*main_fof.EKin/abs(main_fof.EPot))
-Eratio1 = (2.*main1_fof.EKin/abs(main1_fof.EPot))
-   
-lgM = main.lgM
-lgM1 = main1.lgM
-
-lgM_fof  = main_fof.lgM
-lgM1_fof = main1_fof.lgM
+    S = main.c3D/main.a3D
+    Q = main.c3D/main.a3D
+    q = main.b2D/main.a2D
+    S1 = main1.c3D/main1.a3D
+    Q1 = main1.c3D/main1.a3D
+    q1 = main1.b2D/main1.a2D
     
-rc_fof  = np.array(np.sqrt((main_fof.xc - main_fof.xc_rc)**2 + (main_fof.yc - main_fof.yc_rc)**2 + (main_fof.zc - main_fof.zc_rc)**2))
-rc1_fof = np.array(np.sqrt((main1_fof.xc - main1_fof.xc_rc)**2 + (main1_fof.yc - main1_fof.yc_rc)**2 + (main1_fof.zc - main1_fof.zc_rc)**2))
-offset_fof  = rc_fof/main_fof.r_max
-offset1_fof = rc1_fof/main1_fof.r_max
-
+    Eratio  = (2.*main.EKin/abs(main.EPot))
+    Eratio1 = (2.*main1.EKin/abs(main1.EPot))
+    
+    lgM = main.lgM
+    lgM1 = main1.lgM
+    
+    rc = np.array(np.sqrt((main.xc - main.xc_rc)**2 + (main.yc - main.yc_rc)**2 + (main.zc - main.zc_rc)**2))
+    rc1 = np.array(np.sqrt((main1.xc - main1.xc_rc)**2 + (main1.yc - main1.yc_rc)**2 + (main1.zc - main1.zc_rc)**2))
+    offset = rc/main.r_max
+    offset1 = rc1/main1.r_max
     
     
     # COMPARISON rock vs new params
