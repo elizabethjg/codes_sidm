@@ -12,10 +12,10 @@ halos = fits.open('/home/elizabeth/Documentos/proyectos/HALO-SHAPE/MICE/HS-lensi
 zs = ['z0','z51','z96']
 # z = 'z96'
 # z = 'z51'
-mask = (halos.z < 0.1)
+mask = (halos.z < 0.05)
 
 
-z = zs[j]
+z = zs[0]
     
 
 rock     = pd.read_csv('../halo_props/halo_props_cdm_'+z+'_rock.csv.bz2')
@@ -31,8 +31,8 @@ main1_fof = pd.read_csv('../halo_props/halo_props_fof_sidm1_'+z+'_main.csv.bz2')
     
 S_rock = rock['c to a']
 Q_rock = rock['b to a']
-S_rock1 = rock1['c to a']
-Q_rock1 = rock1['b to a']
+S1_rock = rock1['c to a']
+Q1_rock = rock1['b to a']
 
 S = main.c3D/main.a3D
 Q = main.c3D/main.a3D
@@ -51,9 +51,11 @@ q1_fof = main1_fof.b2D/main1_fof.a2D
 Eratio  = (2.*main.EKin/abs(main.EPot))
 Eratio1 = (2.*main1.EKin/abs(main1.EPot))
 
-Eratio  = (2.*main_fof.EKin/abs(main_fof.EPot))
-Eratio1 = (2.*main1_fof.EKin/abs(main1_fof.EPot))
-   
+Eratio_fof  = (2.*main_fof.EKin/abs(main_fof.EPot))
+Eratio1_fof = (2.*main1_fof.EKin/abs(main1_fof.EPot))
+
+Eratio_mice = (2.*halos.K)/abs(halos.U)
+
 lgM = main.lgM
 lgM1 = main1.lgM
 
@@ -65,97 +67,28 @@ rc1_fof = np.array(np.sqrt((main1_fof.xc - main1_fof.xc_rc)**2 + (main1_fof.yc -
 offset_fof  = rc_fof/main_fof.r_max
 offset1_fof = rc1_fof/main1_fof.r_max
 
-    
-    
-    # COMPARISON rock vs new params
+make_plot2(main.lgM,S,nbins=4,color='C0',error=True,label='new par')
+make_plot2(main.lgM,S_rock,nbins=4,color='C1',error=True,label='rockstar')
+make_plot2(main_fof.lgM,S_fof,nbins=4,color='C2',error=True,label='fof')
+make_plot2(halos.lgM[mask],halos.s[mask],nbins=4,color='C7',error=True,label='MICE')
 
-    ax1[j].plot(S_rock,S,'.',label='CDM')
-    ax1[j].plot(S_rock1,S1,'x',label='SIDM')
-    ax1[j].plot([0,1],[0,1],'C7--')
-    ax1[j].set_xlabel('c/a - ROCKSTAR')
-    ax1[j].set_ylabel('c/a - new params')
-    ax1[j].legend()
-    
-    
-    ax2[j].plot(S_rock,S_rock1,'.',label='rock')
-    ax2[j].plot(S,S1,'x',label='new params')
-    ax2[j].plot([0,1],[0,1],'C7--')
-    ax2[j].set_xlabel('c/a - CDM')
-    ax2[j].set_ylabel('c/a - SIDM')
-    ax2[j].legend()
-    
-    
-    ax3[j].plot(Q_rock,Q,'.',label='CDM')
-    ax3[j].plot(Q_rock1,Q1,'x',label='SIDM')
-    ax3[j].plot([0,1],[0,1],'C7--')
-    ax3[j].set_xlabel('b/a - ROCKSTAR')
-    ax3[j].set_ylabel('b/a - new params')
-    ax3[j].legend()
-    
-    
-    ax4[j].plot(Q_rock,Q_rock1,'.',label='rock')
-    ax4[j].plot(Q,Q1,'x',label='new params')
-    ax4[j].plot([0,1],[0,1],'C7--')
-    ax4[j].set_xlabel('b/a - CDM')
-    ax4[j].set_ylabel('b/a - SIDM')
-    ax4[j].legend()
-    
-    
-    make_plot2(main.lgM,q1,nbins=4,color='C1',error=True,label='SIDM',plt=ax5[j])
-    make_plot2(main.lgM,q,nbins=4,color='C0',error=True,label='CDM',plt=ax5[j])
-    ax5[j].legend()
-    ax5[j].set_xlabel('$\log(M_{vir})$')
-    ax5[j].set_ylabel('$q_{2D}$')
-    
-    
-    make_plot2(main.lgM,S_rock,nbins=4,color='C1',error=True,label='SIDM',plt=ax6[j])
-    make_plot2(main.lgM,S_rock1,nbins=4,color='C0',error=True,label='CDM',plt=ax6[j])
-    # make_plot2(halos.lgM[mask],halos.s[mask],nbins=4,color='C7',error=True,label='MICE')
-    ax6[j].legend()
-    ax6[j].set_xlabel('$\log(M_{vir})$')
-    ax6[j].set_ylabel('$c/a$')
-    
-    
-    make_plot2(main.lgM,S,nbins=4,color='C1',error=True,label='SIDM',plt=ax7[j])
-    make_plot2(main.lgM,S1,nbins=4,color='C0',error=True,label='CDM',plt=ax7[j])
-    # make_plot2(halos.lgM[mask],halos.s[mask],nbins=4,color='C7',error=True,label='MICE')
-    ax7[j].legend()
-    ax7[j].set_xlabel('$\log(M_{vir})$')
-    ax7[j].set_ylabel('$c/a$')
-    
-    
-    ax8[j].plot(offset,offset1,'.')
-    ax8[j].plot([0,1.],[0,1],'C7--')
-    ax8[j].set_xlabel('$r_c/r_{MAX}$ - CDM')
-    ax8[j].set_ylabel('$r_c/r_{MAX}$ - SIDM')
-    ax8[j].loglog()
+make_plot2(main.lgM,S1,nbins=4,color='C0',error=True,label='new par',lt='--')
+make_plot2(main.lgM,S1_rock,nbins=4,color='C1',error=True,label='rockstar',lt='--')
+make_plot2(main_fof.lgM,S1_fof,nbins=4,color='C2',error=True,label='fof',lt='--')
 
-    
-    ax9[j].plot(Eratio,Eratio1,'C3.')
-    ax9[j].plot([0,6],[0,6],'C7--')
-    ax9[j].axvline(1.35)
-    ax9[j].axhline(1.35)
-    ax9[j].set_xlabel('$2K/U$ - CDM')
-    ax9[j].set_ylabel('$2K/U$ - SIDM')
-    ax9[j].axis([1,2,0.,4])
-    
-    
-    ax10[j].scatter(S_rock,S,c=offset,vmax=0.1)
-    ax10[j].plot([0,1],[0,1],'C7--')
-    ax10[j].set_xlabel('c/a - ROCKSTAR')
-    ax10[j].set_ylabel('c/a - new params')
-    ax10[j].legend()
 
-f1.savefig('../s_rock_new.png')
-f2.savefig('../s_cdm_sidm.png')
-f3.savefig('../q_rock_new.png')
-f4.savefig('../q_cdm_sidm.png')
-f5.savefig('../mass_q2d.png')
-f6.savefig('../mass_Srock.png')
-f7.savefig('../mass_S.png')
-f8.savefig('../offset.png')    
-f9.savefig('../Eratio.png')
+plt.figure()
+make_plot2(main_fof.lgM,S1_fof,nbins=4,color='C2',error=True,label='fof',lt='--')
+make_plot2(halos.lgM[mask],halos.s[mask],nbins=4,color='C7',error=True,label='MICE')
+make_plot2(main_fof.lgM,S_fof,nbins=4,color='C2',error=True,label='fof')
 
-im0 = ax10[0].scatter(S_rock,S,c=offset,vmax=0.1)
-f10.colorbar(im0, ax=ax10, orientation='vertical', fraction=.05)
-f10.savefig('../s_rock_new_offset.png')
+
+plt.figure()
+make_plot2(main_fof.lgM[offset1_fof<0.1],S1_fof[offset1_fof<0.1],nbins=4,color='C2',error=True,label='fof',lt='--')
+make_plot2(halos.lgM[mask*(halos.offset<0.1)],halos.s[mask*(halos.offset<0.1)],nbins=4,color='C7',error=True,label='MICE')
+make_plot2(main_fof.lgM[offset_fof<0.1],S_fof[offset_fof<0.1],nbins=4,color='C2',error=True,label='fof')
+
+plt.figure()
+plt.hist(Eratio_fof,np.linspace(0.5,2.5,50),histtype='step',density=True,label='FOF')
+plt.hist(Eratio_mice,np.linspace(0.5,2.5,50),histtype='step',density=True,label='MICE')
+plt.hist(Eratio,np.linspace(0.5,2.5,50),histtype='step',density=True,label='Rockstar')
