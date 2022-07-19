@@ -11,8 +11,10 @@ zs = ['z0','z51','z96']
 
 z = zs[0]
 
-path = '/mnt/projects/lensing/SIDM_project/Lentes/Eli_Agus/snapshot_050/CDM/'
-main = pd.read_csv('/home/elizabeth/SIDM/halo_props/halo_props_fof_cdm_'+z+'_main.csv.bz2')
+# path = '/mnt/projects/lensing/SIDM_project/Lentes/Eli_Agus/snapshot_050/CDM/'
+# main = pd.read_csv('/home/elizabeth/SIDM/halo_props/halo_props_fof_cdm_'+z+'_main.csv.bz2')
+path = '/mnt/projects/lensing/SIDM_project/Lentes/Eli_Agus/snapshot_050/SCDM/'
+main = pd.read_csv('/home/elizabeth/SIDM/halo_props/halo_props_fof_sidm1_'+z+'_main.csv.bz2')
 
 x = np.array([])
 y = np.array([])
@@ -75,4 +77,4 @@ ax[1].set_ylabel('z [Mpc/h]')
 
 ax[2].set_xlabel('y [Mpc/h]')
 ax[2].set_ylabel('z [Mpc/h]')
-f.savefig('/home/elizabeth/SIDM/coords_cdm.png',bbox_inches='tight')
+f.savefig('/home/elizabeth/SIDM/coords_sidm1.png',bbox_inches='tight')
