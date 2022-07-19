@@ -49,6 +49,13 @@ q_fof  = main_fof.b2D/main_fof.a2D
 S1_fof = main1_fof.c3D/main1_fof.a3D
 Q1_fof = main1_fof.c3D/main1_fof.a3D
 q1_fof = main1_fof.b2D/main1_fof.a2D
+
+Sr_fof  = main_fof.c3Dr/main_fof.a3Dr
+Qr_fof  = main_fof.c3Dr/main_fof.a3Dr
+qr_fof  = main_fof.b2Dr/main_fof.a2Dr
+S1r_fof = main1_fof.c3Dr/main1_fof.a3Dr
+Q1r_fof = main1_fof.c3Dr/main1_fof.a3Dr
+q1r_fof = main1_fof.b2Dr/main1_fof.a2Dr
     
 Eratio  = (2.*main.EKin/abs(main.EPot))
 Eratio1 = (2.*main1.EKin/abs(main1.EPot))
@@ -90,6 +97,15 @@ make_plot2(main_fof.lgM,S1_fof,nbins=4,color='C2',error=True,label='SIDM',lt='--
 make_plot2(main_fof.lgM,S_fof,nbins=4,color='C2',error=True,label='DM')
 plt.legend()
 
+plt.figure()
+plt.xlabel('$\log M_{FOF}$')
+plt.ylabel('$S_r = c_r/a_r$')
+make_plot2(halos.lgM[mask],halos.sr[mask],nbins=4,color='C7',error=True,label='MICE')
+make_plot2(main_fof.lgM,S1r_fof,nbins=4,color='C2',error=True,label='SIDM',lt='--')
+make_plot2(main_fof.lgM,Sr_fof,nbins=4,color='C2',error=True,label='DM')
+plt.legend()
+
+
 doff = 0.1
 mlim = 14.0
 
@@ -99,6 +115,14 @@ plt.ylabel('$S = c/a$')
 make_plot2(halos.lgM[mask*(halos.offset<doff)],halos.s[mask*(halos.offset<doff)],nbins=4,color='C7',error=True,label='MICE')
 make_plot2(main_fof.lgM[offset1_fof<doff],S1_fof[offset1_fof<doff],nbins=4,color='C2',error=True,label='fof',lt='--')
 make_plot2(main_fof.lgM[offset_fof<doff],S_fof[offset_fof<doff],nbins=4,color='C2',error=True,label='fof')
+plt.legend()
+
+plt.figure()
+plt.xlabel('$\log M_{FOF}$')
+plt.ylabel('$S_r = c_r/a_r$')
+make_plot2(halos.lgM[mask*(halos.offset<doff)],halos.sr[mask*(halos.offset<doff)],nbins=4,color='C7',error=True,label='MICE')
+make_plot2(main_fof.lgM[offset1_fof<doff],S1r_fof[offset1_fof<doff],nbins=4,color='C2',error=True,label='fof',lt='--')
+make_plot2(main_fof.lgM[offset_fof<doff],Sr_fof[offset_fof<doff],nbins=4,color='C2',error=True,label='fof')
 plt.legend()
 
 plt.figure()

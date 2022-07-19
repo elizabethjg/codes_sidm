@@ -31,8 +31,8 @@ mhalos1 = (offset1 < 0.1)*(main1.lgM < 14.2)
 haloids = np.array(main.column_halo_id)[mhalos]
 haloids1 = np.array(main1.column_halo_id)[mhalos1]
     
-x,y,z,x2d,y2d = stack_halos(main_cdm,path_cdm,haloids) 
-x1,y1,z1,x2d1,y2d1 = stack_halos(main_sidm,path_sidm,haloids1) 
+x,y,z,x2d,y2d = stack_halos(main_cdm,path_cdm,haloids,True) 
+x1,y1,z1,x2d1,y2d1 = stack_halos(main_sidm,path_sidm,haloids1,True) 
 
 
 m3d = (abs(x) < 4.)*(abs(y) < 4.)*(abs(z) < 4.)
