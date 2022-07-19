@@ -91,11 +91,11 @@ f, ax = plt.subplots(2,1, figsize=(4,8),sharex=True,sharey=True)
 
 ax[0].plot(x2d,y2d,'C7,')
 ax[0].plot(x2d,y2d,'C2,',alpha=0.005)
-ax[0].plot(x2d,y2d,'C3,',alpha=0.001)
+ax[0].plot(x2d,y2d,'C3,',alpha=0.002)
 
 ax[1].plot(x2dr,y2dr,'C7,')
 ax[1].plot(x2dr,y2dr,'C2,',alpha=0.005)
-ax[1].plot(x2dr,y2dr,'C3,',alpha=0.001)
+ax[1].plot(x2dr,y2dr,'C3,',alpha=0.002)
 
 ax[0].set_xlabel('x [Mpc/h]')
 ax[0].set_ylabel('y [Mpc/h]')
