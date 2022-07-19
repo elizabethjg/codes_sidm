@@ -6,13 +6,15 @@ from scipy import stats
 from astropy.io import fits
 from binned_plots import make_plot2
 
-# halos = fits.open('/home/elizabeth/Documentos/Astronomia/proyectos/HALO-SHAPE/MICE/HS-lensing/HALO_Props_MICE.fits')[1].data        
-halos = fits.open('/home/elizabeth/Documentos/proyectos/HALO-SHAPE/MICE/HS-lensing/HALO_Props_MICE.fits')[1].data        
+try:
+    halos = fits.open('/home/elizabeth/Documentos/Astronomia/proyectos/HALO-SHAPE/MICE/HS-lensing/HALO_Props_MICE.fits')[1].data        
+except:
+    halos = fits.open('/home/elizabeth/Documentos/proyectos/HALO-SHAPE/MICE/HS-lensing/HALO_Props_MICE.fits')[1].data        
 
 zs = ['z0','z51','z96']
 # z = 'z96'
 # z = 'z51'
-mask = (halos.z < 0.05)
+mask = (halos.z < 0.07)
 
 
 z = zs[0]
@@ -67,26 +69,56 @@ rc1_fof = np.array(np.sqrt((main1_fof.xc - main1_fof.xc_rc)**2 + (main1_fof.yc -
 offset_fof  = rc_fof/main_fof.r_max
 offset1_fof = rc1_fof/main1_fof.r_max
 
-make_plot2(main.lgM,S,nbins=4,color='C0',error=True,label='new par')
-make_plot2(main.lgM,S_rock,nbins=4,color='C1',error=True,label='rockstar')
-make_plot2(main_fof.lgM,S_fof,nbins=4,color='C2',error=True,label='fof')
-make_plot2(halos.lgM[mask],halos.s[mask],nbins=4,color='C7',error=True,label='MICE')
-
+plt.figure()
+plt.xlabel('$\log M$')
+plt.ylabel('$S = c/a$')
+make_plot2(main.lgM,S,nbins=4,color='C0',error=True,label='new par - rockstar')
+make_plot2(main.lgM,S_rock,nbins=4,color='C1',error=True,label='rockstar - rockstar')
+make_plot2(main_fof.lgM-0.2,S_fof,nbins=4,color='C2',error=True,label='new par - fof')
+make_plot2(halos.lgM[mask]-0.2,halos.s[mask],nbins=4,color='C7',error=True,label='MICE')
+plt.legend()
 make_plot2(main.lgM,S1,nbins=4,color='C0',error=True,label='new par',lt='--')
 make_plot2(main.lgM,S1_rock,nbins=4,color='C1',error=True,label='rockstar',lt='--')
-make_plot2(main_fof.lgM,S1_fof,nbins=4,color='C2',error=True,label='fof',lt='--')
+make_plot2(main_fof.lgM-0.2,S1_fof,nbins=4,color='C2',error=True,label='fof',lt='--')
 
 
 plt.figure()
-make_plot2(main_fof.lgM,S1_fof,nbins=4,color='C2',error=True,label='fof',lt='--')
+plt.xlabel('$\log M_{FOF}$')
+plt.ylabel('$S = c/a$')
 make_plot2(halos.lgM[mask],halos.s[mask],nbins=4,color='C7',error=True,label='MICE')
-make_plot2(main_fof.lgM,S_fof,nbins=4,color='C2',error=True,label='fof')
+make_plot2(main_fof.lgM,S1_fof,nbins=4,color='C2',error=True,label='SIDM',lt='--')
+make_plot2(main_fof.lgM,S_fof,nbins=4,color='C2',error=True,label='DM')
+plt.legend()
 
+doff = 0.1
+mlim = 14.0
 
 plt.figure()
-make_plot2(main_fof.lgM[offset1_fof<0.1],S1_fof[offset1_fof<0.1],nbins=4,color='C2',error=True,label='fof',lt='--')
-make_plot2(halos.lgM[mask*(halos.offset<0.1)],halos.s[mask*(halos.offset<0.1)],nbins=4,color='C7',error=True,label='MICE')
-make_plot2(main_fof.lgM[offset_fof<0.1],S_fof[offset_fof<0.1],nbins=4,color='C2',error=True,label='fof')
+plt.xlabel('$\log M_{FOF}$')
+plt.ylabel('$S = c/a$')
+make_plot2(halos.lgM[mask*(halos.offset<doff)],halos.s[mask*(halos.offset<doff)],nbins=4,color='C7',error=True,label='MICE')
+make_plot2(main_fof.lgM[offset1_fof<doff],S1_fof[offset1_fof<doff],nbins=4,color='C2',error=True,label='fof',lt='--')
+make_plot2(main_fof.lgM[offset_fof<doff],S_fof[offset_fof<doff],nbins=4,color='C2',error=True,label='fof')
+plt.legend()
+
+plt.figure()
+plt.hist(halos.s[mask*(halos.offset<doff)*(halos.lgM<mlim)],np.linspace(0.2,1.,15),histtype='step',color='C7',density=True)
+plt.hist(S_fof[(offset_fof<doff)*(main_fof.lgM<mlim)],np.linspace(0.2,1.,15),histtype='step',color='C2',density=True,label='CDM')
+plt.hist(S1_fof[(offset1_fof<doff)*(main_fof.lgM<mlim)],np.linspace(0.2,1.,15),histtype='step',color='C3',density=True,label='SIDM')
+plt.axvline(np.mean(S_fof[(offset_fof<doff)*(main_fof.lgM<mlim)]),color='C2')
+plt.axvline(np.mean(S1_fof[(offset1_fof<doff)*(main_fof.lgM<mlim)]),color='C3')
+plt.legend()
+
+plt.figure()
+plt.hist(halos.s[mask*(halos.offset<doff)*(halos.lgM>=mlim)],np.linspace(0.2,1.,15),histtype='step',color='C7',density=True)
+plt.hist(S_fof[(offset_fof<doff)*(main_fof.lgM>=mlim)],np.linspace(0.2,1.,15),histtype='step',color='C2',density=True,label='CDM')
+plt.hist(S1_fof[(offset1_fof<doff)*(main_fof.lgM>=mlim)],np.linspace(0.2,1.,15),histtype='step',color='C3',density=True,label='SIDM')
+plt.axvline(np.mean(S_fof[(offset_fof<doff)*(main_fof.lgM>=mlim)]),color='C2')
+plt.axvline(np.mean(S1_fof[(offset1_fof<doff)*(main_fof.lgM>=mlim)]),color='C3')
+plt.legend()
+
+print(np.mean(S_fof[(offset_fof<doff)*(main_fof.lgM<mlim)])/np.mean(S1_fof[(offset1_fof<doff)*(main_fof.lgM<mlim)]))
+print(np.mean(S_fof[(offset_fof<doff)*(main_fof.lgM>=mlim)])/np.mean(S1_fof[(offset1_fof<doff)*(main_fof.lgM>=mlim)]))
 
 plt.figure()
 plt.hist(Eratio_fof,np.linspace(0.5,2.5,50),histtype='step',density=True,label='FOF')
