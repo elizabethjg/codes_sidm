@@ -20,7 +20,7 @@ x = np.array([])
 y = np.array([])
 z = np.array([])
 
-nhalos = 2
+nhalos = len(main)
 
 for j in range(nhalos):
     
