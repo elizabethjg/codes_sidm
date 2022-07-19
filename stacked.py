@@ -3,6 +3,7 @@ sys.path.append('/home/elizabeth/lens_codes_v3.7')
 import numpy as np
 import pandas as pd
 import h5py
+from member_distribution import projected_coodinates
 
 def stack_halos(main_file,path,haloids):
 
