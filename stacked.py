@@ -20,15 +20,15 @@ x = np.array([])
 y = np.array([])
 z = np.array([])
 
-nhalos = len(main)
+nhalos = 2
 
 for j in range(nhalos):
     
     halo = h5py.File(path+'halo_'+str(j)+'.hdf5','r')       
     
-    X = np.array(halo['X']) - main.xc_rc[j]
-    Y = np.array(halo['Y']) - main.yc_rc[j]
-    Z = np.array(halo['Z']) - main.zc_rc[j]
+    X = np.array(halo['X']) - main.xc_rc[j]/1.e3
+    Y = np.array(halo['Y']) - main.yc_rc[j]/1.e3
+    Z = np.array(halo['Z']) - main.zc_rc[j]/1.e3
     
     xrot = (main.a3Dx[j]*X)+(main.a3Dy[j]*Y)+(main.a3Dz[j]*Z);
     yrot = (main.b3Dx[j]*X)+(main.b3Dy[j]*Y)+(main.b3Dz[j]*Z);
@@ -39,9 +39,6 @@ for j in range(nhalos):
     z = np.append(z,zrot)
 
 f, ax = plt.subplots(1,3, figsize=(12.7,8))
-ax[0].plot(x,y,'C7,',alpha=0.1)
-ax[1].plot(x,z,'C7,',alpha=0.1)
-ax[2].plot(y,z,'C7,',alpha=0.1)
 ax[0].plot(x,y,'C7,')
 ax[1].plot(x,z,'C7,')
 ax[2].plot(y,z,'C7,')
@@ -49,25 +46,13 @@ ax[0].plot(x,y,'C2.',alpha=0.005)
 ax[1].plot(x,z,'C2.',alpha=0.005)
 ax[2].plot(y,z,'C2.',alpha=0.005)
 
-ax[0].set_xlim([-1.01,1.01])
-ax[0].set_ylim([-1.01,1.01])
-ax[1].set_xlim([-1.01,1.01])
-ax[1].set_ylim([-1.01,1.01])
-ax[2].set_xlim([-1.01,1.01])
-ax[2].set_ylim([-1.01,1.01])
+ax[0].set_xlim([-4.01,4.01])
+ax[0].set_ylim([-4.01,4.01])
+ax[1].set_xlim([-4.01,4.01])
+ax[1].set_ylim([-4.01,4.01])
+ax[2].set_xlim([-4.01,4.01])
+ax[2].set_ylim([-4.01,4.01])
 
-ax[0].set_yticks([-1,-0.5,0,0.5,1])
-ax[0].set_yticklabels(['-1.0','-0.5','0.0','0.5','1.0'])
-ax[1].set_yticks([-1,-0.5,0,0.5,1])
-ax[1].set_yticklabels(['-1.0','-0.5','0.0','0.5','1.0'])
-ax[2].set_yticks([-1,-0.5,0,0.5,1])
-ax[2].set_yticklabels(['-1.0','-0.5','0.0','0.5','1.0'])
-ax[0].set_xticks([-1,-0.5,0,0.5,1])
-ax[0].set_xticklabels(['-1.0','-0.5','0.0','0.5','1.0'])
-ax[1].set_xticks([-1,-0.5,0,0.5,1])
-ax[1].set_xticklabels(['-1.0','-0.5','0.0','0.5','1.0'])
-ax[2].set_xticks([-1,-0.5,0,0.5,1])
-ax[2].set_xticklabels(['-1.0','-0.5','0.0','0.5','1.0'])
 
 ax[0].set_xlabel('x [Mpc/h]')
 ax[0].set_ylabel('y [Mpc/h]')
