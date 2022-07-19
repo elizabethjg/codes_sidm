@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import h5py
 
-def stack_halos(main_file,path,haloids)
+def stack_halos(main_file,path,haloids):
 
     main = pd.read_csv(main_file)
     
