@@ -10,10 +10,10 @@ zs = ['z0','z51','z96']
 
 z = zs[0]
 
-path = '/mnt/projects/lensing/SIDM_project/Lentes/Eli_Agus/snapshot_050/SCDM/'
-main_file = '/home/elizabeth/SIDM/halo_props/halo_props_fof_sidm1_'+z+'_main.csv.bz2'
-# path = '/mnt/projects/lensing/SIDM_project/Lentes/Eli_Agus/snapshot_050/CDM/'
-# main_file = '/home/elizabeth/SIDM/halo_props/halo_props_fof_cdm_'+z+'_main.csv.bz2'
+# path = '/mnt/projects/lensing/SIDM_project/Lentes/Eli_Agus/snapshot_050/SCDM/'
+# main_file = '/home/elizabeth/SIDM/halo_props/halo_props_fof_sidm1_'+z+'_main.csv.bz2'
+path = '/mnt/projects/lensing/SIDM_project/Lentes/Eli_Agus/snapshot_050/CDM/'
+main_file = '/home/elizabeth/SIDM/halo_props/halo_props_fof_cdm_'+z+'_main.csv.bz2'
 
 
 main = pd.read_csv(main_file)
@@ -61,8 +61,8 @@ ax[2].set_xlabel('y [Mpc/h]')
 ax[2].set_ylabel('z [Mpc/h]')
 
 # f.savefig('/home/elizabeth/SIDM/coords_sidm1_red.png',bbox_inches='tight')
-f.savefig('/home/elizabeth/SIDM/coords_sidm1.png',bbox_inches='tight')
-# f.savefig('/home/elizabeth/SIDM/coords_cdm.png',bbox_inches='tight')
+# f.savefig('/home/elizabeth/SIDM/coords_sidm1.png',bbox_inches='tight')
+f.savefig('/home/elizabeth/SIDM/coords_cdm.png',bbox_inches='tight')
 
 plt.figure()
 # plt.plot(x2d,y2d,'C7,')
@@ -76,5 +76,5 @@ plt.xlabel('x [Mpc/h]')
 plt.ylabel('y [Mpc/h]')
 plt.colorbar()
 # plt.savefig('/home/elizabeth/SIDM/coords_sidm1_red_2D.png',bbox_inches='tight')
-plt.savefig('/home/elizabeth/SIDM/coords_sidm1_2D.png',bbox_inches='tight')
-# plt.savefig('/home/elizabeth/SIDM/coords_cdm_2D.png',bbox_inches='tight')
+# plt.savefig('/home/elizabeth/SIDM/coords_sidm1_2D.png',bbox_inches='tight')
+plt.savefig('/home/elizabeth/SIDM/coords_cdm_2D.png',bbox_inches='tight')
