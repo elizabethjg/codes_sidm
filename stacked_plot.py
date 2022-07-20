@@ -67,7 +67,7 @@ plt.figure()
 # plt.plot(x2d,y2d,'C7,')
 # plt.plot(x2d,y2d,'C2,',alpha=0.005)
 # plt.plot(x2d,y2d,'C3,',alpha=0.002)
-plt.hexbin(x2d,y2d,extent=[-4,4,-4,4])
+plt.hexbin(x2d,y2d,extent=[-4,4,-4,4],bins='log')
 
 plt.xlim([-4.01,4.01])
 plt.ylim([-4.01,4.01])
