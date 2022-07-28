@@ -107,7 +107,7 @@ plt.legend()
 
 
 doff = 0.1
-mlim = 14.0
+mlim = 14.2
 
 plt.figure()
 plt.xlabel('$\log M_{FOF}$')
@@ -126,12 +126,25 @@ make_plot2(main_fof.lgM[offset_fof<doff],Sr_fof[offset_fof<doff],nbins=4,color='
 plt.legend()
 
 plt.figure()
-plt.hist(halos.s[mask*(halos.offset<doff)*(halos.lgM<mlim)],np.linspace(0.2,1.,15),histtype='step',color='C7',density=True)
+plt.hist(halos.s[mask*(halos.offset<doff)*(halos.lgM<mlim)],np.linspace(0.2,1.,15),histtype='step',color='C7',density=True,label='MICE')
 plt.hist(S_fof[(offset_fof<doff)*(main_fof.lgM<mlim)],np.linspace(0.2,1.,15),histtype='step',color='C2',density=True,label='CDM')
 plt.hist(S1_fof[(offset1_fof<doff)*(main_fof.lgM<mlim)],np.linspace(0.2,1.,15),histtype='step',color='C3',density=True,label='SIDM')
 plt.axvline(np.mean(S_fof[(offset_fof<doff)*(main_fof.lgM<mlim)]),color='C2')
 plt.axvline(np.mean(S1_fof[(offset1_fof<doff)*(main_fof.lgM<mlim)]),color='C3')
+plt.xlabel('$S$')
+plt.ylabel('$N$')
 plt.legend()
+
+plt.figure()
+plt.hist(halos.q2d[mask*(halos.offset<doff)*(halos.lgM<mlim)],np.linspace(0.2,1.,15),histtype='step',color='C7',density=True,label='MICE')
+plt.hist(q_fof[(offset_fof<doff)*(main_fof.lgM<mlim)],np.linspace(0.2,1.,15),histtype='step',color='C2',density=True,label='CDM')
+plt.hist(q1_fof[(offset1_fof<doff)*(main_fof.lgM<mlim)],np.linspace(0.2,1.,15),histtype='step',color='C3',density=True,label='SIDM')
+plt.axvline(np.mean(q_fof[(offset_fof<doff)*(main_fof.lgM<mlim)]),color='C2')
+plt.axvline(np.mean(q1_fof[(offset1_fof<doff)*(main_fof.lgM<mlim)]),color='C3')
+plt.xlabel('$q$')
+plt.ylabel('$N$')
+plt.legend()
+
 
 plt.figure()
 plt.hist(halos.s[mask*(halos.offset<doff)*(halos.lgM>=mlim)],np.linspace(0.2,1.,15),histtype='step',color='C7',density=True)
