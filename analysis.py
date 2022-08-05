@@ -20,13 +20,15 @@ mask = (halos.z < 0.07)
 z = zs[0]
     
 
-rock     = pd.read_csv('../halo_props/halo_props_cdm_'+z+'_rock.csv.bz2')
-main     = pd.read_csv('../halo_props/halo_props_cdm_'+z+'_main.csv.bz2')
-main_fof = pd.read_csv('../halo_props/halo_props_fof_cdm_'+z+'_main.csv.bz2')
+rock      = pd.read_csv('../halo_props/halo_props_cdm_'+z+'_rock.csv.bz2')
+main      = pd.read_csv('../halo_props/halo_props_cdm_'+z+'_main.csv.bz2')
+main_fof  = pd.read_csv('../halo_props/halo_props_fof_cdm_'+z+'_main.csv.bz2')
+main_rock = pd.read_csv('../halo_props/halo_props_rock2_cdm_'+z+'_main.csv.bz2')
 
-rock1     = pd.read_csv('../halo_props/halo_props_sidm1_'+z+'_rock.csv.bz2')
-main1     = pd.read_csv('../halo_props/halo_props_sidm1_'+z+'_main.csv.bz2')
-main1_fof = pd.read_csv('../halo_props/halo_props_fof_sidm1_'+z+'_main.csv.bz2')
+rock1      = pd.read_csv('../halo_props/halo_props_sidm1_'+z+'_rock.csv.bz2')
+main1      = pd.read_csv('../halo_props/halo_props_sidm1_'+z+'_main.csv.bz2')
+main1_fof  = pd.read_csv('../halo_props/halo_props_fof_sidm1_'+z+'_main.csv.bz2')
+main1_rock = pd.read_csv('../halo_props/halo_props_rock2_sidm1_'+z+'_main.csv.bz2')
 
     
     # LOAD PARAMS
@@ -56,6 +58,20 @@ qr_fof  = main_fof.b2Dr/main_fof.a2Dr
 S1r_fof = main1_fof.c3Dr/main1_fof.a3Dr
 Q1r_fof = main1_fof.c3Dr/main1_fof.a3Dr
 q1r_fof = main1_fof.b2Dr/main1_fof.a2Dr
+
+S_rock2  = main_rock.c3D/main_rock.a3D
+Q_rock2  = main_rock.c3D/main_rock.a3D
+q_rock2  = main_rock.b2D/main_rock.a2D
+S1_rock2 = main1_rock.c3D/main1_rock.a3D
+Q1_rock2 = main1_rock.c3D/main1_rock.a3D
+q1_rock2 = main1_rock.b2D/main1_rock.a2D
+
+Sr_rock2  = main_rock.c3Dr/main_rock.a3Dr
+Qr_rock2  = main_rock.c3Dr/main_rock.a3Dr
+qr_rock2  = main_rock.b2Dr/main_rock.a2Dr
+S1r_rock2 = main1_rock.c3Dr/main1_rock.a3Dr
+Q1r_rock2 = main1_rock.c3Dr/main1_rock.a3Dr
+q1r_rock2 = main1_rock.b2Dr/main1_rock.a2Dr
     
 Eratio  = (2.*main.EKin/abs(main.EPot))
 Eratio1 = (2.*main1.EKin/abs(main1.EPot))
@@ -76,24 +92,36 @@ rc1_fof = np.array(np.sqrt((main1_fof.xc - main1_fof.xc_rc)**2 + (main1_fof.yc -
 offset_fof  = rc_fof/main_fof.r_max
 offset1_fof = rc1_fof/main1_fof.r_max
 
+lgM_rock  = main_rock.lgM
+lgM1_rock = main1_rock.lgM
+    
+rc_rock  = np.array(np.sqrt((main_rock.xc - main_rock.xc_rc)**2 + (main_rock.yc - main_rock.yc_rc)**2 + (main_rock.zc - main_rock.zc_rc)**2))
+rc1_rock = np.array(np.sqrt((main1_rock.xc - main1_rock.xc_rc)**2 + (main1_rock.yc - main1_rock.yc_rc)**2 + (main1_rock.zc - main1_rock.zc_rc)**2))
+offset_rock  = rc_rock/main_rock.r_max
+offset1_rock = rc1_rock/main1_rock.r_max
+
 plt.figure()
 plt.xlabel('$\log M$')
 plt.ylabel('$S = c/a$')
 make_plot2(main.lgM,S,nbins=4,color='C0',error=True,label='new par - rockstar')
 make_plot2(main.lgM,S_rock,nbins=4,color='C1',error=True,label='rockstar - rockstar')
 make_plot2(main_fof.lgM-0.2,S_fof,nbins=4,color='C2',error=True,label='new par - fof')
+make_plot2(main_rock.lgM-0.2,S_rock2,nbins=4,color='C3',error=True,label='new par - rockstar2')
 make_plot2(halos.lgM[mask]-0.2,halos.s[mask],nbins=4,color='C7',error=True,label='MICE')
 plt.legend()
 make_plot2(main.lgM,S1,nbins=4,color='C0',error=True,label='new par',lt='--')
 make_plot2(main.lgM,S1_rock,nbins=4,color='C1',error=True,label='rockstar',lt='--')
 make_plot2(main_fof.lgM-0.2,S1_fof,nbins=4,color='C2',error=True,label='fof',lt='--')
+make_plot2(main_rock.lgM-0.2,S1_rock2,nbins=4,color='C3',error=True,label='fof',lt='--')
 
 
 plt.figure()
 plt.xlabel('$\log M_{FOF}$')
 plt.ylabel('$S = c/a$')
 make_plot2(halos.lgM[mask],halos.s[mask],nbins=4,color='C7',error=True,label='MICE')
+make_plot2(main_rock.lgM,S1_rock2,nbins=4,color='C3',error=True,label='SIDM',lt='--')
 make_plot2(main_fof.lgM,S1_fof,nbins=4,color='C2',error=True,label='SIDM',lt='--')
+make_plot2(main_rock.lgM,S_rock2,nbins=4,color='C3',error=True,label='DM')
 make_plot2(main_fof.lgM,S_fof,nbins=4,color='C2',error=True,label='DM')
 plt.legend()
 
@@ -101,7 +129,9 @@ plt.figure()
 plt.xlabel('$\log M_{FOF}$')
 plt.ylabel('$S_r = c_r/a_r$')
 make_plot2(halos.lgM[mask],halos.sr[mask],nbins=4,color='C7',error=True,label='MICE')
+make_plot2(main_rock.lgM,S1r_rock2,nbins=4,color='C3',error=True,label='SIDM',lt='--')
 make_plot2(main_fof.lgM,S1r_fof,nbins=4,color='C2',error=True,label='SIDM',lt='--')
+make_plot2(main_rock.lgM,Sr_rock2,nbins=4,color='C3',error=True,label='DM')
 make_plot2(main_fof.lgM,Sr_fof,nbins=4,color='C2',error=True,label='DM')
 plt.legend()
 
