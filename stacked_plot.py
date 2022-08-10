@@ -12,8 +12,11 @@ z = zs[0]
 
 # path = '/mnt/projects/lensing/SIDM_project/Lentes/Eli_Agus/snapshot_050/SCDM/'
 # main_file = '/home/elizabeth/SIDM/halo_props/halo_props_fof_sidm1_'+z+'_main.csv.bz2'
-path = '/mnt/projects/lensing/SIDM_project/Lentes/Eli_Agus/snapshot_050/CDM/'
-main_file = '/home/elizabeth/SIDM/halo_props/halo_props_fof_cdm_'+z+'_main.csv.bz2'
+# path = '/mnt/projects/lensing/SIDM_project/Lentes/Eli_Agus/snapshot_050/CDM/'
+# main_file = '/home/elizabeth/SIDM/halo_props/halo_props_fof_cdm_'+z+'_main.csv.bz2'
+
+path = '/mnt/projects/lensing/SIDM_project/Lentes/Eli_Agus/snapshot_050/rockstar/CDM/'
+main_file = '/home/elizabeth/SIDM/halo_props/halo_props_rock2_cdm_'+z+'_main.csv.bz2'
 
 
 main = pd.read_csv(main_file)
@@ -26,7 +29,7 @@ nhalos = len(main)
 
 haloids = np.array(main.column_halo_id)[offset < 0.1]
     
-x,y,z,x2d,y2d = stack_halos(main_file,path,haloids,True)   
+x,y,z,x2d,y2d = stack_halos(main_file,path,haloids,reduced=False)   
     
 
 f, ax = plt.subplots(1,3, figsize=(12.7,4))
@@ -62,8 +65,8 @@ ax[2].set_ylabel('z [Mpc/h]')
 
 # f.savefig('/home/elizabeth/SIDM/coords_sidm1_red.png',bbox_inches='tight')
 # f.savefig('/home/elizabeth/SIDM/coords_sidm1.png',bbox_inches='tight')
-f.savefig('/home/elizabeth/SIDM/coords_cdm.png',bbox_inches='tight')
-f.savefig('/home/elizabeth/SIDM/coords_cdm_red.png',bbox_inches='tight')
+f.savefig('/home/elizabeth/SIDM/coords_cdm_rock2.png',bbox_inches='tight')
+# f.savefig('/home/elizabeth/SIDM/coords_cdm_red_rock2.png',bbox_inches='tight')
 
 plt.figure()
 # plt.plot(x2d,y2d,'C7,')
@@ -79,4 +82,4 @@ plt.colorbar()
 # plt.savefig('/home/elizabeth/SIDM/coords_sidm1_red_2D.png',bbox_inches='tight')
 # plt.savefig('/home/elizabeth/SIDM/coords_sidm1_2D.png',bbox_inches='tight')
 # plt.savefig('/home/elizabeth/SIDM/coords_cdm_2D.png',bbox_inches='tight')
-plt.savefig('/home/elizabeth/SIDM/coords_cdm_red_2D.png',bbox_inches='tight')
+plt.savefig('/home/elizabeth/SIDM/coords_cdm_rock2_2D.png',bbox_inches='tight')
