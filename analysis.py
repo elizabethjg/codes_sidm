@@ -33,38 +33,61 @@ main1_rock = pd.read_csv('../halo_props/halo_props_rock2_sidm1_'+z+'_main.csv.bz
     
     # LOAD PARAMS
     
-S_rock = rock['c_to_a2']
-Q_rock = rock['b_to_a2']
-S1_rock = rock1['c_to_a2']
-Q1_rock = rock1['b_to_a2']
+S_rock  = rock['c_to_a']
+Q_rock  = rock['b_to_a']
+T_rock  = (1. - rock['b_to_a']**2)/(1. - rock['c_to_a']**2)
+
+S1_rock = rock1['c_to_a']
+Q1_rock = rock1['b_to_a']
+T1_rock  = (1. - rock1['b_to_a']**2)/(1. - rock1['c_to_a']**2)
+
+S_rock_2  = rock['c_to_a2']
+Q_rock_2  = rock['b_to_a2']
+T_rock_2  = (1. - rock['b_to_a2']**2)/(1. - rock['c_to_a2']**2)
+
+S1_rock_2 = rock1['c_to_a2']
+Q1_rock_2 = rock1['b_to_a2']
+T1_rock_2  = (1. - rock1['b_to_a2']**2)/(1. - rock1['c_to_a2']**2)
 
 S_fof  = main_fof.c3D/main_fof.a3D
 Q_fof  = main_fof.c3D/main_fof.a3D
+T_fof  = (main_fof.a3D**2 - main_fof.b3D**2)/(main_fof.a3D**2 - main_fof.c3D**2)
 q_fof  = main_fof.b2D/main_fof.a2D
+
 S1_fof = main1_fof.c3D/main1_fof.a3D
 Q1_fof = main1_fof.c3D/main1_fof.a3D
+T1_fof  = (main1_fof.a3D**2 - main1_fof.b3D**2)/(main1_fof.a3D**2 - main1_fof.c3D**2)
 q1_fof = main1_fof.b2D/main1_fof.a2D
 
 Sr_fof  = main_fof.c3Dr/main_fof.a3Dr
 Qr_fof  = main_fof.c3Dr/main_fof.a3Dr
 qr_fof  = main_fof.b2Dr/main_fof.a2Dr
+Tr_fof  = (main_fof.a3Dr**2 - main_fof.b3Dr**2)/(main_fof.a3Dr**2 - main_fof.c3Dr**2)
+
 S1r_fof = main1_fof.c3Dr/main1_fof.a3Dr
 Q1r_fof = main1_fof.c3Dr/main1_fof.a3Dr
 q1r_fof = main1_fof.b2Dr/main1_fof.a2Dr
+T1r_fof  = (main1_fof.a3Dr**2 - main1_fof.b3Dr**2)/(main1_fof.a3Dr**2 - main1_fof.c3Dr**2)
 
 S_rock2  = main_rock.c3D/main_rock.a3D
 Q_rock2  = main_rock.c3D/main_rock.a3D
 q_rock2  = main_rock.b2D/main_rock.a2D
+T_rock2  = (main_rock.a3D**2 - main_rock.b3D**2)/(main_rock.a3D**2 - main_rock.c3D**2)
+
 S1_rock2 = main1_rock.c3D/main1_rock.a3D
 Q1_rock2 = main1_rock.c3D/main1_rock.a3D
 q1_rock2 = main1_rock.b2D/main1_rock.a2D
+T1_rock2  = (main1_rock.a3D**2 - main1_rock.b3D**2)/(main1_rock.a3D**2 - main1_rock.c3D**2)
 
 Sr_rock2  = main_rock.c3Dr/main_rock.a3Dr
 Qr_rock2  = main_rock.c3Dr/main_rock.a3Dr
 qr_rock2  = main_rock.b2Dr/main_rock.a2Dr
+Tr_rock2  = (main_rock.a3Dr**2 - main_rock.b3Dr**2)/(main_rock.a3Dr**2 - main_rock.c3Dr**2)
+
 S1r_rock2 = main1_rock.c3Dr/main1_rock.a3Dr
 Q1r_rock2 = main1_rock.c3Dr/main1_rock.a3Dr
 q1r_rock2 = main1_rock.b2Dr/main1_rock.a2Dr
+T1r_rock2 = (main1_rock.a3Dr**2 - main1_rock.b3Dr**2)/(main1_rock.a3Dr**2 - main1_rock.c3Dr**2)
     
 Eratio_fof  = (2.*main_fof.EKin/abs(main_fof.EPot))
 Eratio1_fof = (2.*main1_fof.EKin/abs(main1_fof.EPot))
@@ -94,13 +117,29 @@ plt.figure()
 plt.xlabel('$\log M$')
 plt.ylabel('$S = c/a$')
 make_plot2(lgM,S_rock,nbins=4,color='C1',error=True,label='rockstar - rockstar')
-make_plot2(main_fof.lgM-0.2,S_fof,nbins=4,color='C2',error=True,label='new par - fof')
-make_plot2(main_rock.lgM-0.2,S_rock2,nbins=4,color='C3',error=True,label='new par - rockstar')
-make_plot2(halos.lgM[mask]-0.2,halos.s[mask],nbins=4,color='C7',error=True,label='MICE')
+make_plot2(lgM,S_rock_2,nbins=4,color='C0',error=True,label='rockstar - rockstar2')
+make_plot2(main_fof.lgM-0.2,S_fof,nbins=4,color='C2',error=True,label='FOF - new par')
+make_plot2(main_rock.lgM-0.2,S_rock2,nbins=4,color='C3',error=True,label='rockstar - new par')
+make_plot2(halos.lgM[mask]-0.2,halos.s[mask],nbins=4,color='C7',error=True,label='FOF - new par (MICE)')
 plt.legend()
 make_plot2(lgM1,S1_rock,nbins=4,color='C1',error=True,label='rockstar',lt='--')
+make_plot2(lgM1,S1_rock_2,nbins=4,color='C0',error=True,label='rockstar',lt='--')
 make_plot2(main_fof.lgM-0.2,S1_fof,nbins=4,color='C2',error=True,label='fof',lt='--')
 make_plot2(main_rock.lgM-0.2,S1_rock2,nbins=4,color='C3',error=True,label='fof',lt='--')
+
+plt.figure()
+plt.xlabel('$\log M$')
+plt.ylabel('$T$')
+make_plot2(lgM,T_rock,nbins=4,color='C1',error=True,label='rockstar - rockstar')
+make_plot2(lgM,T_rock_2,nbins=4,color='C0',error=True,label='rockstar - rockstar2')
+make_plot2(main_fof.lgM-0.2,T_fof,nbins=4,color='C2',error=True,label='FOF - new par')
+make_plot2(main_rock.lgM-0.2,T_rock2,nbins=4,color='C3',error=True,label='rockstar - new par')
+make_plot2(halos.lgM[mask]-0.2,((1.-halos.q**2)/(1.-halos.s**2))[mask],nbins=4,color='C7',error=True,label='FOF - new par (MICE)')
+plt.legend()
+make_plot2(lgM1,T1_rock,nbins=4,color='C1',error=True,label='rockstar',lt='--')
+make_plot2(lgM1,T1_rock_2,nbins=4,color='C0',error=True,label='rockstar',lt='--')
+make_plot2(main_fof.lgM-0.2,T1_fof,nbins=4,color='C2',error=True,label='fof',lt='--')
+make_plot2(main_rock.lgM-0.2,T1_rock2,nbins=4,color='C3',error=True,label='fof',lt='--')
 
 
 plt.figure()
