@@ -21,18 +21,25 @@ z = zs[0]
     
 
 rock      = pd.read_csv('../halo_props/halo_props_cdm_'+z+'_rock2.csv.bz2')
-# main      = pd.read_csv('../halo_props/halo_props_cdm_'+z+'_main.csv.bz2')
+rock_sh   = pd.read_csv('../halo_props/halo_props_sh_cdm_'+z+'_rock2.csv.bz2')
+# main    = pd.read_csv('../halo_props/halo_props_cdm_'+z+'_main.csv.bz2')
 main_fof  = pd.read_csv('../halo_props/halo_props_fof_cdm_'+z+'_main.csv.bz2')
 main_rock = pd.read_csv('../halo_props/halo_props_rock2_cdm_'+z+'_main.csv.bz2')
+main_sh = pd.read_csv('../halo_props/halo_props_rock2_sh_cdm__main.csv.bz2')
 
 rock1      = pd.read_csv('../halo_props/halo_props_sidm1_'+z+'_rock2.csv.bz2')
+rock1_sh   = pd.read_csv('../halo_props/halo_props_sh_sidm1_'+z+'_rock2.csv.bz2')
 # main1      = pd.read_csv('../halo_props/halo_props_sidm1_'+z+'_main.csv.bz2')
 main1_fof  = pd.read_csv('../halo_props/halo_props_fof_sidm1_'+z+'_main.csv.bz2')
 main1_rock = pd.read_csv('../halo_props/halo_props_rock2_sidm1_'+z+'_main.csv.bz2')
+main1_sh = pd.read_csv('../halo_props/halo_props_rock2_sh_sidm1__main.csv.bz2')
 
     
     # LOAD PARAMS
-    
+
+nhalos = rock_sh['N_sh']
+nhalos1 = rock1_sh['N_sh']
+
 S_rock  = rock['c_to_a']
 Q_rock  = rock['b_to_a']
 T_rock  = (1. - rock['b_to_a']**2)/(1. - rock['c_to_a']**2)
@@ -88,6 +95,28 @@ S1r_rock2 = main1_rock.c3Dr/main1_rock.a3Dr
 Q1r_rock2 = main1_rock.c3Dr/main1_rock.a3Dr
 q1r_rock2 = main1_rock.b2Dr/main1_rock.a2Dr
 T1r_rock2 = (main1_rock.a3Dr**2 - main1_rock.b3Dr**2)/(main1_rock.a3Dr**2 - main1_rock.c3Dr**2)
+
+S_sh  = main_sh.c3D/main_sh.a3D
+Q_sh  = main_sh.c3D/main_sh.a3D
+q_sh  = main_sh.b2D/main_sh.a2D
+T_sh  = (main_sh.a3D**2 - main_sh.b3D**2)/(main_sh.a3D**2 - main_sh.c3D**2)
+
+S1_sh = main1_sh.c3D/main1_sh.a3D
+Q1_sh = main1_sh.c3D/main1_sh.a3D
+q1_sh = main1_sh.b2D/main1_sh.a2D
+T1_sh  = (main1_sh.a3D**2 - main1_sh.b3D**2)/(main1_sh.a3D**2 - main1_sh.c3D**2)
+
+Sr_sh  = main_sh.c3Dr/main_sh.a3Dr
+Qr_sh  = main_sh.c3Dr/main_sh.a3Dr
+qr_sh  = main_sh.b2Dr/main_sh.a2Dr
+Tr_sh  = (main_sh.a3Dr**2 - main_sh.b3Dr**2)/(main_sh.a3Dr**2 - main_sh.c3Dr**2)
+
+S1r_sh = main1_sh.c3Dr/main1_sh.a3Dr
+Q1r_sh = main1_sh.c3Dr/main1_sh.a3Dr
+q1r_sh = main1_sh.b2Dr/main1_sh.a2Dr
+T1r_sh = (main1_sh.a3Dr**2 - main1_sh.b3Dr**2)/(main1_sh.a3Dr**2 - main1_sh.c3Dr**2)
+
+
     
 Eratio_fof  = (2.*main_fof.EKin/abs(main_fof.EPot))
 Eratio1_fof = (2.*main1_fof.EKin/abs(main1_fof.EPot))
@@ -107,114 +136,201 @@ offset1_fof = rc1_fof/main1_fof.r_max
 
 lgM_rock  = main_rock.lgM
 lgM1_rock = main1_rock.lgM
+
+lgM_sh  = main_sh.lgM
+lgM1_sh = main1_sh.lgM
     
 rc_rock  = np.array(np.sqrt((main_rock.xc - main_rock.xc_rc)**2 + (main_rock.yc - main_rock.yc_rc)**2 + (main_rock.zc - main_rock.zc_rc)**2))
 rc1_rock = np.array(np.sqrt((main1_rock.xc - main1_rock.xc_rc)**2 + (main1_rock.yc - main1_rock.yc_rc)**2 + (main1_rock.zc - main1_rock.zc_rc)**2))
 offset_rock  = rc_rock/main_rock.r_max
 offset1_rock = rc1_rock/main1_rock.r_max
 
+
+nbins = 5
 plt.figure()
 plt.xlabel('$\log M$')
 plt.ylabel('$S = c/a$')
-make_plot2(lgM,S_rock,nbins=4,color='C1',error=True,label='rockstar - rockstar')
-make_plot2(lgM,S_rock_2,nbins=4,color='C0',error=True,label='rockstar - rockstar2')
-make_plot2(main_fof.lgM-0.2,S_fof,nbins=4,color='C2',error=True,label='FOF - new par')
-make_plot2(main_rock.lgM-0.2,S_rock2,nbins=4,color='C3',error=True,label='rockstar - new par')
-make_plot2(halos.lgM[mask]-0.2,halos.s[mask],nbins=4,color='C7',error=True,label='FOF - new par (MICE)')
+make_plot2(lgM,S_rock,nbins=nbins,color='C1',error=True,label='rockstar - rockstar')
+make_plot2(lgM,S_rock_2,nbins=nbins,color='C0',error=True,label='rockstar - rockstar2')
+make_plot2(lgM_sh,S_sh,nbins=nbins,color='k',error=True,label='subhalos - new par')
+make_plot2(main_fof.lgM-0.2,S_fof,nbins=nbins,color='C2',error=True,label='FOF - new par')
+make_plot2(lgM,S_rock2,nbins=nbins,color='C3',error=True,label='rockstar - new par')
+make_plot2(halos.lgM[mask]-0.2,halos.s[mask],nbins=nbins,color='C7',error=True,label='FOF - new par (MICE)')
 plt.legend()
-make_plot2(lgM1,S1_rock,nbins=4,color='C1',error=True,label='rockstar',lt='--')
-make_plot2(lgM1,S1_rock_2,nbins=4,color='C0',error=True,label='rockstar',lt='--')
-make_plot2(main_fof.lgM-0.2,S1_fof,nbins=4,color='C2',error=True,label='fof',lt='--')
-make_plot2(main_rock.lgM-0.2,S1_rock2,nbins=4,color='C3',error=True,label='fof',lt='--')
-plt.axis([13.4,14.75,0.15,0.8])
+make_plot2(lgM1,S1_rock,nbins=nbins,color='C1',error=True,label='rockstar',lt='--')
+make_plot2(lgM1,S1_rock_2,nbins=nbins,color='C0',error=True,label='rockstar',lt='--')
+make_plot2(lgM1_sh,S1_sh,nbins=nbins,color='k',error=True,label='subhalos - new par',lt='--')
+make_plot2(main_fof.lgM-0.2,S1_fof,nbins=nbins,color='C2',error=True,label='fof',lt='--')
+make_plot2(lgM1,S1_rock2,nbins=nbins,color='C3',error=True,label='fof',lt='--')
+plt.axis([13.4,14.8,0.15,0.8])
 plt.savefig('../S_lM.png')
 
 plt.figure()
 plt.xlabel('$\log M$')
 plt.ylabel('$S_r = c/a$')
-make_plot2(lgM,S_rock,nbins=4,color='C1',error=True,label='rockstar - rockstar')
-make_plot2(lgM,S_rock_2,nbins=4,color='C0',error=True,label='rockstar - rockstar2')
-make_plot2(main_fof.lgM-0.2,Sr_fof,nbins=4,color='C2',error=True,label='FOF - new par')
-make_plot2(main_rock.lgM-0.2,Sr_rock2,nbins=4,color='C3',error=True,label='rockstar - new par')
-make_plot2(halos.lgM[mask]-0.2,halos.sr[mask],nbins=4,color='C7',error=True,label='FOF - new par (MICE)')
+make_plot2(lgM,S_rock,nbins=nbins,color='C1',error=True,label='rockstar - rockstar')
+make_plot2(lgM,S_rock_2,nbins=nbins,color='C0',error=True,label='rockstar - rockstar2')
+make_plot2(lgM_sh,Sr_sh,nbins=nbins,color='k',error=True,label='subhalos - new par')
+make_plot2(main_fof.lgM-0.2,Sr_fof,nbins=nbins,color='C2',error=True,label='FOF - new par')
+make_plot2(lgM,Sr_rock2,nbins=nbins,color='C3',error=True,label='rockstar - new par')
+make_plot2(halos.lgM[mask]-0.2,halos.sr[mask],nbins=nbins,color='C7',error=True,label='FOF - new par (MICE)')
 plt.legend()
-make_plot2(lgM1,S1_rock,nbins=4,color='C1',error=True,label='rockstar',lt='--')
-make_plot2(lgM1,S1_rock_2,nbins=4,color='C0',error=True,label='rockstar',lt='--')
-make_plot2(main_fof.lgM-0.2,S1r_fof,nbins=4,color='C2',error=True,label='fof',lt='--')
-make_plot2(main_rock.lgM-0.2,S1r_rock2,nbins=4,color='C3',error=True,label='fof',lt='--')
-plt.axis([13.4,14.75,0.15,0.8])
+make_plot2(lgM1,S1_rock,nbins=nbins,color='C1',error=True,label='rockstar',lt='--')
+make_plot2(lgM1,S1_rock_2,nbins=nbins,color='C0',error=True,label='rockstar',lt='--')
+make_plot2(main_fof.lgM-0.2,S1r_fof,nbins=nbins,color='C2',error=True,label='fof',lt='--')
+make_plot2(lgM,S1r_rock2,nbins=nbins,color='C3',error=True,label='fof',lt='--')
+make_plot2(lgM1_sh,S1r_sh,nbins=nbins,color='k',error=True,label='subhalos - new par',lt='--')
+plt.axis([13.4,14.8,0.15,0.8])
 plt.savefig('../Sr_lM.png')
 
 plt.figure()
 plt.xlabel('$\log M$')
 plt.ylabel('$T$')
-make_plot2(lgM,T_rock,nbins=4,color='C1',error=True,label='rockstar - rockstar')
-make_plot2(lgM,T_rock_2,nbins=4,color='C0',error=True,label='rockstar - rockstar2')
-make_plot2(main_fof.lgM-0.2,T_fof,nbins=4,color='C2',error=True,label='FOF - new par')
-make_plot2(main_rock.lgM-0.2,T_rock2,nbins=4,color='C3',error=True,label='rockstar - new par')
-make_plot2(halos.lgM[mask]-0.2,((1.-halos.q**2)/(1.-halos.s**2))[mask],nbins=4,color='C7',error=True,label='FOF - new par (MICE)')
+make_plot2(lgM,T_rock,nbins=nbins,color='C1',error=True,label='rockstar - rockstar')
+make_plot2(lgM,T_rock_2,nbins=nbins,color='C0',error=True,label='rockstar - rockstar2')
+make_plot2(main_fof.lgM-0.2,T_fof,nbins=nbins,color='C2',error=True,label='FOF - new par')
+make_plot2(lgM,T_rock2,nbins=nbins,color='C3',error=True,label='rockstar - new par')
+make_plot2(halos.lgM[mask]-0.2,((1.-halos.q**2)/(1.-halos.s**2))[mask],nbins=nbins,color='C7',error=True,label='FOF - new par (MICE)')
+make_plot2(lgM_sh,T_sh,nbins=nbins,color='k',error=True,label='subhalos - new par')
 plt.legend()
-make_plot2(lgM1,T1_rock,nbins=4,color='C1',error=True,label='rockstar',lt='--')
-make_plot2(lgM1,T1_rock_2,nbins=4,color='C0',error=True,label='rockstar',lt='--')
-make_plot2(main_fof.lgM-0.2,T1_fof,nbins=4,color='C2',error=True,label='fof',lt='--')
-make_plot2(main_rock.lgM-0.2,T1_rock2,nbins=4,color='C3',error=True,label='fof',lt='--')
-plt.axis([13.4,14.75,0.6,1.])
+make_plot2(lgM1,T1_rock,nbins=nbins,color='C1',error=True,label='rockstar',lt='--')
+make_plot2(lgM1,T1_rock_2,nbins=nbins,color='C0',error=True,label='rockstar',lt='--')
+make_plot2(main1_fof.lgM-0.2,T1_fof,nbins=nbins,color='C2',error=True,label='fof',lt='--')
+make_plot2(lgM,T1_rock2,nbins=nbins,color='C3',error=True,label='fof',lt='--')
+make_plot2(lgM1_sh,T1_sh,nbins=nbins,color='k',error=True,label='subhalos - new par',lt='--')
+plt.axis([13.4,14.8,0.1,1.])
 plt.savefig('../T_lM.png')
 
 plt.figure()
 plt.xlabel('$\log M$')
 plt.ylabel('$T_r$')
-make_plot2(lgM,T_rock,nbins=4,color='C1',error=True,label='rockstar - rockstar')
-make_plot2(lgM,T_rock_2,nbins=4,color='C0',error=True,label='rockstar - rockstar2')
-make_plot2(main_fof.lgM-0.2,Tr_fof,nbins=4,color='C2',error=True,label='FOF - new par')
-make_plot2(main_rock.lgM-0.2,Tr_rock2,nbins=4,color='C3',error=True,label='rockstar - new par')
-make_plot2(halos.lgM[mask]-0.2,((1.-halos.q**2)/(1.-halos.s**2))[mask],nbins=4,color='C7',error=True,label='FOF - new par (MICE)')
+make_plot2(lgM,T_rock,nbins=nbins,color='C1',error=True,label='rockstar - rockstar')
+make_plot2(lgM,T_rock_2,nbins=nbins,color='C0',error=True,label='rockstar - rockstar2')
+make_plot2(main_fof.lgM-0.2,Tr_fof,nbins=nbins,color='C2',error=True,label='FOF - new par')
+make_plot2(lgM,Tr_rock2,nbins=nbins,color='C3',error=True,label='rockstar - new par')
+make_plot2(halos.lgM[mask]-0.2,((1.-halos.q**2)/(1.-halos.s**2))[mask],nbins=nbins,color='C7',error=True,label='FOF - new par (MICE)')
+make_plot2(lgM_sh,Tr_sh,nbins=nbins,color='k',error=True,label='subhalos - new par')
 plt.legend()
-make_plot2(lgM1,T1_rock,nbins=4,color='C1',error=True,label='rockstar',lt='--')
-make_plot2(lgM1,T1_rock_2,nbins=4,color='C0',error=True,label='rockstar',lt='--')
-make_plot2(main_fof.lgM-0.2,T1r_fof,nbins=4,color='C2',error=True,label='fof',lt='--')
-make_plot2(main_rock.lgM-0.2,T1r_rock2,nbins=4,color='C3',error=True,label='fof',lt='--')
-plt.axis([13.4,14.75,0.6,1.])
+make_plot2(lgM1,T1_rock,nbins=nbins,color='C1',error=True,label='rockstar',lt='--')
+make_plot2(lgM1,T1_rock_2,nbins=nbins,color='C0',error=True,label='rockstar',lt='--')
+make_plot2(main_fof.lgM-0.2,T1r_fof,nbins=nbins,color='C2',error=True,label='fof',lt='--')
+make_plot2(lgM,T1r_rock2,nbins=nbins,color='C3',error=True,label='fof',lt='--')
+make_plot2(lgM1_sh,T1r_sh,nbins=nbins,color='k',error=True,label='subhalos - new par',lt='--')
+plt.axis([13.4,14.8,0.1,1.])
 plt.savefig('../Tr_lM.png')
 
-plt.figure()
-plt.xlabel('$\log M_{FOF}$')
-plt.ylabel('$S = c/a$')
-make_plot2(halos.lgM[mask],halos.s[mask],nbins=4,color='C7',error=True,label='MICE')
-make_plot2(main_rock.lgM,S1_rock2,nbins=4,color='C3',error=True,label='SIDM',lt='--')
-make_plot2(main_fof.lgM,S1_fof,nbins=4,color='C2',error=True,label='SIDM',lt='--')
-make_plot2(main_rock.lgM,S_rock2,nbins=4,color='C3',error=True,label='DM')
-make_plot2(main_fof.lgM,S_fof,nbins=4,color='C2',error=True,label='DM')
-plt.legend()
 
-plt.figure()
-plt.xlabel('$\log M_{FOF}$')
-plt.ylabel('$S_r = c_r/a_r$')
-make_plot2(halos.lgM[mask],halos.sr[mask],nbins=4,color='C7',error=True,label='MICE')
-make_plot2(main_rock.lgM,S1r_rock2,nbins=4,color='C3',error=True,label='SIDM',lt='--')
-make_plot2(main_fof.lgM,S1r_fof,nbins=4,color='C2',error=True,label='SIDM',lt='--')
-make_plot2(main_rock.lgM,Sr_rock2,nbins=4,color='C3',error=True,label='DM')
-make_plot2(main_fof.lgM,Sr_fof,nbins=4,color='C2',error=True,label='DM')
-plt.legend()
-
+# ONLY RELAXED
 
 doff = 0.1
+
+plt.figure()
+plt.xlabel('$\log M$')
+plt.ylabel('$S = c/a$')
+make_plot2(lgM[offset_rock<doff],S_rock[offset_rock<doff],nbins=nbins,color='C1',error=True,label='rockstar - rockstar')
+make_plot2(lgM[offset_rock<doff],S_rock_2[offset_rock<doff],nbins=nbins,color='C0',error=True,label='rockstar - rockstar2')
+make_plot2(main_fof.lgM[offset_fof<doff]-0.2,S_fof[offset_fof<doff],nbins=nbins,color='C2',error=True,label='FOF - new par')
+make_plot2(lgM[offset_rock<doff],S_rock2[offset_rock<doff],nbins=nbins,color='C3',error=True,label='rockstar - new par')
+make_plot2(halos.lgM[mask*(halos.offset<doff)]-0.2,halos.s[mask*(halos.offset<doff)],nbins=nbins,color='C7',error=True,label='FOF - new par (MICE)')
+plt.legend()
+make_plot2(lgM1[offset1_rock<doff],S1_rock[offset1_rock<doff],nbins=nbins,color='C1',error=True,label='rockstar',lt='--')
+make_plot2(lgM1[offset1_rock<doff],S1_rock_2[offset1_rock<doff],nbins=nbins,color='C0',error=True,label='rockstar',lt='--')
+make_plot2(main_fof.lgM[offset1_fof<doff]-0.2,S1_fof[offset1_fof<doff],nbins=nbins,color='C2',error=True,label='fof',lt='--')
+make_plot2(lgM[offset1_rock<doff],S1_rock2[offset1_rock<doff],nbins=nbins,color='C3',error=True,label='fof',lt='--')
+plt.axis([13.4,14.8,0.15,0.8])
+plt.savefig('../S_lM_relaxed.png')
+
+plt.figure()
+plt.xlabel('$\log M$')
+plt.ylabel('$S_r = c/a$')
+make_plot2(lgM[offset_rock<doff],S_rock[offset_rock<doff],nbins=nbins,color='C1',error=True,label='rockstar - rockstar')
+make_plot2(lgM[offset_rock<doff],S_rock_2[offset_rock<doff],nbins=nbins,color='C0',error=True,label='rockstar - rockstar2')
+make_plot2(main_fof.lgM[offset_fof<doff]-0.2,Sr_fof[offset_fof<doff],nbins=nbins,color='C2',error=True,label='FOF - new par')
+make_plot2(lgM[offset_rock<doff],Sr_rock2[offset_rock<doff],nbins=nbins,color='C3',error=True,label='rockstar - new par')
+make_plot2(halos.lgM[mask*(halos.offset<doff)]-0.2,halos.sr[mask*(halos.offset<doff)],nbins=nbins,color='C7',error=True,label='FOF - new par (MICE)')
+plt.legend()
+make_plot2(lgM1[offset1_rock<doff],S1_rock[offset1_rock<doff],nbins=nbins,color='C1',error=True,label='rockstar',lt='--')
+make_plot2(lgM1[offset1_rock<doff],S1_rock_2[offset1_rock<doff],nbins=nbins,color='C0',error=True,label='rockstar',lt='--')
+make_plot2(main_fof.lgM[offset1_fof<doff]-0.2,S1r_fof[offset1_fof<doff],nbins=nbins,color='C2',error=True,label='fof',lt='--')
+make_plot2(lgM[offset1_rock<doff],S1r_rock2[offset1_rock<doff],nbins=nbins,color='C3',error=True,label='fof',lt='--')
+plt.axis([13.4,14.8,0.15,0.8])
+plt.savefig('../Sr_lM_relaxed.png')
+
+plt.figure()
+plt.xlabel('$\log M$')
+plt.ylabel('$T$')
+make_plot2(lgM[offset_rock<doff],T_rock[offset_rock<doff],nbins=nbins,color='C1',error=True,label='rockstar - rockstar')
+make_plot2(lgM[offset_rock<doff],T_rock_2[offset_rock<doff],nbins=nbins,color='C0',error=True,label='rockstar - rockstar2')
+make_plot2(main_fof.lgM[offset_fof<doff]-0.2,T_fof[offset_fof<doff],nbins=nbins,color='C2',error=True,label='FOF - new par')
+make_plot2(lgM[offset_rock<doff]-0.2,T_rock2[offset_rock<doff],nbins=nbins,color='C3',error=True,label='rockstar - new par')
+make_plot2(halos.lgM[mask]-0.2,((1.-halos.q**2)/(1.-halos.s**2))[mask],nbins=nbins,color='C7',error=True,label='FOF - new par (MICE)')
+plt.legend()
+make_plot2(lgM1[offset1_rock<doff],T1_rock[offset1_rock<doff],nbins=nbins,color='C1',error=True,label='rockstar',lt='--')
+make_plot2(lgM1[offset1_rock<doff],T1_rock_2[offset1_rock<doff],nbins=nbins,color='C0',error=True,label='rockstar',lt='--')
+make_plot2(main_fof.lgM[offset1_fof<doff]-0.2,T1_fof[offset1_fof<doff],nbins=nbins,color='C2',error=True,label='fof',lt='--')
+make_plot2(lgM[offset1_rock<doff],T1_rock2[offset1_rock<doff],nbins=nbins,color='C3',error=True,label='fof',lt='--')
+plt.axis([13.4,14.8,0.1,1.])
+plt.savefig('../T_lM_relaxed.png')
+
+plt.figure()
+plt.xlabel('$\log M$')
+plt.ylabel('$T_r$')
+make_plot2(lgM[offset_rock<doff],T_rock[offset_rock<doff],nbins=nbins,color='C1',error=True,label='rockstar - rockstar')
+make_plot2(lgM[offset_rock<doff],T_rock_2[offset_rock<doff],nbins=nbins,color='C0',error=True,label='rockstar - rockstar2')
+make_plot2(main_fof.lgM[offset_fof<doff]-0.2,Tr_fof[offset_fof<doff],nbins=nbins,color='C2',error=True,label='FOF - new par')
+make_plot2(lgM[offset_rock<doff],Tr_rock2[offset_rock<doff],nbins=nbins,color='C3',error=True,label='rockstar - new par')
+make_plot2(halos.lgM[mask]-0.2,((1.-halos.q**2)/(1.-halos.s**2))[mask],nbins=nbins,color='C7',error=True,label='FOF - new par (MICE)')
+plt.legend()
+make_plot2(lgM1[offset1_rock<doff],T1_rock[offset1_rock<doff],nbins=nbins,color='C1',error=True,label='rockstar',lt='--')
+make_plot2(lgM1[offset1_rock<doff],T1_rock_2[offset1_rock<doff],nbins=nbins,color='C0',error=True,label='rockstar',lt='--')
+make_plot2(main_fof.lgM[offset1_fof<doff]-0.2,T1r_fof[offset1_fof<doff],nbins=nbins,color='C2',error=True,label='fof',lt='--')
+make_plot2(lgM[offset1_rock<doff],T1r_rock2[offset1_rock<doff],nbins=nbins,color='C3',error=True,label='fof',lt='--')
+plt.axis([13.4,14.8,0.1,1.])
+plt.savefig('../Tr_lM_relaxed.png')
+
+
+plt.figure()
+plt.plot(lgM_sh,nhalos,'.',label='CDM')
+plt.plot(lgM1_sh,nhalos1,'.',label='SIDM')
+plt.legend()
+plt.xlabel('$\log M_{vir}$')
+plt.ylabel('$N_{sh}$')
+plt.savefig('../nhalos_lgM.png')
+
+plt.figure()
+plt.plot(nhalos,S_sh,'.',label='CDM')
+plt.plot(nhalos1,S1_sh,'.',label='SIDM')
+plt.legend()
+plt.ylabel('$S$')
+plt.xlabel('$N_{sh}$')
+plt.savefig('../nhalos_S.png')
+
+minhalos = 120.
+plt.hist(S_sh[nhalos>minhalos],np.linspace(0.4,1.,15),histtype='step')
+plt.hist(S1_sh[nhalos1>minhalos],np.linspace(0.4,1.,15),histtype='step')
+
+minmass = 14.5
+plt.hist(S_sh[lgM_sh>minmass],np.linspace(0.4,1.,15),histtype='step')
+plt.hist(S1_sh[lgM1_sh>minmass],np.linspace(0.4,1.,15),histtype='step')
+
+'''
+
 mlim = 14.2
 
 plt.figure()
 plt.xlabel('$\log M_{FOF}$')
 plt.ylabel('$S = c/a$')
-make_plot2(halos.lgM[mask*(halos.offset<doff)],halos.s[mask*(halos.offset<doff)],nbins=4,color='C7',error=True,label='MICE')
-make_plot2(main_fof.lgM[offset1_fof<doff],S1_fof[offset1_fof<doff],nbins=4,color='C2',error=True,label='fof',lt='--')
-make_plot2(main_fof.lgM[offset_fof<doff],S_fof[offset_fof<doff],nbins=4,color='C2',error=True,label='fof')
+make_plot2(halos.lgM[mask*(halos.offset<doff)],halos.s[mask*(halos.offset<doff)],nbins=nbins,color='C7',error=True,label='MICE')
+make_plot2(main_fof.lgM[offset1_fof<doff],S1_fof[offset1_fof<doff],nbins=nbins,color='C2',error=True,label='fof',lt='--')
+make_plot2(main_fof.lgM[offset_fof<doff],S_fof[offset_fof<doff],nbins=nbins,color='C2',error=True,label='fof')
 plt.legend()
 
 plt.figure()
 plt.xlabel('$\log M_{FOF}$')
 plt.ylabel('$S_r = c_r/a_r$')
-make_plot2(halos.lgM[mask*(halos.offset<doff)],halos.sr[mask*(halos.offset<doff)],nbins=4,color='C7',error=True,label='MICE')
-make_plot2(main_fof.lgM[offset1_fof<doff],S1r_fof[offset1_fof<doff],nbins=4,color='C2',error=True,label='fof',lt='--')
-make_plot2(main_fof.lgM[offset_fof<doff],Sr_fof[offset_fof<doff],nbins=4,color='C2',error=True,label='fof')
+make_plot2(halos.lgM[mask*(halos.offset<doff)],halos.sr[mask*(halos.offset<doff)],nbins=nbins,color='C7',error=True,label='MICE')
+make_plot2(main_fof.lgM[offset1_fof<doff],S1r_fof[offset1_fof<doff],nbins=nbins,color='C2',error=True,label='fof',lt='--')
+make_plot2(main_fof.lgM[offset_fof<doff],Sr_fof[offset_fof<doff],nbins=nbins,color='C2',error=True,label='fof')
 plt.legend()
 
 plt.figure()
@@ -253,3 +369,4 @@ plt.figure()
 plt.hist(Eratio_fof,np.linspace(0.5,2.5,50),histtype='step',density=True,label='FOF')
 plt.hist(Eratio_mice,np.linspace(0.5,2.5,50),histtype='step',density=True,label='MICE')
 plt.hist(Eratio,np.linspace(0.5,2.5,50),histtype='step',density=True,label='Rockstar')
+'''
