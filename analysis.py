@@ -18,21 +18,49 @@ mask = (halos.z < 0.07)
 
 
 z = zs[0]
-    
 
-rock      = pd.read_csv('../halo_props/halo_props_cdm_'+z+'_rock2.csv.bz2')
-rock_sh   = pd.read_csv('../halo_props/halo_props_sh_cdm_'+z+'_rock2.csv.bz2')
-# main    = pd.read_csv('../halo_props/halo_props_cdm_'+z+'_main.csv.bz2')
-main_fof  = pd.read_csv('../halo_props/halo_props_fof_cdm_'+z+'_main.csv.bz2')
-main_rock = pd.read_csv('../halo_props/halo_props_rock2_cdm_'+z+'_main.csv.bz2')
-main_sh = pd.read_csv('../halo_props/halo_props_rock2_sh_cdm__main.csv.bz2')
+def mask_border(x0,y0,z0):
+    mask = (x0 > 2.)*(x0 < 118.)*(y0 > 2.)*(y0 < 118.)*(z0 > 2.)*(z0 < 118.)
+    return mask
 
+rock       = pd.read_csv('../halo_props/halo_props_cdm_'+z+'_rock2.csv.bz2')
+rock_sh    = pd.read_csv('../halo_props/halo_props_sh_cdm_'+z+'_rock2.csv.bz2')
+fof        = pd.read_csv('../halo_props/halo_props_cdm_'+z+'_fof.csv.bz2')
 rock1      = pd.read_csv('../halo_props/halo_props_sidm1_'+z+'_rock2.csv.bz2')
 rock1_sh   = pd.read_csv('../halo_props/halo_props_sh_sidm1_'+z+'_rock2.csv.bz2')
-# main1      = pd.read_csv('../halo_props/halo_props_sidm1_'+z+'_main.csv.bz2')
-main1_fof  = pd.read_csv('../halo_props/halo_props_fof_sidm1_'+z+'_main.csv.bz2')
-main1_rock = pd.read_csv('../halo_props/halo_props_rock2_sidm1_'+z+'_main.csv.bz2')
-main1_sh = pd.read_csv('../halo_props/halo_props_rock2_sh_sidm1__main.csv.bz2')
+fof1       = pd.read_csv('../halo_props/halo_props_sidm1_'+z+'_fof.csv.bz2')
+
+mrock     = mask_border(rock.x0,rock.y0,rock.z0)
+mrock_sh  = mask_border(rock_sh.x0,rock_sh.y0,rock_sh.z0)
+mfof      = mask_border(fof.x0,fof.y0,fof.z0)
+mrock1    = mask_border(rock1.x0,rock1.y0,rock.z0)
+mrock1_sh = mask_border(rock1_sh.x0,rock1_sh.y0,rock1_sh.z0)
+mfof1     = mask_border(fof1.x0,fof1.y0,fof1.z0)
+
+print('rock',len(mrock),mrock.sum())
+print('rock_sh',len(mrock_sh),mrock_sh.sum())
+print('fof',len(mfof),mfof.sum())
+
+print('rock1',len(mrock1),mrock1.sum())
+print('rock1_sh',len(mrock1_sh),mrock1_sh.sum())
+print('fof1',len(mfof1),mfof1.sum())
+
+
+rock       =  rock[mrock]    
+rock_sh    =  rock_sh[mrock_sh] 
+fof        =  fof[mfof]     
+rock1      =  rock1[mrock1]   
+rock1_sh   =  rock1_sh[mrock1_sh]
+fof1       =  fof1[mfof1]    
+
+main_fof  = pd.read_csv('../halo_props/halo_props_fof_cdm_'+z+'_main.csv.bz2')[mfof]
+main_rock = pd.read_csv('../halo_props/halo_props_rock2_cdm_'+z+'_main.csv.bz2')[mrock]
+main_sh = pd.read_csv('../halo_props/halo_props_rock2_sh_cdm__main.csv.bz2')[mrock_sh]
+
+
+main1_fof  = pd.read_csv('../halo_props/halo_props_fof_sidm1_'+z+'_main.csv.bz2')[mfof1]
+main1_rock = pd.read_csv('../halo_props/halo_props_rock2_sidm1_'+z+'_main.csv.bz2')[mrock1]
+main1_sh = pd.read_csv('../halo_props/halo_props_rock2_sh_sidm1__main.csv.bz2')[mrock1_sh]
 
     
     # LOAD PARAMS
@@ -178,7 +206,7 @@ plt.legend()
 make_plot2(lgM1,S1_rock,nbins=nbins,color='C1',error=True,label='rockstar',lt='--')
 make_plot2(lgM1,S1_rock_2,nbins=nbins,color='C0',error=True,label='rockstar',lt='--')
 make_plot2(main_fof.lgM-0.2,S1r_fof,nbins=nbins,color='C2',error=True,label='fof',lt='--')
-make_plot2(lgM,S1r_rock2,nbins=nbins,color='C3',error=True,label='fof',lt='--')
+make_plot2(lgM1,S1r_rock2,nbins=nbins,color='C3',error=True,label='fof',lt='--')
 make_plot2(lgM1_sh,S1r_sh,nbins=nbins,color='k',error=True,label='subhalos - new par',lt='--')
 plt.axis([13.4,14.8,0.15,0.8])
 plt.savefig('../Sr_lM.png')
@@ -196,7 +224,7 @@ plt.legend()
 make_plot2(lgM1,T1_rock,nbins=nbins,color='C1',error=True,label='rockstar',lt='--')
 make_plot2(lgM1,T1_rock_2,nbins=nbins,color='C0',error=True,label='rockstar',lt='--')
 make_plot2(main1_fof.lgM-0.2,T1_fof,nbins=nbins,color='C2',error=True,label='fof',lt='--')
-make_plot2(lgM,T1_rock2,nbins=nbins,color='C3',error=True,label='fof',lt='--')
+make_plot2(lgM1,T1_rock2,nbins=nbins,color='C3',error=True,label='fof',lt='--')
 make_plot2(lgM1_sh,T1_sh,nbins=nbins,color='k',error=True,label='subhalos - new par',lt='--')
 plt.axis([13.4,14.8,0.1,1.])
 plt.savefig('../T_lM.png')
@@ -214,7 +242,7 @@ plt.legend()
 make_plot2(lgM1,T1_rock,nbins=nbins,color='C1',error=True,label='rockstar',lt='--')
 make_plot2(lgM1,T1_rock_2,nbins=nbins,color='C0',error=True,label='rockstar',lt='--')
 make_plot2(main_fof.lgM-0.2,T1r_fof,nbins=nbins,color='C2',error=True,label='fof',lt='--')
-make_plot2(lgM,T1r_rock2,nbins=nbins,color='C3',error=True,label='fof',lt='--')
+make_plot2(lgM1,T1r_rock2,nbins=nbins,color='C3',error=True,label='fof',lt='--')
 make_plot2(lgM1_sh,T1r_sh,nbins=nbins,color='k',error=True,label='subhalos - new par',lt='--')
 plt.axis([13.4,14.8,0.1,1.])
 plt.savefig('../Tr_lM.png')
@@ -235,8 +263,8 @@ make_plot2(halos.lgM[mask*(halos.offset<doff)]-0.2,halos.s[mask*(halos.offset<do
 plt.legend()
 make_plot2(lgM1[offset1_rock<doff],S1_rock[offset1_rock<doff],nbins=nbins,color='C1',error=True,label='rockstar',lt='--')
 make_plot2(lgM1[offset1_rock<doff],S1_rock_2[offset1_rock<doff],nbins=nbins,color='C0',error=True,label='rockstar',lt='--')
-make_plot2(main_fof.lgM[offset1_fof<doff]-0.2,S1_fof[offset1_fof<doff],nbins=nbins,color='C2',error=True,label='fof',lt='--')
-make_plot2(lgM[offset1_rock<doff],S1_rock2[offset1_rock<doff],nbins=nbins,color='C3',error=True,label='fof',lt='--')
+make_plot2(main1_fof.lgM[offset1_fof<doff]-0.2,S1_fof[offset1_fof<doff],nbins=nbins,color='C2',error=True,label='fof',lt='--')
+make_plot2(lgM1[offset1_rock<doff],S1_rock2[offset1_rock<doff],nbins=nbins,color='C3',error=True,label='fof',lt='--')
 plt.axis([13.4,14.8,0.15,0.8])
 plt.savefig('../S_lM_relaxed.png')
 
@@ -251,8 +279,8 @@ make_plot2(halos.lgM[mask*(halos.offset<doff)]-0.2,halos.sr[mask*(halos.offset<d
 plt.legend()
 make_plot2(lgM1[offset1_rock<doff],S1_rock[offset1_rock<doff],nbins=nbins,color='C1',error=True,label='rockstar',lt='--')
 make_plot2(lgM1[offset1_rock<doff],S1_rock_2[offset1_rock<doff],nbins=nbins,color='C0',error=True,label='rockstar',lt='--')
-make_plot2(main_fof.lgM[offset1_fof<doff]-0.2,S1r_fof[offset1_fof<doff],nbins=nbins,color='C2',error=True,label='fof',lt='--')
-make_plot2(lgM[offset1_rock<doff],S1r_rock2[offset1_rock<doff],nbins=nbins,color='C3',error=True,label='fof',lt='--')
+make_plot2(main1_fof.lgM[offset1_fof<doff]-0.2,S1r_fof[offset1_fof<doff],nbins=nbins,color='C2',error=True,label='fof',lt='--')
+make_plot2(lgM1[offset1_rock<doff],S1r_rock2[offset1_rock<doff],nbins=nbins,color='C3',error=True,label='fof',lt='--')
 plt.axis([13.4,14.8,0.15,0.8])
 plt.savefig('../Sr_lM_relaxed.png')
 
@@ -267,8 +295,8 @@ make_plot2(halos.lgM[mask]-0.2,((1.-halos.q**2)/(1.-halos.s**2))[mask],nbins=nbi
 plt.legend()
 make_plot2(lgM1[offset1_rock<doff],T1_rock[offset1_rock<doff],nbins=nbins,color='C1',error=True,label='rockstar',lt='--')
 make_plot2(lgM1[offset1_rock<doff],T1_rock_2[offset1_rock<doff],nbins=nbins,color='C0',error=True,label='rockstar',lt='--')
-make_plot2(main_fof.lgM[offset1_fof<doff]-0.2,T1_fof[offset1_fof<doff],nbins=nbins,color='C2',error=True,label='fof',lt='--')
-make_plot2(lgM[offset1_rock<doff],T1_rock2[offset1_rock<doff],nbins=nbins,color='C3',error=True,label='fof',lt='--')
+make_plot2(main1_fof.lgM[offset1_fof<doff]-0.2,T1_fof[offset1_fof<doff],nbins=nbins,color='C2',error=True,label='fof',lt='--')
+make_plot2(lgM1[offset1_rock<doff],T1_rock2[offset1_rock<doff],nbins=nbins,color='C3',error=True,label='fof',lt='--')
 plt.axis([13.4,14.8,0.1,1.])
 plt.savefig('../T_lM_relaxed.png')
 
@@ -283,8 +311,8 @@ make_plot2(halos.lgM[mask]-0.2,((1.-halos.q**2)/(1.-halos.s**2))[mask],nbins=nbi
 plt.legend()
 make_plot2(lgM1[offset1_rock<doff],T1_rock[offset1_rock<doff],nbins=nbins,color='C1',error=True,label='rockstar',lt='--')
 make_plot2(lgM1[offset1_rock<doff],T1_rock_2[offset1_rock<doff],nbins=nbins,color='C0',error=True,label='rockstar',lt='--')
-make_plot2(main_fof.lgM[offset1_fof<doff]-0.2,T1r_fof[offset1_fof<doff],nbins=nbins,color='C2',error=True,label='fof',lt='--')
-make_plot2(lgM[offset1_rock<doff],T1r_rock2[offset1_rock<doff],nbins=nbins,color='C3',error=True,label='fof',lt='--')
+make_plot2(main1_fof.lgM[offset1_fof<doff]-0.2,T1r_fof[offset1_fof<doff],nbins=nbins,color='C2',error=True,label='fof',lt='--')
+make_plot2(lgM1[offset1_rock<doff],T1r_rock2[offset1_rock<doff],nbins=nbins,color='C3',error=True,label='fof',lt='--')
 plt.axis([13.4,14.8,0.1,1.])
 plt.savefig('../Tr_lM_relaxed.png')
 
@@ -306,10 +334,12 @@ plt.xlabel('$N_{sh}$')
 plt.savefig('../nhalos_S.png')
 
 minhalos = 120.
+plt.figure()
 plt.hist(S_sh[nhalos>minhalos],np.linspace(0.4,1.,15),histtype='step')
 plt.hist(S1_sh[nhalos1>minhalos],np.linspace(0.4,1.,15),histtype='step')
 
 minmass = 14.5
+plt.figure()
 plt.hist(S_sh[lgM_sh>minmass],np.linspace(0.4,1.,15),histtype='step')
 plt.hist(S1_sh[lgM1_sh>minmass],np.linspace(0.4,1.,15),histtype='step')
 
