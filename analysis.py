@@ -55,14 +55,15 @@ fof1       =  fof1[mfof1]
 
 main_fof  = pd.read_csv('../halo_props/halo_props_fof_cdm_'+z+'_main.csv.bz2')[mfof]
 main_rock = pd.read_csv('../halo_props/halo_props_rock2_cdm_'+z+'_main.csv.bz2')[mrock]
-main_v2 = pd.read_csv('../halo_props/halo_propsv2_rock2_cdm_'+z+'_main.csv.bz2')[mrock]
+# main_v2 = pd.read_csv('../halo_props/halo_propsv2_rock2_cdm_'+z+'_main.csv.bz2')[mrock]
 main_sh = pd.read_csv('../halo_props/halo_props_rock2_sh_cdm__main.csv.bz2')[mrock_sh]
-
+main_v2 = pd.read_csv('../halo_props/halo_props_iterative_rock2_cdm_z0_main.csv.bz2')[mrock]
 
 main1_fof  = pd.read_csv('../halo_props/halo_props_fof_sidm1_'+z+'_main.csv.bz2')[mfof1]
 main1_rock = pd.read_csv('../halo_props/halo_props_rock2_sidm1_'+z+'_main.csv.bz2')[mrock1]
-main1_v2 = pd.read_csv('../halo_props/halo_propsv2_rock2_sidm1_'+z+'_main.csv.bz2')[mrock1]
+# main1_v2 = pd.read_csv('../halo_props/halo_propsv2_rock2_sidm1_'+z+'_main.csv.bz2')[mrock1]
 main1_sh = pd.read_csv('../halo_props/halo_props_rock2_sh_sidm1__main.csv.bz2')[mrock1_sh]
+main_v2 = pd.read_csv('../halo_props/halo_props_iterative_rock2_sidm_z0_main.csv.bz2')[:-1][mrock1]
 
     
     # LOAD PARAMS
