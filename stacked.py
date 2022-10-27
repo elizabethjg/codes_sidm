@@ -52,10 +52,10 @@ def stack_halos(main_file,path,haloids,reduced = False):
     return x,y,z,x2d,y2d
 
 
-def stack_profile(X,Y,Z,Xp,Yp,nrings):
+def stack_profile(X,Y,Z,Xp,Yp,nrings,theta):
 
 
-    rin = 1.
+    rin = 10.
     mp = 0.013398587e10
     step = (1000.-rin)/float(nrings)
     
@@ -65,8 +65,9 @@ def stack_profile(X,Y,Z,Xp,Yp,nrings):
     
     rhop = np.zeros(nrings)
     
-    Sp = np.zeros(nrings)
-    rp = np.zeros(nrings)
+    Sp  = np.zeros(nrings)
+    Sp2 = np.zeros(nrings)
+    rp  = np.zeros(nrings)
     mpV = np.zeros(nrings)
     mpA = np.zeros(nrings)
     
@@ -75,7 +76,7 @@ def stack_profile(X,Y,Z,Xp,Yp,nrings):
     
     ring = 0
     
-    rmax = 5000.
+    rmax = 10000.
     
     while ring < (nrings-1) and (rin+step < rmax):
         
@@ -111,10 +112,13 @@ def stack_profile(X,Y,Z,Xp,Yp,nrings):
         A    = np.pi*(((rin+step)/1.e3)**2 - (rin/1.e3)**2)
         mask = (rpart_E_in >= 1)*(rpart_E_out < 1)
     
-        Sp[ring] = (mask.sum()*mp)/A
+        fi = np.arctan2(Yp,Xp) - theta
+    
+        Sp[ring]  = (mask.sum()*mp)/A
+        Sp2[ring] = ((np.cos(2*fi[mask]).sum()*mp)/A)
         
         mpA[ring] = mp/A
         rin += step
         ring += 1
     
-    return rp,rhop,Sp
+    return rp,rhop,Sp,Sp2
