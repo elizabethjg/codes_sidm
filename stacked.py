@@ -52,7 +52,7 @@ def stack_halos(main_file,path,haloids,reduced = False):
     return x,y,z,x2d,y2d
 
 
-def stack_profile(X,Y,Z,Xp,Yp,nrings,theta):
+def stack_profile(X,Y,Z,Xp,Yp,nrings,theta,nhalos):
 
 
     rin = 10.
@@ -66,6 +66,7 @@ def stack_profile(X,Y,Z,Xp,Yp,nrings,theta):
     rhop = np.zeros(nrings)
     
     Sp  = np.zeros(nrings)
+    DSp  = np.zeros(nrings)
     Sp2 = np.zeros(nrings)
     rp  = np.zeros(nrings)
     mpV = np.zeros(nrings)
@@ -78,7 +79,7 @@ def stack_profile(X,Y,Z,Xp,Yp,nrings,theta):
     
     rmax = 10000.
     
-    while ring < (nrings-1) and (rin+step < rmax):
+    while ring < nrings and (rin+step < rmax):
         
         abin_in = rin/(q*s)**(1./3.)
         bbin_in = abin_in*q
@@ -94,6 +95,8 @@ def stack_profile(X,Y,Z,Xp,Yp,nrings,theta):
         rpart_E_out = (X**2/abin_out**2 + Y**2/bbin_out**2 + Z**2/cbin_out**2)
         
         V    = (4./3.)*np.pi*(((rin+step)/1.e3)**3 - (rin/1.e3)**3)
+        
+        
         mask = (rpart_E_in >= 1)*(rpart_E_out < 1)
         rhop[ring] = (mask.sum()*mp)/V
         mpV[ring] = mp/V
@@ -105,20 +108,30 @@ def stack_profile(X,Y,Z,Xp,Yp,nrings,theta):
     
         abin_out = (rin+step)/np.sqrt(q2) 
         bbin_out = abin_out*q2
-    
+
+        abin_med = rp[ring]/np.sqrt(q2) 
+        bbin_med = abin_med*q2
+        
         rpart_E_in = (Xp**2/abin_in**2 + Yp**2/bbin_in**2)
         rpart_E_out = (Xp**2/abin_out**2 + Yp**2/bbin_out**2)
+        rpart_E_med = (Xp**2/abin_med**2 + Yp**2/bbin_med**2)
             
         A    = np.pi*(((rin+step)/1.e3)**2 - (rin/1.e3)**2)
+        Aout = np.pi*(((rp[ring])/1.e3)**2)
+        
         mask = (rpart_E_in >= 1)*(rpart_E_out < 1)
-    
+        mout = (rpart_E_med < 1)
+        
         fi = np.arctan2(Yp,Xp) - theta
     
         Sp[ring]  = (mask.sum()*mp)/A
-        Sp2[ring] = ((np.cos(2*fi[mask]).sum()*mp)/A)
+        
+        DSp[ring]  = (mout.sum()*mp)/Aout - Sp[ring]
+        
+        Sp2[ring] = ((np.cos(2*fi[mask]).sum()*mp)/A)/np.pi
         
         mpA[ring] = mp/A
         rin += step
         ring += 1
     
-    return rp,rhop,Sp,Sp2
+    return rp,rhop/nhalos,Sp/nhalos,DSp/nhalos,Sp2/nhalos

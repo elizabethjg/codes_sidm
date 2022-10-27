@@ -7,6 +7,13 @@ from stacked import stack_profile
 import pandas as pd
 from fit_models_colossus import *
 from models_profiles import *
+from colossus.halo import concentration
+from colossus.cosmology import cosmology  
+from colossus.halo import mass_defs
+params = {'flat': True, 'H0': 70.0, 'Om0': 0.25, 'Ob0': 0.044, 'sigma8': 0.8, 'ns': 0.95}
+cosmology.addCosmology('MICE', params)
+cosmo = cosmology.setCosmology('MICE')
+
 zs = ['z0','z51','z96']
 
 
@@ -60,8 +67,8 @@ Xp1,Yp1  = x2d1[m2d1]*1.e3,y2d1[m2d1]*1.e3
 theta  = np.arctan(main.a2Dy/main.a2Dx)
 theta1 = np.arctan(main1.a2Dy/main1.a2Dx)
 
-r,rho,S,S_2    = stack_profile(X,Y,Z,Xp,Yp,100,0.)
-r1,rho1,S1,S1_2 = stack_profile(X1,Y1,Z1,Xp1,Yp1,100,theta1)
+r,rho,S,DS,S_2    = stack_profile(X,Y,Z,Xp,Yp,100,0.,mhalos.sum())
+r1,rho1,S1,DS1,S1_2 = stack_profile(X1,Y1,Z1,Xp1,Yp1,100,0.,mhalos.sum())
 
    
 z = 0.
@@ -69,10 +76,19 @@ z = 0.
 
 mr = r > 0.
 
-s       = Sigma_NFW_2h(r[mr],z,M200 = 10**14,c200=3.5,terms='1h')
+# cvir = concentration.concentration(np.mean(rock.Mvir[mrock]), 'vir', z, model = 'diemer19')
+# M200c,R,c200c = mass_defs.changeMassDefinition(np.mean(rock.Mvir[mrock]), cvir, z, 'vir', '200c')
 
-rhof    = rho_fit(r[mr],rho[mr]/mhalos.sum(),1./r[mr]**3,z)
-Sf      = Sigma_fit(r[mr],S[mr]/mhalos.sum(),1./r[mr]**2,z)
-rhof_E    = rho_fit(r[mr],rho[mr]/mhalos.sum(),1./r[mr]**3,z,'Einasto',rhof.M200,rhof.c200)
-Sf_E      = Sigma_fit(r[mr],S[mr]/mhalos.sum(),1./r[mr]**2,z,'Einasto',rhof.M200,rhof.c200)
+M200c = 10**13.5
+c200c = concentration.concentration(np.mean(rock.Mvir[mrock]), 'vir', z, model = 'diemer19')
+
+s3d     = rho_NFW_2h(r[mr],z,M200 = M200c,c200=c200c,terms='1h')*(1.e6**3)
+ds      = Delta_Sigma_NFW_2h(r[mr],z,M200 = M200c,c200=c200c,terms='1h')*(1.e6**2)
+s       = Sigma_NFW_2h(r[mr],z,M200 = M200c,c200=c200c,terms='1h')*(1.e6**2)
+s2      = S2_quadrupole(r[mr],z,M200 = M200c,c200=c200c,cosmo_params=params,terms='1h',pname='NFW')*(1.e6**2)
+
+# rhof    = rho_fit(r[mr],rho[mr],1./r[mr]**3,z)
+# Sf      = Sigma_fit(r[mr],S[mr]/mhalos.sum(),1./r[mr]**2,z)
+# rhof_E    = rho_fit(r[mr],rho[mr]/mhalos.sum(),1./r[mr]**3,z,'Einasto',rhof.M200,rhof.c200)
+# Sf_E      = Sigma_fit(r[mr],S[mr]/mhalos.sum(),1./r[mr]**2,z,'Einasto',rhof.M200,rhof.c200)
 
