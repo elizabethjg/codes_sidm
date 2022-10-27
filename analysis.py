@@ -63,7 +63,7 @@ main1_fof  = pd.read_csv('../halo_props/halo_props_fof_sidm1_'+z+'_main.csv.bz2'
 main1_rock = pd.read_csv('../halo_props/halo_props_rock2_sidm1_'+z+'_main.csv.bz2')[mrock1]
 # main1_v2 = pd.read_csv('../halo_props/halo_propsv2_rock2_sidm1_'+z+'_main.csv.bz2')[mrock1]
 main1_sh = pd.read_csv('../halo_props/halo_props_rock2_sh_sidm1__main.csv.bz2')[mrock1_sh]
-main_v2 = pd.read_csv('../halo_props/halo_props_iterative_rock2_sidm_z0_main.csv.bz2')[:-1][mrock1]
+main1_v2 = pd.read_csv('../halo_props/halo_props_iterative_rock2_sidm_z0_main.csv.bz2')[:-1][mrock1]
 
     
     # LOAD PARAMS
@@ -167,8 +167,8 @@ Q1r_v2 = main1_v2.c3Dr/main1_v2.a3Dr
 q1r_v2 = main1_v2.b2Dr/main1_v2.a2Dr
 T1r_v2 = (main1_v2.a3Dr**2 - main1_v2.b3Dr**2)/(main1_v2.a3Dr**2 - main1_v2.c3Dr**2)
 
-mv2  = ~np.isnan(main_v2.a3D)*(S_v2 > 0.)
-mv12 = ~np.isnan(main1_v2.a3D)*(S1_v2 > 0.)
+mv2  = ~np.isnan(main_v2.a3Dr)*(Sr_v2 > 0.)
+mv12 = ~np.isnan(main1_v2.a3Dr)*(S1r_v2 > 0.)
     
 Eratio_fof  = (2.*main_fof.EKin/abs(main_fof.EPot))
 Eratio1_fof = (2.*main1_fof.EKin/abs(main1_fof.EPot))
@@ -218,6 +218,28 @@ make_plot2(lgM1,S1_rock2,nbins=nbins,color='C3',error=True,label='fof',lt='--')
 make_plot2(lgM1[mv12],S1_v2[mv12],nbins=nbins,color='C1',error=True,label='fof',lt='--')
 plt.axis([13.4,14.8,0.15,0.8])
 plt.savefig('../S_lM.png')
+
+plt.figure()
+plt.xlabel('$\log M$')
+plt.ylabel('$S = c/a$')
+make_plot2(lgM,S_rock,nbins=nbins,color='C1',error=True,label='rockstar - rockstar')
+make_plot2(lgM,S_rock_2,nbins=nbins,color='C0',error=True,label='rockstar - rockstar2')
+# make_plot2(lgM_sh,S_sh,nbins=nbins,color='k',error=True,label='subhalos - new par')
+# make_plot2(main_fof.lgM-0.2,S_fof,nbins=nbins,color='C2',error=True,label='FOF - new par')
+make_plot2(lgM,Sr_rock2,nbins=nbins,color='C3',error=True,label='rockstar - new par')
+make_plot2(lgM[mv2],Sr_v2[mv2],nbins=nbins,color='C2',error=True,label='rockstar - new par2')
+# make_plot2(halos.lgM[mask]-0.2,halos.s[mask],nbins=nbins,color='C7',error=True,label='FOF - new par (MICE)')
+plt.legend()
+make_plot2(lgM1,S1_rock,nbins=nbins,color='C1',error=True,label='rockstar',lt='--')
+make_plot2(lgM1,S1_rock_2,nbins=nbins,color='C0',error=True,label='rockstar',lt='--')
+# make_plot2(lgM1_sh,S1_sh,nbins=nbins,color='k',error=True,label='subhalos - new par',lt='--')
+# make_plot2(main_fof.lgM-0.2,S1_fof,nbins=nbins,color='C2',error=True,label='fof',lt='--')
+make_plot2(lgM1,S1r_rock2,nbins=nbins,color='C3',error=True,label='fof',lt='--')
+make_plot2(lgM1[mv12],S1r_v2[mv12],nbins=nbins,color='C2',error=True,label='fof',lt='--')
+plt.axis([13.4,14.8,0.15,0.8])
+plt.savefig('../Sr_lM.png')
+
+'''
 
 plt.figure()
 plt.xlabel('$\log M$')
@@ -369,7 +391,7 @@ plt.figure()
 plt.hist(S_sh[lgM_sh>minmass],np.linspace(0.4,1.,15),histtype='step')
 plt.hist(S1_sh[lgM1_sh>minmass],np.linspace(0.4,1.,15),histtype='step')
 
-'''
+
 
 mlim = 14.2
 
