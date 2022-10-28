@@ -117,18 +117,27 @@ def stack_profile(X,Y,Z,Xp,Yp,nrings,theta,nhalos):
         rpart_E_med = (Xp**2/abin_med**2 + Yp**2/bbin_med**2)
             
         A    = np.pi*(((rin+step)/1.e3)**2 - (rin/1.e3)**2)
-        Aout = np.pi*(((rp[ring])/1.e3)**2)
+        Aout = np.pi*(rp[ring]**2)
         
         mask = (rpart_E_in >= 1)*(rpart_E_out < 1)
         mout = (rpart_E_med < 1)
         
-        fi = np.arctan2(Yp,Xp) - theta
+        fi = np.arctan2(Yp[mask],Xp[mask]) - theta
+
+        # bines = np.linspace(-1.*np.pi,np.pi,num=nrings)
+        # dig = np.digitize(fi,bines)
+        # dt  = np.diff(bines)[0]
     
+        # for j in range(nrings):
+            # mbin = dig == nbin+1 
+            # DSp[ring]  = (((np.cos(2*fi[mbin]).sum()*mp)/A)/np.pi)*dt
+        
+        
         Sp[ring]  = (mask.sum()*mp)/A
         
         DSp[ring]  = (mout.sum()*mp)/Aout - Sp[ring]
         
-        Sp2[ring] = ((np.cos(2*fi[mask]).sum()*mp)/A)/(np.cos(2*fi[mask])**2).sum()
+        Sp2[ring] = ((np.cos(2*fi).sum()*mp))/(np.pi*rp[ring]*(step/1.e3))
         
         mpA[ring] = mp/A
         rin += step

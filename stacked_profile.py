@@ -67,6 +67,9 @@ Xp1,Yp1  = x2d1[m2d1]*1.e3,y2d1[m2d1]*1.e3
 theta  = np.arctan(main.a2Dy/main.a2Dx)
 theta1 = np.arctan(main1.a2Dy/main1.a2Dx)
 
+# r,rho,S,DS,S_2    = stack_profile(X,Y,Z,Xp,Yp,100,0.,mrock.sum())
+# r1,rho1,S1,DS1,S1_2 = stack_profile(X1,Y1,Z1,Xp1,Yp1,100,0.,mrock1.sum())
+
 r,rho,S,DS,S_2    = stack_profile(X,Y,Z,Xp,Yp,100,0.,mrock.sum())
 r1,rho1,S1,DS1,S1_2 = stack_profile(X1,Y1,Z1,Xp1,Yp1,100,0.,mrock1.sum())
 
@@ -84,7 +87,7 @@ mr = r > 0.
 # M200c,R,c200c = mass_defs.changeMassDefinition(np.mean(rock.Mvir[mrock]), cvir, z, 'vir', '200c')
 
 M200c = 10**13.5
-c200c = concentration.concentration(np.mean(rock.Mvir[mrock]), 'vir', z, model = 'diemer19')
+c200c = concentration.concentration(np.mean(rock.Mvir[mrock]), '200c', z, model = 'diemer19')
 
 s3d     = rho_NFW_2h(r[mr],z,M200 = M200c,c200=c200c,terms='1h')*(1.e6**3)
 ds      = Delta_Sigma_NFW_2h(r[mr],z,M200 = M200c,c200=c200c,terms='1h')*(1.e6**2)
