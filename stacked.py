@@ -128,7 +128,7 @@ def stack_profile(X,Y,Z,Xp,Yp,nrings,theta,nhalos):
         
         DSp[ring]  = (mout.sum()*mp)/Aout - Sp[ring]
         
-        Sp2[ring] = ((np.cos(2*fi[mask]).sum()*mp)/A)/np.pi
+        Sp2[ring] = ((np.cos(2*fi[mask]).sum()*mp)/A)/((np.cos(2*fi[mask])**2).sum()
         
         mpA[ring] = mp/A
         rin += step

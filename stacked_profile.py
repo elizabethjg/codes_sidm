@@ -67,8 +67,8 @@ Xp1,Yp1  = x2d1[m2d1]*1.e3,y2d1[m2d1]*1.e3
 theta  = np.arctan(main.a2Dy/main.a2Dx)
 theta1 = np.arctan(main1.a2Dy/main1.a2Dx)
 
-r,rho,S,DS,S_2    = stack_profile(X,Y,Z,Xp,Yp,100,0.,mhalos.sum())
-r1,rho1,S1,DS1,S1_2 = stack_profile(X1,Y1,Z1,Xp1,Yp1,100,0.,mhalos.sum())
+r,rho,S,DS,S_2    = stack_profile(X,Y,Z,Xp,Yp,100,0.,mrock.sum())
+r1,rho1,S1,DS1,S1_2 = stack_profile(X1,Y1,Z1,Xp1,Yp1,100,0.,mrock1.sum())
 
 q2d = np.mean(main.b2D/main.a2D)
 e  = (1.-q2d)/(q2d+1)
