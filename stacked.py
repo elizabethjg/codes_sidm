@@ -170,13 +170,16 @@ def stack_profile(X,Y,Z,Xp,Yp,nrings,theta,nhalos):
     return rp,rhop/nhalos,Sp/nhalos,DSp/nhalos,Sp2/nhalos,DSp_cos/nhalos,DSp_sin/nhalos
 
 
-def stack_profile_forhalo(X,Y,Z,Xp,Yp,nrings,theta,nhalos=1):
+def stack_profile(X,Y,Z,Xp,Yp,nrings,theta,nhalos):
 
 
     rin = 10.
     mp = 0.013398587e10
     step = (1000.-rin)/float(nrings)
     
+    s = 1.
+    q = 1.
+    q2 = 1.
     
     rhop = np.zeros(nrings)
     
@@ -198,13 +201,10 @@ def stack_profile_forhalo(X,Y,Z,Xp,Yp,nrings,theta,nhalos=1):
     
     while ring < nrings and (rin+step < rmax):
         
-        ##############
-        # PERFIL 3D
-        ##############
-        
-        r_in  = rin   
+        r_in  = rin
         r_out = (rin+step)
-        r_med     = (rin + 0.5*step)
+        r_med = (rin + 0.5*step)
+        rp[ring] = r_med/1.e3
         
         rpart_E_in = (X**2/r_in**2 + Y**2/r_in**2 + Z**2/r_in**2)
         rpart_E_out = (X**2/r_out**2 + Y**2/r_out**2 + Z**2/r_out**2)
@@ -216,28 +216,24 @@ def stack_profile_forhalo(X,Y,Z,Xp,Yp,nrings,theta,nhalos=1):
         rhop[ring] = (mask.sum()*mp)/V
         mpV[ring] = mp/V
     
-        ##############
-        # PERFILES 2D
-        ##############
+        # print(mask.sum())
     
-
-        r_1 = (rin+step*0.4)
-        r_2 = (rin+step*0.6)
+        r_1 = (rin+0.4*step)
+        r_2 = (rin+0.6*step)
         
-        rpart_E_in   = (Xp**2/r_in**2 + Yp**2/r_in**2)
+        rpart_E_in  = (Xp**2/r_in**2 + Yp**2/r_in**2)
         rpart_E_out  = (Xp**2/r_out**2 + Yp**2/r_out**2)
         rpart_E_med  = (Xp**2/r_med**2 + Yp**2/r_med**2)
         
-        rpart_E_1    = (Xp**2/r_1**2 + Yp**2/r_1**2)
-        rpart_E_2    = (Xp**2/r_2**2 + Yp**2/r_2**2)
-                        
-        A     = np.pi*(r_out**2 - r_in**2)
-        A1    = np.pi*(r_med**2 - r_1**2)
-        A2    = np.pi*(r_2**2 - r_med**2)
-        
+        rpart_E_1  = (Xp**2/r_1**2 + Yp**2/r_1**2)
+        rpart_E_2 = (Xp**2/r_2**2 + Yp**2/r_2**2)
+            
+        A    = np.pi*(r_out**2 - r_in**2)
+        A2   = np.pi*((rin+step*0.6)**2 - r_med**2)
+        A1   = np.pi*(r_med**2 - (rin+step*0.4)**2)        
         Adisc = np.pi*(r_med**2)
         
-        mask  = (rpart_E_in >= 1)*(rpart_E_out < 1)
+        mask = (rpart_E_in >= 1)*(rpart_E_out < 1)
         mask1 = (rpart_E_1 >= 1)*(rpart_E_med < 1)
         mask2 = (rpart_E_med >= 1)*(rpart_E_2 < 1)
         mdisc = (rpart_E_med < 1)
@@ -249,20 +245,14 @@ def stack_profile_forhalo(X,Y,Z,Xp,Yp,nrings,theta,nhalos=1):
         
         DSp[ring]  = (mdisc.sum()*mp)/Adisc - Sp[ring]
         
-        psi2       = -1.*(mp*np.sum(rpar[mdisc]**2))/Adisc
-        
+        psi2       = -1.*(mp*np.sum(rpar[mdisc]**2))/Adisc 
         S2         = -1.*r_med*mp*((mask2.sum()/A2 - mask1.sum()/A1)/(0.2*step))
-    
-        DSp_cos[ring]  = (-6*psi2/r_med**2) - 2.*Sp[ring] - S2
         
+        DSp_cos[ring]  = ((-6*psi2/r_med**2) - 2.*Sp[ring] - S2)
         DSp_sin[ring]  = (-6*psi2/r_med**2) - 4.*Sp[ring]
-        
         Sp2[ring]      = (np.cos(2*fi).sum()*mp)/(np.pi*r_med*step)
         
-        rp[ring] = r_med/1.e3
-        
         mpA[ring] = mp/A
-        
         rin += step
         ring += 1
     
