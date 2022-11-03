@@ -29,12 +29,16 @@ mrock      = mask_border(rock.x0,rock.y0,rock.z0)
 mrock1     = mask_border(rock1.x0,rock1.y0,rock1.z0)
 
 path1 = '/mnt/projects/lensing/SIDM_project/Lentes/Eli_Agus/snapshot_050/rockstar/SIDM1/'
-main_file1 = '/home/elizabeth/SIDM/halo_props/halo_props_rock2_sidm1_'+z+'_main.csv.bz2'
+main_file1 = '/mnt/projects/lensing/SIDM_project/halo_props/halo_props_iterative_rock2_cdm_z0_main.csv.bz2'
 path = '/mnt/projects/lensing/SIDM_project/Lentes/Eli_Agus/snapshot_050/rockstar/CDM/'
-main_file = '/home/elizabeth/SIDM/halo_props/halo_props_rock2_cdm_'+z+'_main.csv.bz2'
+main_file = '/mnt/projects/lensing/SIDM_project/halo_props/halo_props_iterative_rock2_sidm1_z0_main.csv.bz2'
 
 main  = pd.read_csv(main_file)
 main1 = pd.read_csv(main_file1)
+
+Sr_it  = main_it.c3Dr/main_it.a3Dr
+S1r_it = main1_it.c3Dr/main1_it.a3Dr
+
 
 rc  = np.array(np.sqrt((main.xc - main.xc_rc)**2 + (main.yc - main.yc_rc)**2 + (main.zc - main.zc_rc)**2))
 offset  = rc/main.r_max
@@ -46,8 +50,10 @@ offset1  = rc1/main1.r_max
 mhalos  = offset  < 0.1
 mhalos1 = offset1 < 0.1
 
-haloids  = np.array(main.column_halo_id)[mrock]
-haloids1 = np.array(main1.column_halo_id)[mrock1]
+m = abs(S1_it-S_it)>0.1
+
+haloids  = np.array(main.column_halo_id)[mrock*m]
+haloids1 = np.array(main1.column_halo_id)[mrock1*m]
     
 x,y,z,x2d,y2d      = stack_halos(main_file,path,haloids,True)   
 x1,y1,z1,x2d1,y2d1 = stack_halos(main_file1,path1,haloids1,True)   
@@ -66,6 +72,7 @@ Xp1,Yp1  = x2d1[m2d1]*1.e3,y2d1[m2d1]*1.e3
 
 theta  = np.arctan(main.a2Dy/main.a2Dx)
 theta1 = np.arctan(main1.a2Dy/main1.a2Dx)
+
 
 r,rho,S,DS,S_2,DS_cos,DS_sin    = stack_profile(X,Y,Z,Xp,Yp,100,0.,mrock.sum())
 r1,rho1,S1,DS1,S1_2,DS1_cos,DS1_sin = stack_profile(X1,Y1,Z1,Xp1,Yp1,100,0.,mrock1.sum())
