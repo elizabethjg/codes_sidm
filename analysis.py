@@ -201,6 +201,9 @@ mit1  = ~np.isnan(main1_it.a3D)*(S1_it > 0.)
 Eratio_fof  = (2.*main_fof.EKin/abs(main_fof.EPot))
 Eratio1_fof = (2.*main1_fof.EKin/abs(main1_fof.EPot))
 
+Eratio_it  = (2.*main_it.EKin/abs(main_it.EPot))
+Eratio1_it = (2.*main1_it.EKin/abs(main1_it.EPot))
+
 Eratio_mice = (2.*halos.K)/abs(halos.U)
 
 lgM = np.log10(rock.Mvir)

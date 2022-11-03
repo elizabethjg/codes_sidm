@@ -36,8 +36,8 @@ main_file = '/mnt/projects/lensing/SIDM_project/halo_props/halo_props_iterative_
 main  = pd.read_csv(main_file)
 main1 = pd.read_csv(main_file1)
 
-Sr_it  = main_it.c3Dr/main_it.a3Dr
-S1r_it = main1_it.c3Dr/main1_it.a3Dr
+S_it  = main.c3Dr/main.a3Dr
+S1_it = main1.c3Dr/main1.a3Dr
 
 
 rc  = np.array(np.sqrt((main.xc - main.xc_rc)**2 + (main.yc - main.yc_rc)**2 + (main.zc - main.zc_rc)**2))
@@ -74,8 +74,8 @@ theta  = np.arctan(main.a2Dy/main.a2Dx)
 theta1 = np.arctan(main1.a2Dy/main1.a2Dx)
 
 
-r,rho,S,DS,S_2,DS_cos,DS_sin    = stack_profile(X,Y,Z,Xp,Yp,100,0.,mrock.sum())
-r1,rho1,S1,DS1,S1_2,DS1_cos,DS1_sin = stack_profile(X1,Y1,Z1,Xp1,Yp1,100,0.,mrock1.sum())
+r,rho,S,DS,S_2,DS_cos,DS_sin    = stack_profile(X,Y,Z,Xp,Yp,100,0.,(mrock*m).sum())
+r1,rho1,S1,DS1,S1_2,DS1_cos,DS1_sin = stack_profile(X1,Y1,Z1,Xp1,Yp1,100,0.,(mrock1*m).sum())
 
 # r,rho,S,DS,S_2,DS_cos,DS_sin    = stack_profile(X,Y,Z,Xp,Yp,30,0.,1)
 # r1,rho1,S1,DS1,S1_2,DS1_cos,DS1_sin = stack_profile(X1,Y1,Z1,Xp1,Yp1,30,0.,1)
