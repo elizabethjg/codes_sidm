@@ -6,6 +6,17 @@ from scipy import stats
 from astropy.io import fits
 from binned_plots import make_plot2
 
+
+def make_plot2(X,Y,color='C0',nbins=20,plt=plt,label='',error = False,lw=1,lt='-'):
+    x,q50,q25,q75,nada,ymean,ers = binned(X,Y,nbins)
+    if error:
+        plt.plot(x,ymean,lt,color=color,label=label,lw=lw)
+        plt.fill_between(x,ymean+ers,ymean-ers,color=color,alpha=0.2)
+    else:
+        plt.plot(x,q50,lt,color=color,label=label,lw=lw)
+        plt.fill_between(x,q75,q25,color=color,alpha=0.2)
+
+
 try:
     halos = fits.open('/home/elizabeth/Documentos/Astronomia/proyectos/HALO-SHAPE/MICE/HS-lensing/HALO_Props_MICE.fits')[1].data        
 except:
