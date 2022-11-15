@@ -23,21 +23,24 @@ def mask_border(x0,y0,z0):
     mask = (x0 > 2.)*(x0 < 118.)*(y0 > 2.)*(y0 < 118.)*(z0 > 2.)*(z0 < 118.)
     return mask
 
-rock       = pd.read_csv('../halo_props/halo_props_cdm_'+z+'_rock2.csv.bz2')
-rock1      = pd.read_csv('../halo_props/halo_props_sidm1_'+z+'_rock2.csv.bz2')
+rock       = pd.read_csv('/mnt/projects/lensing/SIDM_project/halo_props/halo_props_match_cdm_'+z+'_rock2.csv.bz2')
+rock1      = pd.read_csv('/mnt/projects/lensing/SIDM_project/halo_props/halo_props_match_sidm1_'+z+'_rock2.csv.bz2')
 mrock      = mask_border(rock.x0,rock.y0,rock.z0)
 mrock1     = mask_border(rock1.x0,rock1.y0,rock1.z0)
 
-path1 = '/mnt/projects/lensing/SIDM_project/Lentes/Eli_Agus/snapshot_050/rockstar/SIDM1/'
-main_file1 = '/mnt/projects/lensing/SIDM_project/halo_props/halo_props_iterative_rock2_cdm_z0_main.csv.bz2'
-path = '/mnt/projects/lensing/SIDM_project/Lentes/Eli_Agus/snapshot_050/rockstar/CDM/'
-main_file = '/mnt/projects/lensing/SIDM_project/halo_props/halo_props_iterative_rock2_sidm1_z0_main.csv.bz2'
+path1 = '/mnt/projects/lensing/SIDM_project/Lentes/Eli_Agus/snapshot_050/rockstar/matcheados/SIDM1/'
+main_file1 = '/mnt/projects/lensing/SIDM_project/halo_props/halo_propsv2_rock2_match_sidm1_z0_main.csv.bz2'
+path = '/mnt/projects/lensing/SIDM_project/Lentes/Eli_Agus/snapshot_050/rockstar/matcheados/CDM/'
+main_file = '/mnt/projects/lensing/SIDM_project/halo_props/halo_propsv2_rock2_match_cdm_z0_main.csv.bz2'
 
 main  = pd.read_csv(main_file)
 main1 = pd.read_csv(main_file1)
 
-S_it  = main.c3Dr/main.a3Dr
-S1_it = main1.c3Dr/main1.a3Dr
+S_it  = main.c3D_it/main.a3D_it
+S1_it = main1.c3D_it/main1.a3D_it
+
+S_itr  = main.c3Dr_it/main.a3Dr_it
+S1_itr = main1.c3Dr_it/main1.a3Dr_it
 
 
 rc  = np.array(np.sqrt((main.xc - main.xc_rc)**2 + (main.yc - main.yc_rc)**2 + (main.zc - main.zc_rc)**2))
