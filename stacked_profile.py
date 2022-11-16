@@ -42,6 +42,16 @@ S1_it = main1.c3D_it/main1.a3D_it
 S_itr  = main.c3Dr_it/main.a3Dr_it
 S1_itr = main1.c3Dr_it/main1.a3Dr_it
 
+S  = main.c3D_it/main.a3D_it
+S1 = main1.c3D_it/main1.a3D_it
+
+S_r  = main.c3Dr/main.a3Dr
+S1_r = main1.c3Dr/main1.a3Dr
+
+Eratio  = (2.*main.EKin/abs(main.EPot))
+Eratio1 = (2.*main1.EKin/abs(main1.EPot))
+
+
 
 rc  = np.array(np.sqrt((main.xc - main.xc_rc)**2 + (main.yc - main.yc_rc)**2 + (main.zc - main.zc_rc)**2))
 offset  = rc/main.r_max
@@ -53,10 +63,11 @@ offset1  = rc1/main1.r_max
 mhalos  = offset  < 0.1
 mhalos1 = offset1 < 0.1
 
-m = abs(S1_it-S_it)>0.1
+# m = (S_itr-S1_itr)/S_itr < -0.1
+m = S_itr < 100.
 
-haloids  = np.array(main.column_halo_id)[mrock*m]
-haloids1 = np.array(main1.column_halo_id)[mrock1*m]
+haloids  = np.array(main.column_halo_id)[m]
+haloids1 = np.array(main1.column_halo_id)[m]
     
 x,y,z,x2d,y2d      = stack_halos(main_file,path,haloids,True)   
 x1,y1,z1,x2d1,y2d1 = stack_halos(main_file1,path1,haloids1,True)   
@@ -77,8 +88,11 @@ theta  = np.arctan(main.a2Dy/main.a2Dx)
 theta1 = np.arctan(main1.a2Dy/main1.a2Dx)
 
 
-r,rho,S,DS,S_2,DS_cos,DS_sin    = stack_profile(X,Y,Z,Xp,Yp,100,0.,(mrock*m).sum())
-r1,rho1,S1,DS1,S1_2,DS1_cos,DS1_sin = stack_profile(X1,Y1,Z1,Xp1,Yp1,100,0.,(mrock1*m).sum())
+r,rho,S,DS,S_2,DS_cos,DS_sin    = stack_profile(X,Y,Z,Xp,Yp,100,0.,m.sum())
+r1,rho1,S1,DS1,S1_2,DS1_cos,DS1_sin = stack_profile(X1,Y1,Z1,Xp1,Yp1,100,0.,m.sum())
+
+# r_m,rho_m,S_m,DS_m,S_2_m,DS_cos_m,DS_sin_m = r,rho,S,DS,S_2,DS_cos,DS_sin
+# r1_m,rho1_m,S1_m,DS1_m,S1_2_m,DS1_cos_m,DS1_sin_m = r1,rho1,S1,DS1,S1_2,DS1_cos,DS1_sin
 
 # r,rho,S,DS,S_2,DS_cos,DS_sin    = stack_profile(X,Y,Z,Xp,Yp,30,0.,1)
 # r1,rho1,S1,DS1,S1_2,DS1_cos,DS1_sin = stack_profile(X1,Y1,Z1,Xp1,Yp1,30,0.,1)
@@ -96,7 +110,7 @@ mr = r > 0.
 # cvir = concentration.concentration(np.mean(rock.Mvir[mrock]), 'vir', z, model = 'diemer19')
 # M200c,R,c200c = mass_defs.changeMassDefinition(np.mean(rock.Mvir[mrock]), cvir, z, 'vir', '200c')
 
-M200c = 10**13.5
+M200c = 10**13.9
 c200c = concentration.concentration(np.mean(rock.Mvir[mrock]), '200c', z, model = 'diemer19')
 
 s3d           = rho_NFW_2h(r[mr],z,M200 = M200c,c200=c200c,terms='1h')*(1.e3**3)
