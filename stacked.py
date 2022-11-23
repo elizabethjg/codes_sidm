@@ -138,4 +138,4 @@ def stack_profile(X,Y,Z,Xp,Yp,nrings,theta,nhalos):
         rin += step
         ring += 1
     
-    return rp,rhop/nhalos,Sp/nhalos,DSp/nhalos,Sp2/nhalos,DSp_cos/nhalos,DSp_sin/nhalos
+    return rp,rhop/(nhalos*1.e3**3),Sp/(nhalos*1.e3**2),DSp/(nhalos*1.e3**2),Sp2/(nhalos*1.e3**2),DSp_cos/(nhalos*1.e3**2),DSp_sin/(nhalos*1.e3**2)

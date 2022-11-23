@@ -66,8 +66,10 @@ mhalos1 = offset1 < 0.1
 # m = (S_itr-S1_itr)/S_itr < -0.1
 m = S_itr < 100.
 
-haloids  = np.array(main.column_halo_id)[m]
-haloids1 = np.array(main1.column_halo_id)[m]
+haloids  = np.array(main.column_halo_id)[:10]
+haloids1 = np.array(main1.column_halo_id)[:10]
+
+nhalos = len(haloids)
     
 x,y,z,x2d,y2d      = stack_halos(main_file,path,haloids,True)   
 x1,y1,z1,x2d1,y2d1 = stack_halos(main_file1,path1,haloids1,True)   
@@ -88,8 +90,9 @@ theta  = np.arctan(main.a2Dy/main.a2Dx)
 theta1 = np.arctan(main1.a2Dy/main1.a2Dx)
 
 
-r,rho,S,DS,S_2,DS_cos,DS_sin    = stack_profile(X,Y,Z,Xp,Yp,100,0.,m.sum())
-r1,rho1,S1,DS1,S1_2,DS1_cos,DS1_sin = stack_profile(X1,Y1,Z1,Xp1,Yp1,100,0.,m.sum())
+r,rho,S,DS,S_2,DS_cos,DS_sin    = stack_profile(X,Y,Z,Xp,Yp,100,0.,nhalos)
+r1,rho1,S1,DS1,S1_2,DS1_cos,DS1_sin = stack_profile(X1,Y1,Z1,Xp1,Yp1,100,0.,nhalos)
+
 
 # r_m,rho_m,S_m,DS_m,S_2_m,DS_cos_m,DS_sin_m = r,rho,S,DS,S_2,DS_cos,DS_sin
 # r1_m,rho1_m,S1_m,DS1_m,S1_2_m,DS1_cos_m,DS1_sin_m = r1,rho1,S1,DS1,S1_2,DS1_cos,DS1_sin
@@ -110,17 +113,38 @@ mr = r > 0.
 # cvir = concentration.concentration(np.mean(rock.Mvir[mrock]), 'vir', z, model = 'diemer19')
 # M200c,R,c200c = mass_defs.changeMassDefinition(np.mean(rock.Mvir[mrock]), cvir, z, 'vir', '200c')
 
-M200c = 10**13.9
+M200c = 10**13.4
 c200c = concentration.concentration(np.mean(rock.Mvir[mrock]), '200c', z, model = 'diemer19')
 
-s3d           = rho_NFW_2h(r[mr],z,M200 = M200c,c200=c200c,terms='1h')*(1.e3**3)
-ds            = Delta_Sigma_NFW_2h(r[mr],z,M200 = M200c,c200=c200c,terms='1h')*(1.e3**2)
-s             = Sigma_NFW_2h(r[mr],z,M200 = M200c,c200=c200c,terms='1h')*(1.e3**2)
-s2            = S2_quadrupole(r[mr],z,M200 = M200c,c200=c200c,cosmo_params=params,terms='1h',pname='NFW')*(1.e3**2)
+s3d           = rho_NFW_2h(r[mr],z,M200 = M200c,c200=c200c,terms='1h')
+ds            = Delta_Sigma_NFW_2h(r[mr],z,M200 = M200c,c200=c200c,terms='1h')
+s             = Sigma_NFW_2h(r[mr],z,M200 = M200c,c200=c200c,terms='1h')
+s2            = S2_quadrupole(r[mr],z,M200 = M200c,c200=c200c,cosmo_params=params,terms='1h',pname='NFW')
 ds_cos,ds_sin = GAMMA_components(r[mr],z,1.,M200 = M200c,c200=c200c,cosmo_params=params,terms='1h',pname='NFW')
 
-ds_cos = ds_cos*(1.e3**2)
-ds_sin = ds_sin*(1.e3**2)
+
+# MAKE KAPPA MAP
+mp = 0.013398587e10
+xedges = np.linspace(-3,3,4)
+lsize  = np.diff(xedges)[0]
+xb, yb = np.meshgrid(xedges[:-1],xedges[:-1])+(lsize/2.)
+
+H, xedges, xedges = np.histogram2d(Xp*1.e-3, Yp*1.e-3, bins=(xedges,xedges))
+kE = (H*mp)/(nhalos*((lsize*1.e-6)**2))
+kB = np.zeros(kE.shape)
+e1, e2 = ks93inv(kE, kB)
+
+xb = xb.flatten()
+yb = yb.flatten()
+
+rb = np.sqrt(xb**2+yb**2)
+theta  = np.arctan2(yb,xb)
+
+#get tangential ellipticities 
+et = (-e1.flatten()*np.cos(2*theta)-e2.flatten()*np.sin(2*theta))
+#get cross ellipticities
+ex = (-e1.flatten()*np.sin(2*theta)+e2.flatten()*np.cos(2*theta))
+
 
 # rhof    = rho_fit(r[mr],rho[mr],1./r[mr]**3,z)
 # Sf      = Sigma_fit(r[mr],S[mr]/mhalos.sum(),1./r[mr]**2,z)
