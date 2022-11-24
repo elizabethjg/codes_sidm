@@ -348,15 +348,36 @@ class fit_profiles(profile_from_map):
         self.c200_ds  = c200
         
         # FIT SHEAR QUADRUPOLE PROFILES
+        # FIT THEM TOGETHER
         
         GT,GX = GAMMA_components(self.r,z,ellip=1.,M200 = 10**logM200,c200=c200,cosmo_params=params)
-        
+                
         q_ds,mcmc_out = fit_quadrupoles(self.r,self.GT,self.GX,self.eGT,self.eGX,GT,GX)
         
         e = (1. - q_ds)/(1. + q_ds)
         
-        self.q_ds     = q_ds
+        self.q_2g     = q_ds
         self.mcmc_out = mcmc_out
-        self.GT_fit = e*GT
-        self.GX_fit = e*GX
+        self.GT_fit2 = e*GT
+        self.GX_fit2 = e*GX
         
+        # FIT THEM SEPARATELY
+        
+        def GT(self.r,e)
+            return e*GT
+            
+        GT_fit = curve_fit(GT,self.r,self.GT,sigma=np.ones(len(self.r)),absolute_sigma=True,bounds=(0,1))
+        e = GT_fit[0]
+        
+        self.q_gt     = (1.-e)/(1.+e)
+        self.GT_fit   = GT(self.r,e)
+
+        def GX(self.r,e)
+            return e*GX
+            
+        GX_fit = curve_fit(GX,self.r,self.GT,sigma=np.ones(len(self.r)),absolute_sigma=True,bounds=(0,1))
+        e = GX_fit[0]
+        
+        self.q_gx     = (1.-e)/(1.+e)
+        self.GX_fit   = GX(self.r,e)
+
