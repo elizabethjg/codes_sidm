@@ -363,7 +363,7 @@ class fit_profiles(profile_from_map):
         
         # FIT THEM SEPARATELY
         
-        def GT(self.r,e)
+        def GT(self.r,e):
             return e*GT
             
         GT_fit = curve_fit(GT,self.r,self.GT,sigma=np.ones(len(self.r)),absolute_sigma=True,bounds=(0,1))
@@ -372,7 +372,7 @@ class fit_profiles(profile_from_map):
         self.q_gt     = (1.-e)/(1.+e)
         self.GT_fit   = GT(self.r,e)
 
-        def GX(self.r,e)
+        def GX(self.r,e):
             return e*GX
             
         GX_fit = curve_fit(GX,self.r,self.GT,sigma=np.ones(len(self.r)),absolute_sigma=True,bounds=(0,1))
