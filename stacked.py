@@ -6,6 +6,56 @@ import h5py
 from member_distribution import projected_coodinates
 from lenspack.image.inversion import ks93inv
 
+
+def fit_quadrupoles(R,gt,gx,egt,egx,GT,GX):
+    
+    
+    def log_likelihood(q, R, profiles, eprofiles):
+        
+        gt, gx   = profiles
+        egt, egx = eprofiles
+        
+        e   = (1.-q)/(1.+q)
+        
+        sigma2 = egt**2
+        LGT = -0.5 * np.sum((e*GT - gt)**2 / sigma2 + np.log(2.*np.pi*sigma2))
+
+        sigma2 = egx**2
+        LGX = -0.5 * np.sum((e*GX - gx)**2 / sigma2 + np.log(2.*np.pi*sigma2))
+
+        return LGT +  LGX
+    
+    
+    def log_probability(q, R, profiles, eprofiles):
+        
+        
+        if 0. < q < 1.:
+            return log_likelihood(q, R, profiles, eprofiles)
+            
+        return -np.inf
+    
+    # initializing
+    
+    pos = np.array([np.random.uniform(0.6,0.9,15)]).T
+    
+    nwalkers, ndim = pos.shape
+    
+    #-------------------
+    # running emcee
+    
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, 
+                                    args=(R,[gt,gx],[egt,egx]))
+                                    # pool = pool)
+                    
+    sampler.run_mcmc(pos, 250, progress=True)
+    
+    mcmc_out = sampler.get_chain(flat=True)
+    
+    return mcmc_out
+
+
+
+
 def stack_halos(main_file,path,haloids,reduced = False):
 
     main = pd.read_csv(main_file)
@@ -144,9 +194,9 @@ class stack_profile:
     
         self.r      = rp
         self.rho    = rhop/(nhalos*1.e3**3)
-        self.erho   = (mpV*nhalos)/(1.e3**3)
+        self.erho   = mpV/(1.e3**3)
         self.S      = Sp/(nhalos*1.e3**2)
-        self.eS     = (mpA*nhalos)/(1.e3**2)
+        self.eS     = mpA*nhalos/(1.e3**2)
         self.DS     = DSp/(nhalos*1.e3**2)
         self.S2     = Sp2/(nhalos*1.e3**2)
 
@@ -164,7 +214,7 @@ class profile_from_map:
         kE = (H*mp)/(nhalos*((lsize*1.e6)**2))
         kB = np.zeros(kE.shape)
         
-        ekE = np.ones(kE.shape)*mp*nhalos
+        ekE = (np.ones(kE.shape)*mp)/(nhalos*((lsize*1.e6)**2))
         
         e1, e2   = ks93inv(kE, kB)
         ee1, ee2 = ks93inv(ekE, kB)
@@ -179,7 +229,14 @@ class profile_from_map:
         et = (-e1.flatten()*np.cos(2*theta)-e2.flatten()*np.sin(2*theta))
         #get cross ellipticities
         ex = (-e1.flatten()*np.sin(2*theta)+e2.flatten()*np.cos(2*theta))
-        kE = kE.flatten()
+
+        #get tangential ellipticities 
+        eet = (-ee1.flatten()*np.cos(2*theta)-ee2.flatten()*np.sin(2*theta))
+        #get cross ellipticities
+        eex = (-ee1.flatten()*np.sin(2*theta)+ee2.flatten()*np.cos(2*theta))
+
+        kE  = kE.flatten()
+        ekE = ekE.flatten()
         
         bines = np.round(np.logspace(np.log10(RIN),np.log10(ROUT),num=ndots+1),0)
         dig = np.digitize(r*1.e3,bines)
@@ -235,4 +292,61 @@ class profile_from_map:
         self.eS2   = -1.*eSIGMAcos 
         self.eGT   = -1.*eGAMMATcos
         self.eGX   = eGAMMAXsin
+        
+
+class fit_profiles(profile_from_map):
+
+    def __init__(self,Xp,Yp,nhalos,RIN=100.,ROUT=1500.,ndots=20,resolution=500,params,z=0.):
+        
+        
+        # COMPUTE PROFILES
+        
+        profile_from_map.__init__(self, Xp,Yp,nhalos,RIN,ROUT,ndots,resolution)
+        
+        # FIT KAPPA PROFILE
+
+        def S(R,logM200,c200):
+            return Sigma_NFW_2h(R,z,10**logM200,c200,cosmo_params=params)
+
+        S_fit = curve_fit(S,self.r,self.S,sigma=self.eS,absolute_sigma=True)
+        pcov    = S_fit[1]
+        perr    = np.sqrt(np.diag(pcov))
+        e_lM200 = perr[0]
+        e_c200  = perr[1]
+        logM200 = S_fit[0][0]
+        c200    = S_fit[0][1]
+        
+        self.lM200_s = logM200
+        self.c200_s  = c200
+
+        def S2(R,e):
+            return e*S2_quadrupole(R,z,10**logM200,c200,cosmo_params=params)
+            
+        self.q_s = (1.-e)/(1.+e)
+
+        # FIT SHEAR PROFILE
+
+        def DS(R,logM200,c200):
+            return Delta_Sigma_NFW_2h(R,z,10**logM200,c200,cosmo_params=params)
+
+        DS_fit = curve_fit(S,self.r,self.DS,sigma=self.eDS,absolute_sigma=True)
+        pcov    = DS_fit[1]
+        perr    = np.sqrt(np.diag(pcov))
+        e_lM200 = perr[0]
+        e_c200  = perr[1]
+        logM200 = DS_fit[0][0]
+        c200    = DS_fit[0][1]
+        
+        self.lM200_ds = logM200
+        self.c200_ds  = c200
+        
+        GT,GX = GAMMA_components(self.r,z,ellip=1.,M200 = 10**logM200,c200=c200,cosmo_params=params)
+        
+        q_ds = fit_quadrupoles(self.r,self.GT,self.GX,self.eGT,self.eGX,GT,GX)
+        
+        q_ds = self.q_ds
+
+
+            
+
         
