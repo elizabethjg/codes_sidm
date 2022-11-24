@@ -5,7 +5,8 @@ import pandas as pd
 import h5py
 from member_distribution import projected_coodinates
 from lenspack.image.inversion import ks93inv
-
+from models_profiles import *
+import emcee
 
 def fit_quadrupoles(R,gt,gx,egt,egx,GT,GX):
     
