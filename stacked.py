@@ -144,9 +144,9 @@ class stack_profile:
     
         self.r      = rp
         self.rho    = rhop/(nhalos*1.e3**3)
-        self.erho   = mpV/(1.e3**3)
+        self.erho   = (mpV*nhalos)/(1.e3**3)
         self.S      = Sp/(nhalos*1.e3**2)
-        self.eS     = mpA/(1.e3**2)
+        self.eS     = (mpA*nhalos)/(1.e3**2)
         self.DS     = DSp/(nhalos*1.e3**2)
         self.S2     = Sp2/(nhalos*1.e3**2)
 
@@ -191,6 +191,13 @@ class profile_from_map:
         SIGMAcos = []
         GAMMATcos = []
         GAMMAXsin = []
+        
+        eSIGMA   = []
+        eDSIGMA_T = []
+        eDSIGMA_X = []
+        eSIGMAcos = []
+        eGAMMATcos = []
+        eGAMMAXsin = []
                         
                             
         for nbin in range(ndots):
@@ -204,6 +211,15 @@ class profile_from_map:
             
             GAMMATcos = np.append(GAMMATcos,np.sum(et[mbin]*np.cos(2.*theta[mbin]))/np.sum(np.cos(2.*theta[mbin])**2))
             GAMMAXsin = np.append(GAMMAXsin,np.sum(ex[mbin]*np.sin(2.*theta[mbin]))/np.sum(np.sin(2.*theta[mbin])**2))
+
+            eSIGMA     = np.append(eSIGMA,np.mean(ekE[mbin]))
+            eDSIGMA_T  = np.append(eDSIGMA_T,np.mean(eet[mbin]))
+            eDSIGMA_X  = np.append(eDSIGMA_X,np.mean(eex[mbin]))
+            
+            eSIGMAcos  = np.append(eSIGMAcos,np.sum(ekE[mbin]*np.cos(2.*theta[mbin]))/np.sum(np.cos(2.*theta[mbin])**2))
+            
+            eGAMMATcos = np.append(eGAMMATcos,np.sum(eet[mbin]*np.cos(2.*theta[mbin]))/np.sum(np.cos(2.*theta[mbin])**2))
+            eGAMMAXsin = np.append(eGAMMAXsin,np.sum(eex[mbin]*np.sin(2.*theta[mbin]))/np.sum(np.sin(2.*theta[mbin])**2))
         
         
         self.r     = R
@@ -213,5 +229,10 @@ class profile_from_map:
         self.S2    = -1.*SIGMAcos 
         self.GT    = -1.*GAMMATcos
         self.GX    = GAMMAXsin
-        
+        self.eS    = eSIGMA    
+        self.eDS_T = eDSIGMA_T 
+        self.eDS_X = eDSIGMA_X 
+        self.eS2   = -1.*eSIGMAcos 
+        self.eGT   = -1.*eGAMMATcos
+        self.eGX   = eGAMMAXsin
         
