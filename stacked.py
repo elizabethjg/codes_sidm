@@ -7,6 +7,7 @@ from member_distribution import projected_coodinates
 from lenspack.image.inversion import ks93inv
 from models_profiles import *
 import emcee
+params = {'flat': True, 'H0': 70.0, 'Om0': 0.25, 'Ob0': 0.044, 'sigma8': 0.8, 'ns': 0.95}
 
 def fit_quadrupoles(R,gt,gx,egt,egx,GT,GX):
     
@@ -52,7 +53,7 @@ def fit_quadrupoles(R,gt,gx,egt,egx,GT,GX):
     
     mcmc_out = sampler.get_chain(flat=True)
     
-    return mcmc_out
+    return np.median(mcmc_out[1500:]),mcmc_out
 
 
 
@@ -297,7 +298,7 @@ class profile_from_map:
 
 class fit_profiles(profile_from_map):
 
-    def __init__(self,Xp,Yp,nhalos,RIN=100.,ROUT=1500.,ndots=20,resolution=500,params=params,z=0.):
+    def __init__(self,Xp,Yp,nhalos,RIN=100.,ROUT=1000.,ndots=20,resolution=500,params=params,z=0.):
         
         
         # COMPUTE PROFILES
@@ -309,7 +310,7 @@ class fit_profiles(profile_from_map):
         def S(R,logM200,c200):
             return Sigma_NFW_2h(R,z,10**logM200,c200,cosmo_params=params)
 
-        S_fit = curve_fit(S,self.r,self.S,sigma=self.eS,absolute_sigma=True)
+        S_fit = curve_fit(S,self.r,self.S,sigma=np.ones(len(self.r)),absolute_sigma=True,bounds=([12,2],[15,10]))
         pcov    = S_fit[1]
         perr    = np.sqrt(np.diag(pcov))
         e_lM200 = perr[0]
@@ -319,18 +320,22 @@ class fit_profiles(profile_from_map):
         
         self.lM200_s = logM200
         self.c200_s  = c200
+        self.S_fit   = S(self.r,logM200,c200)
 
         def S2(R,e):
             return e*S2_quadrupole(R,z,10**logM200,c200,cosmo_params=params)
             
-        self.q_s = (1.-e)/(1.+e)
-
+        S2_fit = curve_fit(S2,self.r,self.S2,sigma=np.ones(len(self.r)),absolute_sigma=True,bounds=(0,1))
+        e = S2_fit[0]
+        
+        self.q_s      = (1.-e)/(1.+e)
+        self.S2_fit   = S2(self.r,e)
         # FIT SHEAR PROFILE
 
         def DS(R,logM200,c200):
             return Delta_Sigma_NFW_2h(R,z,10**logM200,c200,cosmo_params=params)
 
-        DS_fit = curve_fit(S,self.r,self.DS,sigma=self.eDS,absolute_sigma=True)
+        DS_fit = curve_fit(DS,self.r,self.DS_T,sigma=self.eDS_T,absolute_sigma=True,bounds=([12,2],[15,10]))
         pcov    = DS_fit[1]
         perr    = np.sqrt(np.diag(pcov))
         e_lM200 = perr[0]
@@ -341,13 +346,16 @@ class fit_profiles(profile_from_map):
         self.lM200_ds = logM200
         self.c200_ds  = c200
         
+        # FIT SHEAR QUADRUPOLE PROFILES
+        
         GT,GX = GAMMA_components(self.r,z,ellip=1.,M200 = 10**logM200,c200=c200,cosmo_params=params)
         
-        q_ds = fit_quadrupoles(self.r,self.GT,self.GX,self.eGT,self.eGX,GT,GX)
+        mcmc_out,q_ds = fit_quadrupoles(self.r,self.GT,self.GX,self.eGT,self.eGX,GT,GX)
         
-        q_ds = self.q_ds
-
-
-            
-
+        e = (1. - q_ds)/(1. + q_ds)
+        
+        self.q_ds     = q_ds
+        self.mcmc_out = mcmc_out
+        self.GT_fit = e*GT
+        self.GX_fit = e*GX
         

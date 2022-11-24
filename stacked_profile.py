@@ -81,17 +81,13 @@ Xp1,Yp1  = x2d1[m2d1]*1.e3,y2d1[m2d1]*1.e3
 p_DM    = stack_profile(X,Y,Z,Xp,Yp,nhalos)
 p_SIDM  = stack_profile(X1,Y1,Z1,Xp1,Yp1,nhalos)
 
-# COMPUTE PROFILES USING MAPS
-pm_DM    = profile_from_map(Xp,Yp,nhalos)
-pm_SIDM  = profile_from_map(Xp1,Yp1,nhalos)
+# COMPUTE AND FIT PROFILES USING MAPS
+pm_DM    = fit_profiles(Xp,Yp,nhalos)
+pm_SIDM  = fit_profiles(Xp1,Yp1,nhalos)
 
 
-
-r = profile_DM.rp
-   
-
-M200c = 10**13.4
-c200c = concentration.concentration(np.mean(rock.Mvir[mrock]), '200c', z, model = 'diemer19')
+M200c = 10**13.6
+c200c = concentration.concentration(M200c, '200c', z, model = 'diemer19')
 
 s3d           = rho_NFW_2h(profile_DM.rp,z,M200 = M200c,c200=c200c,terms='1h')
 ds            = Delta_Sigma_NFW_2h(profile_DM.rp,z,M200 = M200c,c200=c200c,terms='1h')
