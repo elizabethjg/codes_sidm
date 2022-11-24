@@ -297,7 +297,7 @@ class profile_from_map:
 
 class fit_profiles(profile_from_map):
 
-    def __init__(self,Xp,Yp,nhalos,RIN=100.,ROUT=1500.,ndots=20,resolution=500,params,z=0.):
+    def __init__(self,Xp,Yp,nhalos,RIN=100.,ROUT=1500.,ndots=20,resolution=500,params=params,z=0.):
         
         
         # COMPUTE PROFILES
