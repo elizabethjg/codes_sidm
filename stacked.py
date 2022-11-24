@@ -55,7 +55,7 @@ def stack_halos(main_file,path,haloids,reduced = False):
 
 class stack_profile:
 
-    def __init__(self,X,Y,Z,Xp,Yp,nrings,theta,nhalos):
+    def __init__(self,X,Y,Z,Xp,Yp,nhalos,nrings=100,theta=0):
 
         rin = 10.
         mp = 0.013398587e10
@@ -69,9 +69,11 @@ class stack_profile:
         
         Sp  = np.zeros(nrings)
         DSp  = np.zeros(nrings)
+        Sp2 = np.zeros(nrings)        
+        
         DSp_cos  = np.zeros(nrings)
         DSp_sin  = np.zeros(nrings)
-        Sp2 = np.zeros(nrings)
+
         rp  = np.zeros(nrings)
         mpV = np.zeros(nrings)
         mpA = np.zeros(nrings)
@@ -142,11 +144,11 @@ class stack_profile:
     
         self.r      = rp
         self.rho    = rhop/(nhalos*1.e3**3)
+        self.erho   = mpV/(1.e3**3)
         self.S      = Sp/(nhalos*1.e3**2)
+        self.eS     = mpA/(1.e3**2)
         self.DS     = DSp/(nhalos*1.e3**2)
         self.S2     = Sp2/(nhalos*1.e3**2)
-        self.DS_cos = DSp_cos/(nhalos*1.e3**2)
-        self.DS_sin = DSp_sin/(nhalos*1.e3**2)
 
 class profile_from_map:
 
@@ -161,7 +163,11 @@ class profile_from_map:
         H, xedges, xedges = np.histogram2d(Xp*1.e-3, Yp*1.e-3, bins=(xedges,xedges))
         kE = (H*mp)/(nhalos*((lsize*1.e6)**2))
         kB = np.zeros(kE.shape)
-        e1, e2 = ks93inv(kE, kB)
+        
+        ekE = np.ones(kE.shape)*mp*nhalos
+        
+        e1, e2   = ks93inv(kE, kB)
+        ee1, ee2 = ks93inv(ekE, kB)
         
         xb = xb.flatten()
         yb = yb.flatten()
