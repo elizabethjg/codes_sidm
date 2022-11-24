@@ -198,5 +198,5 @@ plt.axvline(pm_SIDM.q_gt,label='fit GT',color='C4',lw=3)
 plt.axvline(pm_SIDM.q_gx,label='fit GX',color='C5',lw=3)
 plt.legend(loc=2,frameon=False)
 plt.xlabel('q2d')
-plt.savefig('../profile_q2d_cdm_'+sname+'.png')
+plt.savefig('../profile_q2d_sidm_'+sname+'.png')
 
