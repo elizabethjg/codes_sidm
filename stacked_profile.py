@@ -45,17 +45,30 @@ S1 = main1.c3D_it/main1.a3D_it
 S_r  = main.c3Dr/main.a3Dr
 S1_r = main1.c3Dr/main1.a3Dr
 
-q2d = np.mean(main.b2D/main.a2D)
-e  = (1.-q2d)/(q2d+1)
-q2dr = np.mean(main.b2Dr/main.a2Dr)
-er  = (1.-q2dr)/(q2dr+1)
+q2d = main.b2D/main.a2D
+q2d1 = main1.b2D/main1.a2D
+
+q2dr = main.b2Dr/main.a2Dr
+q2dr1 = main1.b2Dr/main1.a2Dr
+
+q2d_it  = main.b2D_it/main.a2D_it
+q2d1_it  = main1.b2D_it/main1.a2D_it
+
+q2dr_it = main.b2Dr_it/main.a2Dr_it
+q2dr1_it = main1.b2Dr_it/main1.a2Dr_it
+
 
 Eratio  = (2.*main.EKin/abs(main.EPot))
 Eratio1 = (2.*main1.EKin/abs(main1.EPot))
 
 
 # SELECT AN HALO SAMPLE
-m = (S_itr-S1_itr)/S_itr < -0.1
+# sname = 'subset'
+# m = (S_itr-S1_itr)/S_itr < -0.1
+
+sname = 'total'
+m = S_itr < 100.
+
 haloids  = np.array(main.column_halo_id)[m]
 haloids1 = np.array(main1.column_halo_id)[m]
 nhalos = len(haloids)
@@ -86,31 +99,35 @@ pm_DM    = fit_profiles(Xp,Yp,nhalos)
 pm_SIDM  = fit_profiles(Xp1,Yp1,nhalos)
 
 
-M200c = 10**13.6
-c200c = concentration.concentration(M200c, '200c', z, model = 'diemer19')
+# M200c = 10**13.6
+# c200c = concentration.concentration(M200c, '200c', z, model = 'diemer19')
 
 
 plt.figure()
-plt.plot(pm_SIDM.r,pm_SIDM.GX,'C3--',label='SIDM')
+plt.plot(pm_SIDM.r,pm_SIDM.GX,'C3',label='SIDM')
 plt.plot(pm_SIDM.r,pm_SIDM.GX_fit,'C3',alpha=0.5)
+plt.plot(pm_SIDM.r,pm_SIDM.GX_fit2,'C3--',alpha=0.5)
 plt.plot(pm_DM.r,pm_DM.GX,'k',label='CDM')
-plt.plot(pm_DM.r,pm_DM.GX_fit,'k',alpha=0.5)
+plt.plot(pm_DM.r,pm_DM.GX_fit,'k',alpha=0.5,label='fit separately')
+plt.plot(pm_DM.r,pm_DM.GX_fit2,'k--',alpha=0.5,label='fit simultaneously')
 plt.xscale('log')
 plt.xlabel('$R [Mpc]$')
 plt.ylabel(r'$\epsilon \times \Gamma_X [M_\odot/pc^2]$')
 plt.legend()
-plt.savefig('../profile_GX.png')
+plt.savefig('../profile_GX_'+sname+'.png')
 
 plt.figure()
 plt.plot(pm_SIDM.r,pm_SIDM.GT,'C3',label='SIDM')
 plt.plot(pm_SIDM.r,pm_SIDM.GT_fit,'C3',alpha=0.5)
+plt.plot(pm_SIDM.r,pm_SIDM.GT_fit2,'C3--',alpha=0.5)
 plt.plot(pm_DM.r,pm_DM.GT,'k',label='CDM')
-plt.plot(pm_DM.r,pm_DM.GT_fit,'k',alpha=0.5)
+plt.plot(pm_DM.r,pm_DM.GT_fit,'k',alpha=0.5,label='fit separately')
+plt.plot(pm_DM.r,pm_DM.GT_fit2,'k--',alpha=0.5,label='fit simultaneously')
 plt.loglog()
 plt.xlabel('$R [Mpc]$')
 plt.ylabel(r'$\epsilon \times \Gamma_T [M_\odot/pc^2]$')
 plt.legend()
-plt.savefig('../profile_GT.png')
+plt.savefig('../profile_GT_'+sname+'.png')
 
 plt.figure()
 plt.plot(pm_SIDM.r,pm_SIDM.S2,'C3',label='SIDM')
@@ -121,10 +138,65 @@ plt.loglog()
 plt.xlabel('$R [Mpc]$')
 plt.ylabel(r'$\epsilon \times \Sigma_2 [M_\odot/pc^2]$')
 plt.legend()
-plt.savefig('../profile_S2.png')
+plt.savefig('../profile_S2_'+sname+'.png')
 
-# rhof    = rho_fit(r[mr],rho[mr],1./r[mr]**3,z)
-# Sf      = Sigma_fit(r[mr],S[mr]/mhalos.sum(),1./r[mr]**2,z)
-# rhof_E    = rho_fit(r[mr],rho[mr]/mhalos.sum(),1./r[mr]**3,z,'Einasto',rhof.M200,rhof.c200)
-# Sf_E      = Sigma_fit(r[mr],S[mr]/mhalos.sum(),1./r[mr]**2,z,'Einasto',rhof.M200,rhof.c200)
+
+# q2d distributions for DM
+plt.figure()
+plt.title('DM')
+plt.hist(q2d_it[m],np.linspace(0.35,1,20),histtype='step',label='std - it',lw=3)
+plt.hist(q2dr_it[m],np.linspace(0.35,1,20),histtype='step',label='red - it',lw=3)
+plt.axvline(np.mean(q2d_it[m]),color='C0',lw=3,ls='--')
+plt.axvline(np.mean(q2dr_it[m]),color='C1',lw=3,ls='--')
+plt.axvline(pm_DM.q_s,label='fit S',color='C2',lw=3)
+plt.axvline(pm_DM.q_2g,label='fit G',color='C3',lw=3)
+plt.axvline(pm_DM.q_gt,label='fit GT',color='C4',lw=3)
+plt.axvline(pm_DM.q_gx,label='fit GX',color='C5',lw=3)
+plt.legend(loc=2,frameon=False)
+plt.xlabel('q2d')
+plt.savefig('../profile_q2d_cdm_it_'+sname+'.png')
+
+plt.figure()
+plt.title('DM')
+plt.hist(q2d[m],np.linspace(0.35,1,20),histtype='step',label='std',lw=3)
+plt.hist(q2dr[m],np.linspace(0.35,1,20),histtype='step',label='red',lw=3)
+plt.axvline(np.mean(q2d[m]),color='C0',lw=3,ls='--')
+plt.axvline(np.mean(q2dr[m]),color='C1',lw=3,ls='--')
+plt.axvline(pm_DM.q_s,label='fit S',color='C2',lw=3)
+plt.axvline(pm_DM.q_2g,label='fit G',color='C3',lw=3)
+plt.axvline(pm_DM.q_gt,label='fit GT',color='C4',lw=3)
+plt.axvline(pm_DM.q_gx,label='fit GX',color='C5',lw=3)
+plt.legend(loc=2,frameon=False)
+plt.xlabel('q2d')
+plt.savefig('../profile_q2d_cdm_'+sname+'.png')
+
+
+# q2d distributions for SIDM
+plt.figure()
+plt.title('SIDM')
+plt.hist(q2d1_it[m],np.linspace(0.35,1,20),histtype='step',label='std - it',lw=3)
+plt.hist(q2dr1_it[m],np.linspace(0.35,1,20),histtype='step',label='red - it',lw=3)
+plt.axvline(np.mean(q2d1_it[m]),color='C0',lw=3,ls='--')
+plt.axvline(np.mean(q2dr1_it[m]),color='C1',lw=3,ls='--')
+plt.axvline(pm_SIDM.q_s,label='fit S',color='C2',lw=3)
+plt.axvline(pm_SIDM.q_2g,label='fit G',color='C3',lw=3)
+plt.axvline(pm_SIDM.q_gt,label='fit GT',color='C4',lw=3)
+plt.axvline(pm_SIDM.q_gx,label='fit GX',color='C5',lw=3)
+plt.legend(loc=2,frameon=False)
+plt.xlabel('q2d')
+plt.savefig('../profile_q2d_sidm_it_'+sname+'.png')
+
+plt.figure()
+plt.title('SIDM')
+plt.hist(q2d1[m],np.linspace(0.35,1,20),histtype='step',label='std',lw=3)
+plt.hist(q2dr1[m],np.linspace(0.35,1,20),histtype='step',label='red',lw=3)
+plt.axvline(np.mean(q2d1[m]),color='C0',lw=3,ls='--')
+plt.axvline(np.mean(q2dr1[m]),color='C1',lw=3,ls='--')
+plt.axvline(pm_SIDM.q_s,label='fit S',color='C2',lw=3)
+plt.axvline(pm_SIDM.q_2g,label='fit G',color='C3',lw=3)
+plt.axvline(pm_SIDM.q_gt,label='fit GT',color='C4',lw=3)
+plt.axvline(pm_SIDM.q_gx,label='fit GX',color='C5',lw=3)
+plt.legend(loc=2,frameon=False)
+plt.xlabel('q2d')
+plt.savefig('../profile_q2d_cdm_'+sname+'.png')
 

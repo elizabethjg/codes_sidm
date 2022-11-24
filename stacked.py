@@ -377,7 +377,7 @@ class fit_profiles(profile_from_map):
             GT,GX = GAMMA_components(R,z,ellip=e,M200 = 10**logM200,c200=c200,cosmo_params=params)
             return GX
             
-        GX_fit = curve_fit(GX,self.r,self.GT,sigma=np.ones(len(self.r)),absolute_sigma=True,bounds=(0,1))
+        GX_fit = curve_fit(GX,self.r,self.GX,sigma=np.ones(len(self.r)),absolute_sigma=True,bounds=(0,1))
         e = GX_fit[0]
         
         self.q_gx     = (1.-e)/(1.+e)
