@@ -7,6 +7,7 @@ from member_distribution import projected_coodinates
 from lenspack.image.inversion import ks93inv
 from models_profiles import *
 import emcee
+from scipy.optimize import curve_fit
 params = {'flat': True, 'H0': 70.0, 'Om0': 0.25, 'Ob0': 0.044, 'sigma8': 0.8, 'ns': 0.95}
 
 def fit_quadrupoles(R,gt,gx,egt,egx,GT,GX):
