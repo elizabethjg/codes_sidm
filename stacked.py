@@ -351,7 +351,7 @@ class fit_profiles(profile_from_map):
         
         GT,GX = GAMMA_components(self.r,z,ellip=1.,M200 = 10**logM200,c200=c200,cosmo_params=params)
         
-        mcmc_out,q_ds = fit_quadrupoles(self.r,self.GT,self.GX,self.eGT,self.eGX,GT,GX)
+        q_ds,mcmc_out = fit_quadrupoles(self.r,self.GT,self.GX,self.eGT,self.eGX,GT,GX)
         
         e = (1. - q_ds)/(1. + q_ds)
         

@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from stacked import stack_halos
 from stacked import stack_profile
-from stacked import profile_from_map
+from stacked import fit_profiles
 import pandas as pd
 from fit_models_colossus import *
 from models_profiles import *
@@ -89,16 +89,12 @@ pm_SIDM  = fit_profiles(Xp1,Yp1,nhalos)
 M200c = 10**13.6
 c200c = concentration.concentration(M200c, '200c', z, model = 'diemer19')
 
-s3d           = rho_NFW_2h(profile_DM.rp,z,M200 = M200c,c200=c200c,terms='1h')
-ds            = Delta_Sigma_NFW_2h(profile_DM.rp,z,M200 = M200c,c200=c200c,terms='1h')
-s             = Sigma_NFW_2h(profile_DM.rp,z,M200 = M200c,c200=c200c,terms='1h')
-s2            = S2_quadrupole(profile_DM.rp,z,M200 = M200c,c200=c200c,cosmo_params=params,terms='1h',pname='NFW')
-ds_cos,ds_sin = GAMMA_components(profile_DM.rp,z,1.,M200 = M200c,c200=c200c,cosmo_params=params,terms='1h',pname='NFW')
-
 
 plt.figure()
-plt.plot(pm_SIDM.r,pm_SIDM.GX,'C3',label='SIDM')
+plt.plot(pm_SIDM.r,pm_SIDM.GX,'C3--',label='SIDM')
+plt.plot(pm_SIDM.r,pm_SIDM.GX_fit,'C3',alpha=0.5)
 plt.plot(pm_DM.r,pm_DM.GX,'k',label='CDM')
+plt.plot(pm_DM.r,pm_DM.GX_fit,'k',alpha=0.5)
 plt.xscale('log')
 plt.xlabel('$R [Mpc]$')
 plt.ylabel(r'$\epsilon \times \Gamma_X [M_\odot/pc^2]$')
@@ -107,7 +103,9 @@ plt.savefig('../profile_GX.png')
 
 plt.figure()
 plt.plot(pm_SIDM.r,pm_SIDM.GT,'C3',label='SIDM')
+plt.plot(pm_SIDM.r,pm_SIDM.GT_fit,'C3',alpha=0.5)
 plt.plot(pm_DM.r,pm_DM.GT,'k',label='CDM')
+plt.plot(pm_DM.r,pm_DM.GT_fit,'k',alpha=0.5)
 plt.loglog()
 plt.xlabel('$R [Mpc]$')
 plt.ylabel(r'$\epsilon \times \Gamma_T [M_\odot/pc^2]$')
@@ -116,7 +114,9 @@ plt.savefig('../profile_GT.png')
 
 plt.figure()
 plt.plot(pm_SIDM.r,pm_SIDM.S2,'C3',label='SIDM')
+plt.plot(pm_SIDM.r,pm_SIDM.S2_fit,'C3',alpha=0.5)
 plt.plot(pm_DM.r,pm_DM.S2,'k',label='CDM')
+plt.plot(pm_DM.r,pm_DM.S2_fit,'k',alpha=0.5)
 plt.loglog()
 plt.xlabel('$R [Mpc]$')
 plt.ylabel(r'$\epsilon \times \Sigma_2 [M_\odot/pc^2]$')
