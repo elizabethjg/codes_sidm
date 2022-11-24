@@ -63,11 +63,11 @@ Eratio1 = (2.*main1.EKin/abs(main1.EPot))
 
 
 # SELECT AN HALO SAMPLE
-# sname = 'subset'
-# m = (S_itr-S1_itr)/S_itr < -0.1
+sname = 'subset'
+m = (S_itr-S1_itr)/S_itr < -0.1
 
-sname = 'total'
-m = S_itr < 100.
+# sname = 'total'
+# m = S_itr < 100.
 
 haloids  = np.array(main.column_halo_id)[m]
 haloids1 = np.array(main1.column_halo_id)[m]
