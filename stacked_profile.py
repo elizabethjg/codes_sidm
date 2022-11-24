@@ -63,11 +63,11 @@ offset1  = rc1/main1.r_max
 mhalos  = offset  < 0.1
 mhalos1 = offset1 < 0.1
 
-# m = (S_itr-S1_itr)/S_itr < -0.1
-m = S_itr < 100.
+m = (S_itr-S1_itr)/S_itr < -0.1
+# m = S_itr < 100.
 
-haloids  = np.array(main.column_halo_id)[:10]
-haloids1 = np.array(main1.column_halo_id)[:10]
+haloids  = np.array(main.column_halo_id)[m]
+haloids1 = np.array(main1.column_halo_id)[m]
 
 nhalos = len(haloids)
     
@@ -90,25 +90,23 @@ theta  = np.arctan(main.a2Dy/main.a2Dx)
 theta1 = np.arctan(main1.a2Dy/main1.a2Dx)
 
 
-r,rho,S,DS,S_2,DS_cos,DS_sin    = stack_profile(X,Y,Z,Xp,Yp,100,0.,nhalos)
-r1,rho1,S1,DS1,S1_2,DS1_cos,DS1_sin = stack_profile(X1,Y1,Z1,Xp1,Yp1,100,0.,nhalos)
+p_DM    = stack_profile(X,Y,Z,Xp,Yp,100,0.,nhalos)
+p_SIDM  = stack_profile(X1,Y1,Z1,Xp1,Yp1,100,0.,nhalos)
 
+pm_DM    = profile_from_map(Xp,Yp,nhalos)
+pm_SIDM  = profile_from_map(Xp1,Yp1,nhalos)
 
-# r_m,rho_m,S_m,DS_m,S_2_m,DS_cos_m,DS_sin_m = r,rho,S,DS,S_2,DS_cos,DS_sin
-# r1_m,rho1_m,S1_m,DS1_m,S1_2_m,DS1_cos_m,DS1_sin_m = r1,rho1,S1,DS1,S1_2,DS1_cos,DS1_sin
-
-# r,rho,S,DS,S_2,DS_cos,DS_sin    = stack_profile(X,Y,Z,Xp,Yp,30,0.,1)
-# r1,rho1,S1,DS1,S1_2,DS1_cos,DS1_sin = stack_profile(X1,Y1,Z1,Xp1,Yp1,30,0.,1)
 
 q2d = np.mean(main.b2D/main.a2D)
 e  = (1.-q2d)/(q2d+1)
 q2dr = np.mean(main.b2Dr/main.a2Dr)
 er  = (1.-q2dr)/(q2dr+1)
+
+r = profile_DM.rp
    
 z = 0.
 
 
-mr = r > 0.
 
 # cvir = concentration.concentration(np.mean(rock.Mvir[mrock]), 'vir', z, model = 'diemer19')
 # M200c,R,c200c = mass_defs.changeMassDefinition(np.mean(rock.Mvir[mrock]), cvir, z, 'vir', '200c')
@@ -116,35 +114,39 @@ mr = r > 0.
 M200c = 10**13.4
 c200c = concentration.concentration(np.mean(rock.Mvir[mrock]), '200c', z, model = 'diemer19')
 
-s3d           = rho_NFW_2h(r[mr],z,M200 = M200c,c200=c200c,terms='1h')
-ds            = Delta_Sigma_NFW_2h(r[mr],z,M200 = M200c,c200=c200c,terms='1h')
-s             = Sigma_NFW_2h(r[mr],z,M200 = M200c,c200=c200c,terms='1h')
-s2            = S2_quadrupole(r[mr],z,M200 = M200c,c200=c200c,cosmo_params=params,terms='1h',pname='NFW')
-ds_cos,ds_sin = GAMMA_components(r[mr],z,1.,M200 = M200c,c200=c200c,cosmo_params=params,terms='1h',pname='NFW')
+s3d           = rho_NFW_2h(profile_DM.rp,z,M200 = M200c,c200=c200c,terms='1h')
+ds            = Delta_Sigma_NFW_2h(profile_DM.rp,z,M200 = M200c,c200=c200c,terms='1h')
+s             = Sigma_NFW_2h(profile_DM.rp,z,M200 = M200c,c200=c200c,terms='1h')
+s2            = S2_quadrupole(profile_DM.rp,z,M200 = M200c,c200=c200c,cosmo_params=params,terms='1h',pname='NFW')
+ds_cos,ds_sin = GAMMA_components(profile_DM.rp,z,1.,M200 = M200c,c200=c200c,cosmo_params=params,terms='1h',pname='NFW')
 
 
-# MAKE KAPPA MAP
-mp = 0.013398587e10
-xedges = np.linspace(-3,3,4)
-lsize  = np.diff(xedges)[0]
-xb, yb = np.meshgrid(xedges[:-1],xedges[:-1])+(lsize/2.)
+plt.figure()
+plt.plot(pm_SIDM.r,pm_SIDM.GX,'C3',label='SIDM')
+plt.plot(pm_DM.r,pm_DM.GX,'k',label='CDM')
+plt.xscale('log')
+plt.xlabel('$R [Mpc]$')
+plt.ylabel(r'$\epsilon \times \Gamma_X [M_\odot/pc^2]$')
+plt.legend()
+plt.savefig('../profile_GT.png')
 
-H, xedges, xedges = np.histogram2d(Xp*1.e-3, Yp*1.e-3, bins=(xedges,xedges))
-kE = (H*mp)/(nhalos*((lsize*1.e-6)**2))
-kB = np.zeros(kE.shape)
-e1, e2 = ks93inv(kE, kB)
+plt.figure()
+plt.plot(pm_SIDM.r,pm_SIDM.GT,'C3',label='SIDM')
+plt.plot(pm_DM.r,pm_DM.GT,'k',label='CDM')
+plt.loglog()
+plt.xlabel('$R [Mpc]$')
+plt.ylabel(r'$\epsilon \times \Gamma_T [M_\odot/pc^2]$')
+plt.legend()
+plt.savefig('../profile_GX.png')
 
-xb = xb.flatten()
-yb = yb.flatten()
-
-rb = np.sqrt(xb**2+yb**2)
-theta  = np.arctan2(yb,xb)
-
-#get tangential ellipticities 
-et = (-e1.flatten()*np.cos(2*theta)-e2.flatten()*np.sin(2*theta))
-#get cross ellipticities
-ex = (-e1.flatten()*np.sin(2*theta)+e2.flatten()*np.cos(2*theta))
-
+plt.figure()
+plt.plot(pm_SIDM.r,pm_SIDM.S2,'C3',label='SIDM')
+plt.plot(pm_DM.r,pm_DM.S2,'k',label='CDM')
+plt.loglog()
+plt.xlabel('$R [Mpc]$')
+plt.ylabel(r'$\epsilon \times \Sigma_2 [M_\odot/pc^2]$')
+plt.legend()
+plt.savefig('../profile_S2.png')
 
 # rhof    = rho_fit(r[mr],rho[mr],1./r[mr]**3,z)
 # Sf      = Sigma_fit(r[mr],S[mr]/mhalos.sum(),1./r[mr]**2,z)
