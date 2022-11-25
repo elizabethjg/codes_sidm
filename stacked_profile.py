@@ -66,8 +66,8 @@ Eratio1 = (2.*main1.EKin/abs(main1.EPot))
 sname = 'subset'
 m = (S_itr-S1_itr)/S_itr < -0.1
 
-# sname = 'total'
-# m = S_itr < 100.
+sname = 'total'
+m = S_itr < 100.
 
 haloids  = np.array(main.column_halo_id)[m]
 haloids1 = np.array(main1.column_halo_id)[m]
@@ -104,24 +104,26 @@ pm_SIDM  = fit_profiles(Xp1,Yp1,nhalos)
 
 plt.figure()
 plt.plot(pm_SIDM.r,pm_SIDM.S,'C3',label='SIDM')
-plt.plot(pm_SIDM.r,pm_SIDM.S_fit,'C3',alpha=0.5)
+plt.plot(pm_SIDM.r,pm_SIDM.S_fit,'C3',alpha=0.5,label='$\log M_{200} =$'+str(np.round(pm_SIDM.lM200_s,2))+',$c_{200} =$'+str(np.round(pm_SIDM.c200_s,2)))
 plt.plot(pm_DM.r,pm_DM.S,'k',label='CDM')
 plt.plot(pm_DM.r,pm_DM.S_fit,'k',alpha=0.5,label='$\log M_{200} =$'+str(np.round(pm_DM.lM200_s,2))+',$c_{200} =$'+str(np.round(pm_DM.c200_s,2)))
 plt.xscale('log')
 plt.xlabel('$R [Mpc]$')
 plt.ylabel(r'$\Sigma [M_\odot/pc^2]$')
 plt.legend()
+plt.loglog()
 plt.savefig('../profile_S_'+sname+'.png')
 
 plt.figure()
 plt.plot(pm_SIDM.r,pm_SIDM.DS_T,'C3',label='SIDM')
-plt.plot(pm_SIDM.r,pm_SIDM.DS_fit,'C3',alpha=0.5)
+plt.plot(pm_SIDM.r,pm_SIDM.DS_fit,'C3',alpha=0.5,label='$\log M_{200} =$'+str(np.round(pm_SIDM.lM200_ds,2))+',$c_{200} =$'+str(np.round(pm_SIDM.c200_ds,2)))
 plt.plot(pm_DM.r,pm_DM.DS_T,'k',label='CDM')
 plt.plot(pm_DM.r,pm_DM.DS_fit,'k',alpha=0.5,label='$\log M_{200} =$'+str(np.round(pm_DM.lM200_ds,2))+',$c_{200} =$'+str(np.round(pm_DM.c200_ds,2)))
 plt.xscale('log')
 plt.xlabel('$R [Mpc]$')
-plt.ylabel(r'$\Sigma [M_\odot/pc^2]$')
+plt.ylabel(r'$\Delta \Sigma [M_\odot/pc^2]$')
 plt.legend()
+plt.loglog()
 plt.savefig('../profile_DS_'+sname+'.png')
 
 
