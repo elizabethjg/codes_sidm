@@ -344,6 +344,7 @@ class fit_profiles(profile_from_map):
         logM200 = DS_fit[0][0]
         c200    = DS_fit[0][1]
         
+        self.DS_fit  = DS_fit
         self.lM200_ds = logM200
         self.c200_ds  = c200
         
