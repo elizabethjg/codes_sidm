@@ -22,14 +22,19 @@ rock       = pd.read_csv('/mnt/projects/lensing/SIDM_project/halo_props/halo_pro
 rock1      = pd.read_csv('/mnt/projects/lensing/SIDM_project/halo_props/halo_props_match_sidm1_z0_rock2.csv.bz2')
 
 # FOLDERS WHERE PARTICLES ARE SAVED
-path = '/mnt/projects/lensing/SIDM_project/Lentes/Eli_Agus/snapshot_050/rockstar/matcheados/CDM/'
-path1 = '/mnt/projects/lensing/SIDM_project/Lentes/Eli_Agus/snapshot_050/rockstar/matcheados/SIDM1/'
+# path = '/mnt/projects/lensing/SIDM_project/Lentes/Eli_Agus/snapshot_050/rockstar/matcheados/CDM/'
+# path1 = '/mnt/projects/lensing/SIDM_project/Lentes/Eli_Agus/snapshot_050/rockstar/matcheados/SIDM1/'
+
+path  = '/mnt/projects/lensing/SIDM_project/cuadrados/CDM/'
+path1 = '/mnt/projects/lensing/SIDM_project/cuadrados/SIDM1/'
 
 # READ halos computed profperties
-main_file1 = '/mnt/projects/lensing/SIDM_project/halo_props/halo_propsv2_rock2_match_sidm1_z0_main.csv.bz2'
-main_file = '/mnt/projects/lensing/SIDM_project/halo_props/halo_propsv2_rock2_match_cdm_z0_main.csv.bz2'
+main_file1 = '/mnt/projects/lensing/SIDM_project/halo_props/extend_halo_propsv2_rock2_match_sidm1_z0_main.csv.bz2'
+main_file = '/mnt/projects/lensing/SIDM_project/halo_props/extend_halo_propsv2_rock2_match_cdm_z0_main.csv.bz2'
 main  = pd.read_csv(main_file)
 main1 = pd.read_csv(main_file1)
+
+
 
 
 # COMPUTE SHAPES AND ENERGY RATIO
@@ -69,7 +74,7 @@ m = (S_itr-S1_itr)/S_itr < -0.1
 sname = 'total'
 m = S_itr < 100.
 
-haloids  = np.array(main.column_halo_id)[m]
+haloids  = np.array(main.column_halo_id)[:10]
 haloids1 = np.array(main1.column_halo_id)[m]
 nhalos = len(haloids)
 

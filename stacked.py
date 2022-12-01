@@ -57,8 +57,6 @@ def fit_quadrupoles(R,gt,gx,egt,egx,GT,GX):
     return np.median(mcmc_out[1500:]),mcmc_out
 
 
-
-
 def stack_halos(main_file,path,haloids,reduced = False):
 
     main = pd.read_csv(main_file)
@@ -91,14 +89,29 @@ def stack_halos(main_file,path,haloids,reduced = False):
         y = np.append(y,yrot)
         z = np.append(z,zrot)
         
-        X2d,Y2d = projected_coodinates(X,Y,Z,main.xc_rc[j],main.yc_rc[j],main.zc_rc[j])
+        X2d_xy,Y2d_xy = projected_coodinates(X,Y,Z,main.xc_rc[j],main.yc_rc[j],main.zc_rc[j])
+        X2d_zx,Y2d_zx = projected_coodinates(Z,X,Y,main.zc_rc[j],main.xc_rc[j],main.yc_rc[j])
+        X2d_yz,Y2d_yz = projected_coodinates(Y,Z,X,main.yc_rc[j],main.zc_rc[j],main.xc_rc[j])
+        
+        X2d = np.vstack((X2d_xy,X2d_zx,X2d_yz))
+        Y2d = np.vstack((Y2d_xy,Y2d_zx,Y2d_yz))
+        
+        a2Drx = np.vstack((main.a2Drx_xy[j],main.a2Drx_zx[j],main.a2Drx_yz[j]))
+        b2Drx = np.vstack((main.b2Drx_xy[j],main.b2Drx_zx[j],main.b2Drx_yz[j]))
+        a2Dx  = np.vstack((main.a2Dx_xy[j],main.a2Dx_zx[j],main.a2Dx_yz[j]))
+        b2Dx  = np.vstack((main.b2Dx_xy[j],main.b2Dx_zx[j],main.b2Dx_yz[j]))
+
+        a2Dry = np.vstack((main.a2Dry_xy[j],main.a2Dry_zx[j],main.a2Dry_yz[j]))
+        b2Dry = np.vstack((main.b2Dry_xy[j],main.b2Dry_zx[j],main.b2Dry_yz[j]))
+        a2Dy  = np.vstack((main.a2Dy_xy[j],main.a2Dy_zx[j],main.a2Dy_yz[j]))
+        b2Dy  = np.vstack((main.b2Dy_xy[j],main.b2Dy_zx[j],main.b2Dy_yz[j]))
 
         if reduced:
-            x2drot = (main.a2Drx[j]*X2d)+(main.a2Dry[j]*Y2d)
-            y2drot = (main.b2Drx[j]*X2d)+(main.b2Dry[j]*Y2d)
+            x2drot = (a2Drx[j]*X2d)+(a2Dry[j]*Y2d)
+            y2drot = (b2Drx[j]*X2d)+(b2Dry[j]*Y2d)
         else:
-            x2drot = (main.a2Dx[j]*X2d)+(main.a2Dy[j]*Y2d)
-            y2drot = (main.b2Dx[j]*X2d)+(main.b2Dy[j]*Y2d)
+            x2drot = (a2Dx[j]*X2d)+(a2Dy[j]*Y2d)
+            y2drot = (b2Dx[j]*X2d)+(b2Dy[j]*Y2d)
 
         x2d = np.append(x2d,x2drot)
         y2d = np.append(y2d,y2drot)
