@@ -76,6 +76,7 @@ def stack_halos(main_file,path,haloids,reduced = False):
         Y = np.array(halo['Y']) - main.yc_rc[j]/1.e3
         Z = np.array(halo['Z']) - main.zc_rc[j]/1.e3
         
+        '''
         if reduced:
             xrot = (main.a3Drx[j]*X)+(main.a3Dry[j]*Y)+(main.a3Drz[j]*Z);
             yrot = (main.b3Drx[j]*X)+(main.b3Dry[j]*Y)+(main.b3Drz[j]*Z);
@@ -88,6 +89,11 @@ def stack_halos(main_file,path,haloids,reduced = False):
         x = np.append(x,xrot)
         y = np.append(y,yrot)
         z = np.append(z,zrot)
+        '''
+        x = np.append(x,X)
+        y = np.append(y,Y)
+        z = np.append(z,Z)
+
         
         X2d_xy,Y2d_xy = projected_coodinates(X,Y,Z,main.xc_rc[j],main.yc_rc[j],main.zc_rc[j])
         X2d_zx,Y2d_zx = projected_coodinates(Z,X,Y,main.zc_rc[j],main.xc_rc[j],main.yc_rc[j])
@@ -95,29 +101,101 @@ def stack_halos(main_file,path,haloids,reduced = False):
         
         X2d = np.vstack((X2d_xy,X2d_zx,X2d_yz))
         Y2d = np.vstack((Y2d_xy,Y2d_zx,Y2d_yz))
-        
-        a2Drx = np.vstack((main.a2Drx_xy[j],main.a2Drx_zx[j],main.a2Drx_yz[j]))
-        b2Drx = np.vstack((main.b2Drx_xy[j],main.b2Drx_zx[j],main.b2Drx_yz[j]))
-        a2Dx  = np.vstack((main.a2Dx_xy[j],main.a2Dx_zx[j],main.a2Dx_yz[j]))
-        b2Dx  = np.vstack((main.b2Dx_xy[j],main.b2Dx_zx[j],main.b2Dx_yz[j]))
-
-        a2Dry = np.vstack((main.a2Dry_xy[j],main.a2Dry_zx[j],main.a2Dry_yz[j]))
-        b2Dry = np.vstack((main.b2Dry_xy[j],main.b2Dry_zx[j],main.b2Dry_yz[j]))
-        a2Dy  = np.vstack((main.a2Dy_xy[j],main.a2Dy_zx[j],main.a2Dy_yz[j]))
-        b2Dy  = np.vstack((main.b2Dy_xy[j],main.b2Dy_zx[j],main.b2Dy_yz[j]))
 
         if reduced:
-            x2drot = (a2Drx[j]*X2d)+(a2Dry[j]*Y2d)
-            y2drot = (b2Drx[j]*X2d)+(b2Dry[j]*Y2d)
+        
+            a2Drx = np.vstack((np.repeat(main.a2Drx_xy[j],len(X2d_xy)),
+                               np.repeat(main.a2Drx_zx[j],len(X2d_xy)),
+                               np.repeat(main.a2Drx_yz[j],len(X2d_xy))))
+                            
+            b2Drx = np.vstack((np.repeat(main.b2Drx_xy[j],len(X2d_xy)),
+                               np.repeat(main.b2Drx_zx[j],len(X2d_xy)),
+                               np.repeat(main.b2Drx_yz[j],len(X2d_xy))))
+    
+            a2Dry = np.vstack((np.repeat(main.a2Dry_xy[j],len(X2d_xy)),
+                               np.repeat(main.a2Dry_zx[j],len(X2d_xy)),
+                               np.repeat(main.a2Dry_yz[j],len(X2d_xy))))
+            
+            b2Dry = np.vstack((np.repeat(main.b2Dry_xy[j],len(X2d_xy)),
+                               np.repeat(main.b2Dry_zx[j],len(X2d_xy)),
+                               np.repeat(main.b2Dry_yz[j],len(X2d_xy))))
+
+            x2drot = (a2Drx*X2d)+(a2Dry*Y2d)
+            y2drot = (b2Drx*X2d)+(b2Dry*Y2d)
+
         else:
-            x2drot = (a2Dx[j]*X2d)+(a2Dy[j]*Y2d)
-            y2drot = (b2Dx[j]*X2d)+(b2Dy[j]*Y2d)
+        
+            a2Dx  = np.vstack((np.repeat(main.a2Dx_xy[j],len(X2d_xy)),
+                               np.repeat(main.a2Dx_zx[j],len(X2d_xy)),
+                               np.repeat(main.a2Dx_yz[j],len(X2d_xy))))
+            
+            
+            b2Dx  = np.vstack((np.repeat(main.b2Dx_xy[j],len(X2d_xy)),
+                               np.repeat(main.b2Dx_zx[j],len(X2d_xy)),
+                               np.repeat(main.b2Dx_yz[j],len(X2d_xy))))
+    
+            a2Dy  = np.vstack((np.repeat(main.a2Dy_xy[j],len(X2d_xy)),
+                               np.repeat(main.a2Dy_zx[j],len(X2d_xy)),
+                               np.repeat(main.a2Dy_yz[j],len(X2d_xy))))
+                               
+            b2Dy  = np.vstack((np.repeat(main.b2Dy_xy[j],len(X2d_xy)),
+                               np.repeat(main.b2Dy_zx[j],len(X2d_xy)),
+                               np.repeat(main.b2Dy_yz[j],len(X2d_xy))))
+
+
+            x2drot = (a2Dx*X2d)+(a2Dy*Y2d)
+            y2drot = (b2Dx*X2d)+(b2Dy*Y2d)
 
         x2d = np.append(x2d,x2drot)
         y2d = np.append(y2d,y2drot)
         
     return x,y,z,x2d,y2d
 
+def stack_halos_unpack(minput):
+	return stack_halos(*minput)
+
+def stack_halos_parallel(main_file,path,haloids,reduced = False,ncores=10):
+    
+
+    if ncores > len(haloids):
+        ncores = len(haloids)
+    
+    
+    slicer = int(round(len(haloids)/float(ncores), 0))
+    slices = ((np.arange(ncores-1)+1)*slicer).astype(int)
+    slices = slices[(slices < len(haloids))]
+    hids_splitted = np.split(haloids,slices)
+    
+    ncores = len(hids_splitted)
+    
+    mfile   = [main_file]*ncores
+    path    = [path]*ncores
+    reduced = [reduced]*ncores
+            
+    entrada = np.array([mfile,path,hids_splitted,reduced]).T
+    
+    pool = Pool(processes=(ncores))
+    salida=np.array(pool.map(stack_halos_unpack, entrada))
+    pool.terminate()
+
+    x = np.array([])
+    y= np.array([])
+    z = np.array([])
+    x2d = np.array([])
+    y2d = np.array([])
+    
+    for s in salida:
+        X,Y,Z,x2d,y2d = s
+        
+        x = np.append(x,X)
+        y = np.append(x,Y)
+        z = np.append(x,Z)
+        
+        x2d = np.append(x2d,X)
+        y2d = np.append(y2d,X)
+            
+    return x,y,z,x2d,y2d
+    
 
 class stack_profile:
 
