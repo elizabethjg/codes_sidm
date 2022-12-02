@@ -96,8 +96,8 @@ def stack_halos(main_file,path,haloids,reduced = False):
 
         
         X2d_xy,Y2d_xy = projected_coodinates(X,Y,Z,main.xc_rc[j],main.yc_rc[j],main.zc_rc[j])
-        X2d_zx,Y2d_zx = projected_coodinates(Z,X,Y,main.zc_rc[j],main.xc_rc[j],main.yc_rc[j])
-        X2d_yz,Y2d_yz = projected_coodinates(Y,Z,X,main.yc_rc[j],main.zc_rc[j],main.xc_rc[j])
+        X2d_zx,Y2d_zx = projected_coodinates(Z,X,Y,main.xc_rc[j],main.yc_rc[j],main.zc_rc[j])
+        X2d_yz,Y2d_yz = projected_coodinates(Y,Z,X,main.xc_rc[j],main.yc_rc[j],main.zc_rc[j])
         
         X2d = np.vstack((X2d_xy,X2d_zx,X2d_yz))
         Y2d = np.vstack((Y2d_xy,Y2d_zx,Y2d_yz))
