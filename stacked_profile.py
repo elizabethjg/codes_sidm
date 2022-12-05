@@ -29,8 +29,8 @@ path1 = '/mnt/projects/lensing/SIDM_project/Lentes/Eli_Agus/snapshot_050/rocksta
 # path1 = '/mnt/projects/lensing/SIDM_project/cuadrados/SIDM1/'
 
 # READ halos computed profperties
-main_file1 = '/mnt/projects/lensing/SIDM_project/halo_props/extend_halo_propsv2_rock2_match_sidm1_z0_main.csv.bz2'
-main_file = '/mnt/projects/lensing/SIDM_project/halo_props/extend_halo_propsv2_rock2_match_cdm_z0_main.csv.bz2'
+main_file = '/mnt/projects/lensing/SIDM_project/halo_props/projections/v1_extend_halo_propsv2_rock2_match_cdm_z0_main.csv.bz2'
+main_file1 = '/mnt/projects/lensing/SIDM_project/halo_props/projections/v1_extend_halo_propsv2_rock2_match_sidm1_z0_main.csv.bz2'
 main  = pd.read_csv(main_file)
 main1 = pd.read_csv(main_file1)
 
@@ -41,9 +41,6 @@ m = (S_itr-S1_itr)/S_itr < -0.1
 sname = 'total'
 m = S_itr < 100.
 
-haloids  = np.array(main.column_halo_id)[:10]
-haloids1 = np.array(main1.column_halo_id)[m]
-nhalos = len(haloids)
 
 
 
@@ -60,7 +57,10 @@ S1 = main1.c3D_it/main1.a3D_it
 S_r  = main.c3Dr/main.a3Dr
 S1_r = main1.c3Dr/main1.a3Dr
 
-q2d = main.b2D/main.a2D
+q2d_xy = main.b2D_xy/main.a2D_xy
+q2d_zx = main.b2D_zx/main.a2D_zx
+q2d_yz = main.b2D_yz/main.a2D_yz
+
 q2d1 = main1.b2D/main1.a2D
 
 q2dr = main.b2Dr/main.a2Dr
@@ -76,6 +76,11 @@ q2dr1_it = main1.b2Dr_it/main1.a2Dr_it
 Eratio  = (2.*main.EKin/abs(main.EPot))
 Eratio1 = (2.*main1.EKin/abs(main1.EPot))
 
+
+
+haloids  = np.array(main.column_halo_id)[:10]
+haloids1 = np.array(main1.column_halo_id)[m]
+nhalos = len(haloids)
 
 
 # ROTATE, STACK AND PROJECT PARTICLES    

@@ -76,7 +76,7 @@ def stack_halos(main_file,path,haloids,reduced = False):
         Y = np.array(halo['Y']) - main.yc_rc[j]/1.e3
         Z = np.array(halo['Z']) - main.zc_rc[j]/1.e3
         
-        '''
+
         if reduced:
             xrot = (main.a3Drx[j]*X)+(main.a3Dry[j]*Y)+(main.a3Drz[j]*Z);
             yrot = (main.b3Drx[j]*X)+(main.b3Dry[j]*Y)+(main.b3Drz[j]*Z);
@@ -89,10 +89,6 @@ def stack_halos(main_file,path,haloids,reduced = False):
         x = np.append(x,xrot)
         y = np.append(y,yrot)
         z = np.append(z,zrot)
-        '''
-        x = np.append(x,X)
-        y = np.append(y,Y)
-        z = np.append(z,Z)
 
         
         X2d_xy,Y2d_xy = projected_coodinates(X,Y,Z,main.xc_rc[j],main.yc_rc[j],main.zc_rc[j])
@@ -179,20 +175,20 @@ def stack_halos_parallel(main_file,path,haloids,reduced = False,ncores=10):
     pool.terminate()
 
     x = np.array([])
-    y= np.array([])
+    y = np.array([])
     z = np.array([])
     x2d = np.array([])
     y2d = np.array([])
     
     for s in salida:
-        X,Y,Z,x2d,y2d = s
+        X,Y,Z,X2d,Y2d = s
         
         x = np.append(x,X)
-        y = np.append(x,Y)
-        z = np.append(x,Z)
+        y = np.append(y,Y)
+        z = np.append(z,Z)
         
-        x2d = np.append(x2d,X)
-        y2d = np.append(y2d,X)
+        x2d = np.append(x2d,X2d)
+        y2d = np.append(y2d,Y2d)
             
     return x,y,z,x2d,y2d
     
