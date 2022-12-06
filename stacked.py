@@ -512,15 +512,14 @@ class fit_profiles(profile_from_map):
     def __init__(self,Xp,Yp,nhalos,
                  RIN=100.,ROUT=1000.,ndots=20,
                  resolution=500,params=params,z=0.,
-                 only_quadrupoles=False,
-                 logM200 = 14., c200 = 4.):
+                 twohalo = False):
         
         
         # COMPUTE PROFILES
         
         profile_from_map.__init__(self, Xp,Yp,nhalos,RIN,ROUT,ndots,resolution)
         
-        if not only_quadrupoles:
+        if not twohalo:
         
         # FIT KAPPA PROFILE
 
@@ -600,7 +599,24 @@ class fit_profiles(profile_from_map):
             self.q_gx     = (1.-e)/(1.+e)
             self.GX_fit   = GX(self.r,e)
 
-        if only_quadrupoles:
+        if twohalo:
+
+            # FIT SHEAR PROFILE
+    
+            def DS(R,logM200,c200):
+                return Delta_Sigma_NFW_2h(R,z,10**logM200,c200,cosmo_params=params)
+    
+            DS_fit = curve_fit(DS,self.r,self.DS_T,sigma=self.eDS_T,absolute_sigma=True,bounds=([12,2],[15,10]))
+            pcov    = DS_fit[1]
+            perr    = np.sqrt(np.diag(pcov))
+            e_lM200 = perr[0]
+            e_c200  = perr[1]
+            logM200 = DS_fit[0][0]
+            c200    = DS_fit[0][1]
+            
+            self.DS_fit   = DS(self.r,logM200,c200)
+            self.lM200_ds = logM200
+            self.c200_ds  = c200
                     
             # FIT SHEAR QUADRUPOLE PROFILES
             
@@ -631,7 +647,7 @@ class fit_profiles(profile_from_map):
             e2h = (1. - q2h)/(1. + q2h)
             
             self.q1h_gt      = q1h
-            self.q2h_gx      = q2h
+            self.q2h_gt      = q2h
             self.mcmc_q1h_gt = mcmc_q1h
             self.mcmc_q2h_gt = mcmc_q2h
             self.GT1h        = e1h*GT
