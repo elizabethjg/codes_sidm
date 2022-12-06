@@ -23,8 +23,8 @@ rock       = pd.read_csv('/mnt/projects/lensing/SIDM_project/halo_props/halo_pro
 rock1      = pd.read_csv('/mnt/projects/lensing/SIDM_project/halo_props/halo_props_match_sidm1_z0_rock2.csv.bz2')
 
 # FOLDERS WHERE PARTICLES ARE SAVED
-# path = '/mnt/projects/lensing/SIDM_project/Lentes/Eli_Agus/snapshot_050/rockstar/matcheados/CDM/'
-# path1 = '/mnt/projects/lensing/SIDM_project/Lentes/Eli_Agus/snapshot_050/rockstar/matcheados/SIDM1/'
+path_oh = '/mnt/projects/lensing/SIDM_project/Lentes/Eli_Agus/snapshot_050/rockstar/matcheados/CDM/'
+path1_oh = '/mnt/projects/lensing/SIDM_project/Lentes/Eli_Agus/snapshot_050/rockstar/matcheados/SIDM1/'
 
 path  = '/mnt/projects/lensing/SIDM_project/cuadrados/CDM/'
 path1 = '/mnt/projects/lensing/SIDM_project/cuadrados/SIDM/'
@@ -94,10 +94,11 @@ haloids  = np.array(main.column_halo_id)[m]
 haloids1 = np.array(main1.column_halo_id)[m]
 nhalos = len(haloids)
 
+print('First using halo particles')
 print('Rotating and stacking...')
 # ROTATE, STACK AND PROJECT PARTICLES    
-x,y,z,x2d,y2d      = stack_halos_parallel(main_file,path,haloids,reduced=True,iterative=False,ncores=ncores)   
-x1,y1,z1,x2d1,y2d1 = stack_halos_parallel(main_file1,path1,haloids1,reduced=True,iterative=False,ncores=ncores)
+x,y,z,x2d,y2d      = stack_halos_parallel(main_file,path_oh,haloids,reduced=True,iterative=False,ncores=ncores)   
+x1,y1,z1,x2d1,y2d1 = stack_halos_parallel(main_file1,path1_oh,haloids1,reduced=True,iterative=False,ncores=ncores)
 
 # SELECT ONLY PARTICLES WITHIN 4Mpc
 m3d = (abs(x) < 4.)*(abs(y) < 4.)*(abs(z) < 4.)
@@ -121,6 +122,47 @@ print('Computing and fitting profiles...')
 pm_DM    = fit_profiles(Xp,Yp,nhalos*3)
 pm_SIDM  = fit_profiles(Xp1,Yp1,nhalos*3)
 
+del(x,y,z,x2d,y2d)
+del(x1,y1,z1,x2d1,y2d1)
+del(X,Y,Z,Xp,Yp)
+del(X1,Y1,Z1,Xp1,Yp1)
+
+print('Now using all the particles')
+print('Rotating and stacking...')
+# ROTATE, STACK AND PROJECT PARTICLES    
+x,y,z,x2d,y2d      = stack_halos_parallel(main_file,path,haloids,reduced=True,iterative=False,ncores=ncores)   
+x1,y1,z1,x2d1,y2d1 = stack_halos_parallel(main_file1,path1,haloids1,reduced=True,iterative=False,ncores=ncores)
+
+# SELECT ONLY PARTICLES WITHIN 4Mpc
+m3d = (abs(x) < 4.)*(abs(y) < 4.)*(abs(z) < 4.)
+m2d = (abs(x2d) < 4.)*(abs(y2d) < 4.)
+
+m3d1 = (abs(x1) < 4.)*(abs(y1) < 4.)*(abs(z1) < 4.)
+m2d1 = (abs(x2d1) < 4.)*(abs(y2d1) < 4.)
+
+X,Y,Z = x[m3d]*1.e3,y[m3d]*1.e3,z[m3d]*1.e3 # 3D coordinates in kpc
+Xp,Yp = x2d[m2d]*1.e3,y2d[m2d]*1.e3 # 2D coordinates in kpc
+
+X1,Y1,Z1 = x1[m3d1]*1.e3,y1[m3d1]*1.e3,z1[m3d1]*1.e3
+Xp1,Yp1  = x2d1[m2d1]*1.e3,y2d1[m2d1]*1.e3
+
+del(x,y,z,x2d,y2d)
+del(x1,y1,z1,x2d1,y2d1)
+del(X,Y,Z)
+del(X1,Y1,Z1)
+
+
+# COMPUTE PROFILES USING PARTICLES
+# p_DM    = stack_profile(X,Y,Z,Xp,Yp,nhalos)
+# p_SIDM  = stack_profile(X1,Y1,Z1,Xp1,Yp1,nhalos)
+
+print('Computing and fitting profiles...')
+# COMPUTE AND FIT PROFILES USING MAPS
+pm_DM2h   = fit_profiles(Xp,Yp,nhalos*3,only_quadrupoles=True,logM200=pm_DM.lM200_ds,c200=pm_DM.c200_ds)
+pm_SIDM2h = fit_profiles(Xp1,Yp1,nhalos*3,only_quadrupoles=True,logM200=pm_SIDM.lM200_ds,c200=pm_SIDM.c200_ds)
+
+del(Xp,Yp)
+del(Xp1,Yp1)
 
 # M200c = 10**13.6
 # c200c = concentration.concentration(M200c, '200c', z, model = 'diemer19')
@@ -151,6 +193,19 @@ plt.savefig('../profile_DS_'+sname+'.png')
 
 
 plt.figure()
+plt.plot(pm_SIDM.r,pm_SIDM.S2,'C3',label='SIDM')
+plt.plot(pm_SIDM.r,pm_SIDM.S2_fit,'C3',alpha=0.5)
+plt.plot(pm_DM.r,pm_DM.S2,'k',label='CDM')
+plt.plot(pm_DM.r,pm_DM.S2_fit,'k',alpha=0.5)
+plt.loglog()
+plt.xlabel('$R [Mpc]$')
+plt.ylabel(r'$\epsilon \times \Sigma_2 [M_\odot/pc^2]$')
+plt.legend()
+plt.savefig('../profile_S2_'+sname+'.png')
+
+# quadrupole plots with 1term
+
+plt.figure()
 plt.plot(pm_SIDM.r,pm_SIDM.GX,'C3',label='SIDM')
 plt.plot(pm_SIDM.r,pm_SIDM.GX_fit,'C3',alpha=0.5)
 plt.plot(pm_SIDM.r,pm_SIDM.GX_fit2,'C3--',alpha=0.5)
@@ -176,17 +231,49 @@ plt.ylabel(r'$\epsilon \times \Gamma_T [M_\odot/pc^2]$')
 plt.legend()
 plt.savefig('../profile_GT_'+sname+'.png')
 
+# quadrupole plots with 2terms
+
 plt.figure()
-plt.plot(pm_SIDM.r,pm_SIDM.S2,'C3',label='SIDM')
-plt.plot(pm_SIDM.r,pm_SIDM.S2_fit,'C3',alpha=0.5)
-plt.plot(pm_DM.r,pm_DM.S2,'k',label='CDM')
-plt.plot(pm_DM.r,pm_DM.S2_fit,'k',alpha=0.5)
+plt.plot(pm_SIDM2h.r,pm_SIDM2h.GX,'C3',label='SIDM')
+plt.plot(pm_SIDM2h.r,pm_SIDM2h.GX1h+pm_SIDM2h.GX2h,'C3',alpha=0.5)
+plt.plot(pm_SIDM2h.r,pm_SIDM2h.GX2h,'C4:',alpha=0.5)
+plt.plot(pm_SIDM2h.r,pm_SIDM2h.GX1h,'C4--',alpha=0.5)
+plt.plot(pm_SIDM2h.r,pm_SIDM2h.GX1h_fit2+pm_SIDM2h.GX2h_fit2,'C3--',alpha=0.5)
+plt.plot(pm_SIDM2h.r,pm_SIDM2h.GX1h_fit2,'C5--',alpha=0.5)
+plt.plot(pm_SIDM2h.r,pm_SIDM2h.GX2h_fit2,'C5:',alpha=0.5)
+plt.plot(pm_DM2h.r,pm_DM2h.GX,'k',label='SIDM')
+plt.plot(pm_DM2h.r,pm_DM2h.GX1h+pm_SIDM2h.GX2h,'k',alpha=0.5)
+plt.plot(pm_DM2h.r,pm_DM2h.GX2h,'C7:',alpha=0.5)
+plt.plot(pm_DM2h.r,pm_DM2h.GX1h,'C7--',alpha=0.5)
+plt.plot(pm_DM2h.r,pm_DM2h.GX1h_fit2+pm_SIDM2h.GX2h_fit2,'C7--',alpha=0.5)
+plt.plot(pm_DM2h.r,pm_DM2h.GX1h_fit2,'C8--',alpha=0.5)
+plt.plot(pm_DM2h.r,pm_DM2h.GX2h_fit2,'C8:',alpha=0.5)
+plt.xscale('log')
+plt.xlabel('$R [Mpc]$')
+plt.ylabel(r'$\epsilon \times \Gamma_X [M_\odot/pc^2]$')
+plt.legend()
+plt.savefig('../profile_GX_2h_'+sname+'.png')
+
+plt.figure()
+plt.plot(pm_SIDM2h.r,pm_SIDM2h.GT,'C3',label='SIDM')
+plt.plot(pm_SIDM2h.r,pm_SIDM2h.GT1h+pm_SIDM2h.GT2h,'C3',alpha=0.5)
+plt.plot(pm_SIDM2h.r,pm_SIDM2h.GT2h,'C4:',alpha=0.5)
+plt.plot(pm_SIDM2h.r,pm_SIDM2h.GT1h,'C4--',alpha=0.5)
+plt.plot(pm_SIDM2h.r,pm_SIDM2h.GT1h_fit2+pm_SIDM2h.GT2h_fit2,'C3--',alpha=0.5)
+plt.plot(pm_SIDM2h.r,pm_SIDM2h.GT1h_fit2,'C5--',alpha=0.5)
+plt.plot(pm_SIDM2h.r,pm_SIDM2h.GT2h_fit2,'C5:',alpha=0.5)
+plt.plot(pm_DM2h.r,pm_DM2h.GT,'k',label='SIDM')
+plt.plot(pm_DM2h.r,pm_DM2h.GT1h+pm_SIDM2h.GT2h,'k',alpha=0.5)
+plt.plot(pm_DM2h.r,pm_DM2h.GT2h,'C7:',alpha=0.5)
+plt.plot(pm_DM2h.r,pm_DM2h.GT1h,'C7--',alpha=0.5)
+plt.plot(pm_DM2h.r,pm_DM2h.GT1h_fit2+pm_SIDM2h.GT2h_fit2,'C7--',alpha=0.5)
+plt.plot(pm_DM2h.r,pm_DM2h.GT1h_fit2,'C8--',alpha=0.5)
+plt.plot(pm_DM2h.r,pm_DM2h.GT2h_fit2,'C8:',alpha=0.5)
 plt.loglog()
 plt.xlabel('$R [Mpc]$')
-plt.ylabel(r'$\epsilon \times \Sigma_2 [M_\odot/pc^2]$')
+plt.ylabel(r'$\epsilon \times \Gamma_T [M_\odot/pc^2]$')
 plt.legend()
-plt.savefig('../profile_S2_'+sname+'.png')
-
+plt.savefig('../profile_GT_2h_'+sname+'.png')
 
 # q2d distributions for DM
 plt.figure()
@@ -199,6 +286,9 @@ plt.axvline(pm_DM.q_s,label='fit S',color='C2',lw=3)
 plt.axvline(pm_DM.q_2g,label='fit G',color='C3',lw=3)
 plt.axvline(pm_DM.q_gt,label='fit GT',color='C4',lw=3)
 plt.axvline(pm_DM.q_gx,label='fit GX',color='C5',lw=3)
+plt.axvline(pm_DM2h.q1h_2g,label='fit G',color='C3',lw=3,ls='--')
+plt.axvline(pm_DM2h.q1h_gt,label='fit GT',color='C4',lw=3,ls='--')
+plt.axvline(pm_DM2h.q1h_gx,label='fit GX',color='C5',lw=3,ls='--')
 plt.legend(loc=2,frameon=False)
 plt.xlabel('q2d')
 plt.savefig('../profile_q2d_cdm_it_'+sname+'.png')
@@ -213,6 +303,9 @@ plt.axvline(pm_DM.q_s,label='fit S',color='C2',lw=3)
 plt.axvline(pm_DM.q_2g,label='fit G',color='C3',lw=3)
 plt.axvline(pm_DM.q_gt,label='fit GT',color='C4',lw=3)
 plt.axvline(pm_DM.q_gx,label='fit GX',color='C5',lw=3)
+plt.axvline(pm_DM2h.q1h_2g,label='fit G',color='C3',lw=3,ls='--')
+plt.axvline(pm_DM2h.q1h_gt,label='fit GT',color='C4',lw=3,ls='--')
+plt.axvline(pm_DM2h.q1h_gx,label='fit GX',color='C5',lw=3,ls='--')
 plt.legend(loc=2,frameon=False)
 plt.xlabel('q2d')
 plt.savefig('../profile_q2d_cdm_'+sname+'.png')
@@ -229,6 +322,9 @@ plt.axvline(pm_SIDM.q_s,label='fit S',color='C2',lw=3)
 plt.axvline(pm_SIDM.q_2g,label='fit G',color='C3',lw=3)
 plt.axvline(pm_SIDM.q_gt,label='fit GT',color='C4',lw=3)
 plt.axvline(pm_SIDM.q_gx,label='fit GX',color='C5',lw=3)
+plt.axvline(pm_SIDM2h.q1h_2g,label='fit G',color='C3',lw=3,ls='--')
+plt.axvline(pm_SIDM2h.q1h_gt,label='fit GT',color='C4',lw=3,ls='--')
+plt.axvline(pm_SIDM2h.q1h_gx,label='fit GX',color='C5',lw=3,ls='--')
 plt.legend(loc=2,frameon=False)
 plt.xlabel('q2d')
 plt.savefig('../profile_q2d_sidm_it_'+sname+'.png')
@@ -243,6 +339,9 @@ plt.axvline(pm_SIDM.q_s,label='fit S',color='C2',lw=3)
 plt.axvline(pm_SIDM.q_2g,label='fit G',color='C3',lw=3)
 plt.axvline(pm_SIDM.q_gt,label='fit GT',color='C4',lw=3)
 plt.axvline(pm_SIDM.q_gx,label='fit GX',color='C5',lw=3)
+plt.axvline(pm_SIDM2h.q1h_2g,label='fit G',color='C3',lw=3,ls='--')
+plt.axvline(pm_SIDM2h.q1h_gt,label='fit GT',color='C4',lw=3,ls='--')
+plt.axvline(pm_SIDM2h.q1h_gx,label='fit GX',color='C5',lw=3,ls='--')
 plt.legend(loc=2,frameon=False)
 plt.xlabel('q2d')
 plt.savefig('../profile_q2d_sidm_'+sname+'.png')

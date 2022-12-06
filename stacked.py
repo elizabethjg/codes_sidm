@@ -56,7 +56,7 @@ def fit_quadrupoles(R,gt,gx,egt,egx,GT,GX):
     
     return np.median(mcmc_out[1500:]),mcmc_out
 
-def fit_quadrupoles_2terms(R,gt,gx,egt,egx,GT,GX,GT_2h,GX_2h):
+def fit_quadrupoles_2terms(R,gt,gx,egt,egx,GT,GX,GT_2h,GX_2h,fit_components):
     
     
     def log_likelihood(data_model, R, profiles, eprofiles,
@@ -642,7 +642,7 @@ class fit_profiles(profile_from_map):
             e1h = (1. - q1h)/(1. + q1h)
             e2h = (1. - q2h)/(1. + q2h)
             
-            self.q1h_gt      = q1h
+            self.q1h_gx      = q1h
             self.q2h_gx      = q2h
             self.mcmc_q1h_gx = mcmc_q1h
             self.mcmc_q2h_gx = mcmc_q2h
