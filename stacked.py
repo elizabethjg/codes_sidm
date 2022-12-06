@@ -95,24 +95,24 @@ def stack_halos(main_file,path,haloids,reduced = False):
         X2d_zx,Y2d_zx = projected_coodinates(Z,X,Y,main.xc_rc[j],main.yc_rc[j],main.zc_rc[j])
         X2d_yz,Y2d_yz = projected_coodinates(Y,Z,X,main.xc_rc[j],main.yc_rc[j],main.zc_rc[j])
         
-        X2d = np.vstack((X2d_xy,X2d_zx,X2d_yz))
-        Y2d = np.vstack((Y2d_xy,Y2d_zx,Y2d_yz))
+        X2d = np.concatenate((X2d_xy,X2d_zx,X2d_yz))
+        Y2d = np.concatenate((Y2d_xy,Y2d_zx,Y2d_yz))
 
         if reduced:
         
-            a2Drx = np.vstack((np.repeat(main.a2Drx_xy[j],len(X2d_xy)),
-                               np.repeat(main.a2Drx_zx[j],len(X2d_xy)),
-                               np.repeat(main.a2Drx_yz[j],len(X2d_xy))))
+            a2Drx = np.concatenate((np.repeat(main.a2Drx_xy[j],10),
+                               np.repeat(main.a2Drx_zx[j],10),
+                               np.repeat(main.a2Drx_yz[j],10)))
                             
-            b2Drx = np.vstack((np.repeat(main.b2Drx_xy[j],len(X2d_xy)),
+            b2Drx = np.concatenate((np.repeat(main.b2Drx_xy[j],len(X2d_xy)),
                                np.repeat(main.b2Drx_zx[j],len(X2d_xy)),
                                np.repeat(main.b2Drx_yz[j],len(X2d_xy))))
     
-            a2Dry = np.vstack((np.repeat(main.a2Dry_xy[j],len(X2d_xy)),
+            a2Dry = np.concatenate((np.repeat(main.a2Dry_xy[j],len(X2d_xy)),
                                np.repeat(main.a2Dry_zx[j],len(X2d_xy)),
                                np.repeat(main.a2Dry_yz[j],len(X2d_xy))))
             
-            b2Dry = np.vstack((np.repeat(main.b2Dry_xy[j],len(X2d_xy)),
+            b2Dry = np.concatenate((np.repeat(main.b2Dry_xy[j],len(X2d_xy)),
                                np.repeat(main.b2Dry_zx[j],len(X2d_xy)),
                                np.repeat(main.b2Dry_yz[j],len(X2d_xy))))
 
@@ -121,20 +121,20 @@ def stack_halos(main_file,path,haloids,reduced = False):
 
         else:
         
-            a2Dx  = np.vstack((np.repeat(main.a2Dx_xy[j],len(X2d_xy)),
+            a2Dx  = np.concatenate((np.repeat(main.a2Dx_xy[j],len(X2d_xy)),
                                np.repeat(main.a2Dx_zx[j],len(X2d_xy)),
                                np.repeat(main.a2Dx_yz[j],len(X2d_xy))))
             
             
-            b2Dx  = np.vstack((np.repeat(main.b2Dx_xy[j],len(X2d_xy)),
+            b2Dx  = np.concatenate((np.repeat(main.b2Dx_xy[j],len(X2d_xy)),
                                np.repeat(main.b2Dx_zx[j],len(X2d_xy)),
                                np.repeat(main.b2Dx_yz[j],len(X2d_xy))))
     
-            a2Dy  = np.vstack((np.repeat(main.a2Dy_xy[j],len(X2d_xy)),
+            a2Dy  = np.concatenate((np.repeat(main.a2Dy_xy[j],len(X2d_xy)),
                                np.repeat(main.a2Dy_zx[j],len(X2d_xy)),
                                np.repeat(main.a2Dy_yz[j],len(X2d_xy))))
                                
-            b2Dy  = np.vstack((np.repeat(main.b2Dy_xy[j],len(X2d_xy)),
+            b2Dy  = np.concatenate((np.repeat(main.b2Dy_xy[j],len(X2d_xy)),
                                np.repeat(main.b2Dy_zx[j],len(X2d_xy)),
                                np.repeat(main.b2Dy_yz[j],len(X2d_xy))))
 
@@ -285,10 +285,10 @@ class stack_profile:
         self.r      = rp
         self.rho    = rhop/(nhalos*1.e3**3)
         self.erho   = mpV/(1.e3**3)
-        self.S      = Sp/(nhalos*1.e3**2)
+        self.S      = Sp/(nhalos*3*1.e3**2)
         self.eS     = mpA*nhalos/(1.e3**2)
-        self.DS     = DSp/(nhalos*1.e3**2)
-        self.S2     = Sp2/(nhalos*1.e3**2)
+        self.DS     = DSp/(nhalos*3*1.e3**2)
+        self.S2     = Sp2/(nhalos*3*1.e3**2)
 
 class profile_from_map:
 
