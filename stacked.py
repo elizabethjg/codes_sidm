@@ -57,7 +57,7 @@ def fit_quadrupoles(R,gt,gx,egt,egx,GT,GX):
     return np.median(mcmc_out[1500:]),mcmc_out
 
 
-def stack_halos(main_file,path,haloids,reduced = False):
+def stack_halos(main_file,path,haloids,reduced = False, iterative = False):
 
     main = pd.read_csv(main_file)
     
@@ -76,15 +76,24 @@ def stack_halos(main_file,path,haloids,reduced = False):
         Y = np.array(halo['Y']) - main.yc_rc[j]/1.e3
         Z = np.array(halo['Z']) - main.zc_rc[j]/1.e3
         
-
-        if reduced:
-            xrot = (main.a3Drx[j]*X)+(main.a3Dry[j]*Y)+(main.a3Drz[j]*Z);
-            yrot = (main.b3Drx[j]*X)+(main.b3Dry[j]*Y)+(main.b3Drz[j]*Z);
-            zrot = (main.c3Drx[j]*X)+(main.c3Dry[j]*Y)+(main.c3Drz[j]*Z);
+        if iterative:
+            if reduced:
+                xrot = (main.a3Drx_it[j]*X)+(main.a3Dry_it[j]*Y)+(main.a3Drz_it[j]*Z);
+                yrot = (main.b3Drx_it[j]*X)+(main.b3Dry_it[j]*Y)+(main.b3Drz_it[j]*Z);
+                zrot = (main.c3Drx_it[j]*X)+(main.c3Dry_it[j]*Y)+(main.c3Drz_it[j]*Z);
+            else:
+                xrot = (main.a3Dx_it[j]*X)+(main.a3Dy_it[j]*Y)+(main.a3Dz_it[j]*Z);
+                yrot = (main.b3Dx_it[j]*X)+(main.b3Dy_it[j]*Y)+(main.b3Dz_it[j]*Z);
+                zrot = (main.c3Dx_it[j]*X)+(main.c3Dy_it[j]*Y)+(main.c3Dz_it[j]*Z);
         else:
-            xrot = (main.a3Dx[j]*X)+(main.a3Dy[j]*Y)+(main.a3Dz[j]*Z);
-            yrot = (main.b3Dx[j]*X)+(main.b3Dy[j]*Y)+(main.b3Dz[j]*Z);
-            zrot = (main.c3Dx[j]*X)+(main.c3Dy[j]*Y)+(main.c3Dz[j]*Z);
+            if reduced:
+                xrot = (main.a3Drx[j]*X)+(main.a3Dry[j]*Y)+(main.a3Drz[j]*Z);
+                yrot = (main.b3Drx[j]*X)+(main.b3Dry[j]*Y)+(main.b3Drz[j]*Z);
+                zrot = (main.c3Drx[j]*X)+(main.c3Dry[j]*Y)+(main.c3Drz[j]*Z);
+            else:
+                xrot = (main.a3Dx[j]*X)+(main.a3Dy[j]*Y)+(main.a3Dz[j]*Z);
+                yrot = (main.b3Dx[j]*X)+(main.b3Dy[j]*Y)+(main.b3Dz[j]*Z);
+                zrot = (main.c3Dx[j]*X)+(main.c3Dy[j]*Y)+(main.c3Dz[j]*Z);
         
         x = np.append(x,xrot)
         y = np.append(y,yrot)
@@ -98,50 +107,97 @@ def stack_halos(main_file,path,haloids,reduced = False):
         X2d = np.concatenate((X2d_xy,X2d_zx,X2d_yz))
         Y2d = np.concatenate((Y2d_xy,Y2d_zx,Y2d_yz))
 
-        if reduced:
-        
-            a2Drx = np.concatenate((np.repeat(main.a2Drx_xy[j],10),
-                               np.repeat(main.a2Drx_zx[j],10),
-                               np.repeat(main.a2Drx_yz[j],10)))
-                            
-            b2Drx = np.concatenate((np.repeat(main.b2Drx_xy[j],len(X2d_xy)),
-                               np.repeat(main.b2Drx_zx[j],len(X2d_xy)),
-                               np.repeat(main.b2Drx_yz[j],len(X2d_xy))))
-    
-            a2Dry = np.concatenate((np.repeat(main.a2Dry_xy[j],len(X2d_xy)),
-                               np.repeat(main.a2Dry_zx[j],len(X2d_xy)),
-                               np.repeat(main.a2Dry_yz[j],len(X2d_xy))))
+        if iterative:
+
+            if reduced:
             
-            b2Dry = np.concatenate((np.repeat(main.b2Dry_xy[j],len(X2d_xy)),
-                               np.repeat(main.b2Dry_zx[j],len(X2d_xy)),
-                               np.repeat(main.b2Dry_yz[j],len(X2d_xy))))
-
-            x2drot = (a2Drx*X2d)+(a2Dry*Y2d)
-            y2drot = (b2Drx*X2d)+(b2Dry*Y2d)
-
+                a2Drx = np.concatenate((np.repeat(main.a2Drx_it_xy[j],10),
+                                np.repeat(main.a2Drx_it_zx[j],10),
+                                np.repeat(main.a2Drx_it_yz[j],10)))
+                                
+                b2Drx = np.concatenate((np.repeat(main.b2Drx_it_xy[j],len(X2d_it_xy)),
+                                np.repeat(main.b2Drx_it_zx[j],len(X2d_it_xy)),
+                                np.repeat(main.b2Drx_it_yz[j],len(X2d_it_xy))))
+        
+                a2Dry = np.concatenate((np.repeat(main.a2Dry_it_xy[j],len(X2d_it_xy)),
+                                np.repeat(main.a2Dry_it_zx[j],len(X2d_it_xy)),
+                                np.repeat(main.a2Dry_it_yz[j],len(X2d_it_xy))))
+                
+                b2Dry = np.concatenate((np.repeat(main.b2Dry_it_xy[j],len(X2d_it_xy)),
+                                np.repeat(main.b2Dry_it_zx[j],len(X2d_it_xy)),
+                                np.repeat(main.b2Dry_it_yz[j],len(X2d_it_xy))))
+    
+                x2drot = (a2Drx*X2d)+(a2Dry*Y2d)
+                y2drot = (b2Drx*X2d)+(b2Dry*Y2d)
+    
+            else:
+            
+                a2Dx  = np.concatenate((np.repeat(main.a2Dx_it_xy[j],len(X2d_it_xy)),
+                                np.repeat(main.a2Dx_it_zx[j],len(X2d_it_xy)),
+                                np.repeat(main.a2Dx_it_yz[j],len(X2d_it_xy))))
+                
+                
+                b2Dx  = np.concatenate((np.repeat(main.b2Dx_it_xy[j],len(X2d_it_xy)),
+                                np.repeat(main.b2Dx_it_zx[j],len(X2d_it_xy)),
+                                np.repeat(main.b2Dx_it_yz[j],len(X2d_it_xy))))
+        
+                a2Dy  = np.concatenate((np.repeat(main.a2Dy_it_xy[j],len(X2d_it_xy)),
+                                np.repeat(main.a2Dy_it_zx[j],len(X2d_it_xy)),
+                                np.repeat(main.a2Dy_it_yz[j],len(X2d_it_xy))))
+                                
+                b2Dy  = np.concatenate((np.repeat(main.b2Dy_it_xy[j],len(X2d_it_xy)),
+                                np.repeat(main.b2Dy_it_zx[j],len(X2d_it_xy)),
+                                np.repeat(main.b2Dy_it_yz[j],len(X2d_it_xy))))
+    
+    
+                x2drot = (a2Dx*X2d)+(a2Dy*Y2d)
+                y2drot = (b2Dx*X2d)+(b2Dy*Y2d)
+        
         else:
+            if reduced:
+            
+                a2Drx = np.concatenate((np.repeat(main.a2Drx_xy[j],10),
+                                np.repeat(main.a2Drx_zx[j],10),
+                                np.repeat(main.a2Drx_yz[j],10)))
+                                
+                b2Drx = np.concatenate((np.repeat(main.b2Drx_xy[j],len(X2d_xy)),
+                                np.repeat(main.b2Drx_zx[j],len(X2d_xy)),
+                                np.repeat(main.b2Drx_yz[j],len(X2d_xy))))
         
-            a2Dx  = np.concatenate((np.repeat(main.a2Dx_xy[j],len(X2d_xy)),
-                               np.repeat(main.a2Dx_zx[j],len(X2d_xy)),
-                               np.repeat(main.a2Dx_yz[j],len(X2d_xy))))
-            
-            
-            b2Dx  = np.concatenate((np.repeat(main.b2Dx_xy[j],len(X2d_xy)),
-                               np.repeat(main.b2Dx_zx[j],len(X2d_xy)),
-                               np.repeat(main.b2Dx_yz[j],len(X2d_xy))))
+                a2Dry = np.concatenate((np.repeat(main.a2Dry_xy[j],len(X2d_xy)),
+                                np.repeat(main.a2Dry_zx[j],len(X2d_xy)),
+                                np.repeat(main.a2Dry_yz[j],len(X2d_xy))))
+                
+                b2Dry = np.concatenate((np.repeat(main.b2Dry_xy[j],len(X2d_xy)),
+                                np.repeat(main.b2Dry_zx[j],len(X2d_xy)),
+                                np.repeat(main.b2Dry_yz[j],len(X2d_xy))))
     
-            a2Dy  = np.concatenate((np.repeat(main.a2Dy_xy[j],len(X2d_xy)),
-                               np.repeat(main.a2Dy_zx[j],len(X2d_xy)),
-                               np.repeat(main.a2Dy_yz[j],len(X2d_xy))))
-                               
-            b2Dy  = np.concatenate((np.repeat(main.b2Dy_xy[j],len(X2d_xy)),
-                               np.repeat(main.b2Dy_zx[j],len(X2d_xy)),
-                               np.repeat(main.b2Dy_yz[j],len(X2d_xy))))
-
-
-            x2drot = (a2Dx*X2d)+(a2Dy*Y2d)
-            y2drot = (b2Dx*X2d)+(b2Dy*Y2d)
-
+                x2drot = (a2Drx*X2d)+(a2Dry*Y2d)
+                y2drot = (b2Drx*X2d)+(b2Dry*Y2d)
+    
+            else:
+            
+                a2Dx  = np.concatenate((np.repeat(main.a2Dx_xy[j],len(X2d_xy)),
+                                np.repeat(main.a2Dx_zx[j],len(X2d_xy)),
+                                np.repeat(main.a2Dx_yz[j],len(X2d_xy))))
+                
+                
+                b2Dx  = np.concatenate((np.repeat(main.b2Dx_xy[j],len(X2d_xy)),
+                                np.repeat(main.b2Dx_zx[j],len(X2d_xy)),
+                                np.repeat(main.b2Dx_yz[j],len(X2d_xy))))
+        
+                a2Dy  = np.concatenate((np.repeat(main.a2Dy_xy[j],len(X2d_xy)),
+                                np.repeat(main.a2Dy_zx[j],len(X2d_xy)),
+                                np.repeat(main.a2Dy_yz[j],len(X2d_xy))))
+                                
+                b2Dy  = np.concatenate((np.repeat(main.b2Dy_xy[j],len(X2d_xy)),
+                                np.repeat(main.b2Dy_zx[j],len(X2d_xy)),
+                                np.repeat(main.b2Dy_yz[j],len(X2d_xy))))
+    
+    
+                x2drot = (a2Dx*X2d)+(a2Dy*Y2d)
+                y2drot = (b2Dx*X2d)+(b2Dy*Y2d)
+        
         x2d = np.append(x2d,x2drot)
         y2d = np.append(y2d,y2drot)
         
