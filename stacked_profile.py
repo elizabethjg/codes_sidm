@@ -69,10 +69,10 @@ Eratio1 = (2.*main1.EKin/abs(main1.EPot))
 # sname = 'subset'
 # m = (S_itr-S1_itr)/S_itr < -0.1
 
-sname = 'total_onlyhalo_reduced'
+sname = 'total_onlyhalo_standard'
 m = S_itr < 100.
 
-m2d = np.concatenate((m,m,m))
+mask_2d = np.concatenate((m,m,m))
 
 haloids  = np.array(main.column_halo_id)[m]
 haloids1 = np.array(main1.column_halo_id)[m]
@@ -80,8 +80,8 @@ nhalos = len(haloids)
 
 print('Rotating and stacking...')
 # ROTATE, STACK AND PROJECT PARTICLES    
-x,y,z,x2d,y2d      = stack_halos_parallel(main_file,path,haloids,True,ncores)   
-x1,y1,z1,x2d1,y2d1 = stack_halos_parallel(main_file1,path1,haloids1,True,ncores)   
+x,y,z,x2d,y2d      = stack_halos_parallel(main_file,path,haloids,reduced=False,iterative=False,ncores=ncores)   
+x1,y1,z1,x2d1,y2d1 = stack_halos_parallel(main_file1,path1,haloids1,reduced=False,iterative=False,ncores=ncores)
 
 # SELECT ONLY PARTICLES WITHIN 4Mpc
 m3d = (abs(x) < 4.)*(abs(y) < 4.)*(abs(z) < 4.)
@@ -175,10 +175,10 @@ plt.savefig('../profile_S2_'+sname+'.png')
 # q2d distributions for DM
 plt.figure()
 plt.title('DM')
-plt.hist(q2d_it[m2d],np.linspace(0.35,1,20),histtype='step',label='std - it',lw=3)
-plt.hist(q2dr_it[m2d],np.linspace(0.35,1,20),histtype='step',label='red - it',lw=3)
-plt.axvline(np.mean(q2d_it[m2d]),color='C0',lw=3,ls='--')
-plt.axvline(np.mean(q2dr_it[m2d]),color='C1',lw=3,ls='--')
+plt.hist(q2d_it[mask_2d],np.linspace(0.35,1,20),histtype='step',label='std - it',lw=3)
+plt.hist(q2dr_it[mask_2d],np.linspace(0.35,1,20),histtype='step',label='red - it',lw=3)
+plt.axvline(np.mean(q2d_it[mask_2d]),color='C0',lw=3,ls='--')
+plt.axvline(np.mean(q2dr_it[mask_2d]),color='C1',lw=3,ls='--')
 plt.axvline(pm_DM.q_s,label='fit S',color='C2',lw=3)
 plt.axvline(pm_DM.q_2g,label='fit G',color='C3',lw=3)
 plt.axvline(pm_DM.q_gt,label='fit GT',color='C4',lw=3)
@@ -189,10 +189,10 @@ plt.savefig('../profile_q2d_cdm_it_'+sname+'.png')
 
 plt.figure()
 plt.title('DM')
-plt.hist(q2d[m2d],np.linspace(0.35,1,20),histtype='step',label='std',lw=3)
-plt.hist(q2dr[m2d],np.linspace(0.35,1,20),histtype='step',label='red',lw=3)
-plt.axvline(np.mean(q2d[m2d]),color='C0',lw=3,ls='--')
-plt.axvline(np.mean(q2dr[m2d]),color='C1',lw=3,ls='--')
+plt.hist(q2d[mask_2d],np.linspace(0.35,1,20),histtype='step',label='std',lw=3)
+plt.hist(q2dr[mask_2d],np.linspace(0.35,1,20),histtype='step',label='red',lw=3)
+plt.axvline(np.mean(q2d[mask_2d]),color='C0',lw=3,ls='--')
+plt.axvline(np.mean(q2dr[mask_2d]),color='C1',lw=3,ls='--')
 plt.axvline(pm_DM.q_s,label='fit S',color='C2',lw=3)
 plt.axvline(pm_DM.q_2g,label='fit G',color='C3',lw=3)
 plt.axvline(pm_DM.q_gt,label='fit GT',color='C4',lw=3)
@@ -205,10 +205,10 @@ plt.savefig('../profile_q2d_cdm_'+sname+'.png')
 # q2d distributions for SIDM
 plt.figure()
 plt.title('SIDM')
-plt.hist(q2d1_it[m2d],np.linspace(0.35,1,20),histtype='step',label='std - it',lw=3)
-plt.hist(q2dr1_it[m2d],np.linspace(0.35,1,20),histtype='step',label='red - it',lw=3)
-plt.axvline(np.mean(q2d1_it[m2d]),color='C0',lw=3,ls='--')
-plt.axvline(np.mean(q2dr1_it[m2d]),color='C1',lw=3,ls='--')
+plt.hist(q2d1_it[mask_2d],np.linspace(0.35,1,20),histtype='step',label='std - it',lw=3)
+plt.hist(q2dr1_it[mask_2d],np.linspace(0.35,1,20),histtype='step',label='red - it',lw=3)
+plt.axvline(np.mean(q2d1_it[mask_2d]),color='C0',lw=3,ls='--')
+plt.axvline(np.mean(q2dr1_it[mask_2d]),color='C1',lw=3,ls='--')
 plt.axvline(pm_SIDM.q_s,label='fit S',color='C2',lw=3)
 plt.axvline(pm_SIDM.q_2g,label='fit G',color='C3',lw=3)
 plt.axvline(pm_SIDM.q_gt,label='fit GT',color='C4',lw=3)
@@ -219,10 +219,10 @@ plt.savefig('../profile_q2d_sidm_it_'+sname+'.png')
 
 plt.figure()
 plt.title('SIDM')
-plt.hist(q2d1[m2d],np.linspace(0.35,1,20),histtype='step',label='std',lw=3)
-plt.hist(q2dr1[m2d],np.linspace(0.35,1,20),histtype='step',label='red',lw=3)
-plt.axvline(np.mean(q2d1[m2d]),color='C0',lw=3,ls='--')
-plt.axvline(np.mean(q2dr1[m2d]),color='C1',lw=3,ls='--')
+plt.hist(q2d1[mask_2d],np.linspace(0.35,1,20),histtype='step',label='std',lw=3)
+plt.hist(q2dr1[mask_2d],np.linspace(0.35,1,20),histtype='step',label='red',lw=3)
+plt.axvline(np.mean(q2d1[mask_2d]),color='C0',lw=3,ls='--')
+plt.axvline(np.mean(q2dr1[mask_2d]),color='C1',lw=3,ls='--')
 plt.axvline(pm_SIDM.q_s,label='fit S',color='C2',lw=3)
 plt.axvline(pm_SIDM.q_2g,label='fit G',color='C3',lw=3)
 plt.axvline(pm_SIDM.q_gt,label='fit GT',color='C4',lw=3)
