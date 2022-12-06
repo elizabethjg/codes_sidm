@@ -107,47 +107,49 @@ def stack_halos(main_file,path,haloids,reduced = False, iterative = False):
         X2d = np.concatenate((X2d_xy,X2d_zx,X2d_yz))
         Y2d = np.concatenate((Y2d_xy,Y2d_zx,Y2d_yz))
 
+        nparts = len(X2d_xy)
+
         if iterative:
 
             if reduced:
             
-                a2Drx = np.concatenate((np.repeat(main.a2Drx_it_xy[j],len(X2d_it_xy)),
-                                np.repeat(main.a2Drx_it_zx[j],len(X2d_it_xy)),
-                                np.repeat(main.a2Drx_it_yz[j],len(X2d_it_xy))))
+                a2Drx = np.concatenate((np.repeat(main.a2Drx_it_xy[j],nparts),
+                                np.repeat(main.a2Drx_it_zx[j],nparts),
+                                np.repeat(main.a2Drx_it_yz[j],nparts)))
                                 
-                b2Drx = np.concatenate((np.repeat(main.b2Drx_it_xy[j],len(X2d_it_xy)),
-                                np.repeat(main.b2Drx_it_zx[j],len(X2d_it_xy)),
-                                np.repeat(main.b2Drx_it_yz[j],len(X2d_it_xy))))
+                b2Drx = np.concatenate((np.repeat(main.b2Drx_it_xy[j],nparts),
+                                np.repeat(main.b2Drx_it_zx[j],nparts),
+                                np.repeat(main.b2Drx_it_yz[j],nparts)))
         
-                a2Dry = np.concatenate((np.repeat(main.a2Dry_it_xy[j],len(X2d_it_xy)),
-                                np.repeat(main.a2Dry_it_zx[j],len(X2d_it_xy)),
-                                np.repeat(main.a2Dry_it_yz[j],len(X2d_it_xy))))
+                a2Dry = np.concatenate((np.repeat(main.a2Dry_it_xy[j],nparts),
+                                np.repeat(main.a2Dry_it_zx[j],nparts),
+                                np.repeat(main.a2Dry_it_yz[j],nparts)))
                 
-                b2Dry = np.concatenate((np.repeat(main.b2Dry_it_xy[j],len(X2d_it_xy)),
-                                np.repeat(main.b2Dry_it_zx[j],len(X2d_it_xy)),
-                                np.repeat(main.b2Dry_it_yz[j],len(X2d_it_xy))))
+                b2Dry = np.concatenate((np.repeat(main.b2Dry_it_xy[j],nparts),
+                                np.repeat(main.b2Dry_it_zx[j],nparts),
+                                np.repeat(main.b2Dry_it_yz[j],nparts)))
     
                 x2drot = (a2Drx*X2d)+(a2Dry*Y2d)
                 y2drot = (b2Drx*X2d)+(b2Dry*Y2d)
     
             else:
             
-                a2Dx  = np.concatenate((np.repeat(main.a2Dx_it_xy[j],len(X2d_it_xy)),
-                                np.repeat(main.a2Dx_it_zx[j],len(X2d_it_xy)),
-                                np.repeat(main.a2Dx_it_yz[j],len(X2d_it_xy))))
+                a2Dx  = np.concatenate((np.repeat(main.a2Dx_it_xy[j],nparts),
+                                np.repeat(main.a2Dx_it_zx[j],nparts),
+                                np.repeat(main.a2Dx_it_yz[j],nparts)))
                 
                 
-                b2Dx  = np.concatenate((np.repeat(main.b2Dx_it_xy[j],len(X2d_it_xy)),
-                                np.repeat(main.b2Dx_it_zx[j],len(X2d_it_xy)),
-                                np.repeat(main.b2Dx_it_yz[j],len(X2d_it_xy))))
+                b2Dx  = np.concatenate((np.repeat(main.b2Dx_it_xy[j],nparts),
+                                np.repeat(main.b2Dx_it_zx[j],nparts),
+                                np.repeat(main.b2Dx_it_yz[j],nparts)))
         
-                a2Dy  = np.concatenate((np.repeat(main.a2Dy_it_xy[j],len(X2d_it_xy)),
-                                np.repeat(main.a2Dy_it_zx[j],len(X2d_it_xy)),
-                                np.repeat(main.a2Dy_it_yz[j],len(X2d_it_xy))))
+                a2Dy  = np.concatenate((np.repeat(main.a2Dy_it_xy[j],nparts),
+                                np.repeat(main.a2Dy_it_zx[j],nparts),
+                                np.repeat(main.a2Dy_it_yz[j],nparts)))
                                 
-                b2Dy  = np.concatenate((np.repeat(main.b2Dy_it_xy[j],len(X2d_it_xy)),
-                                np.repeat(main.b2Dy_it_zx[j],len(X2d_it_xy)),
-                                np.repeat(main.b2Dy_it_yz[j],len(X2d_it_xy))))
+                b2Dy  = np.concatenate((np.repeat(main.b2Dy_it_xy[j],nparts),
+                                np.repeat(main.b2Dy_it_zx[j],nparts),
+                                np.repeat(main.b2Dy_it_yz[j],nparts)))
     
     
                 x2drot = (a2Dx*X2d)+(a2Dy*Y2d)
@@ -156,9 +158,9 @@ def stack_halos(main_file,path,haloids,reduced = False, iterative = False):
         else:
             if reduced:
             
-                a2Drx = np.concatenate((np.repeat(main.a2Drx_xy[j],len(X2d_it_xy)),
-                                np.repeat(main.a2Drx_zx[j],len(X2d_it_xy)),
-                                np.repeat(main.a2Drx_yz[j],len(X2d_it_xy)),))
+                a2Drx = np.concatenate((np.repeat(main.a2Drx_xy[j],nparts),
+                                np.repeat(main.a2Drx_zx[j],nparts),
+                                np.repeat(main.a2Drx_yz[j],nparts),))
                                 
                 b2Drx = np.concatenate((np.repeat(main.b2Drx_xy[j],len(X2d_xy)),
                                 np.repeat(main.b2Drx_zx[j],len(X2d_xy)),
@@ -206,7 +208,9 @@ def stack_halos(main_file,path,haloids,reduced = False, iterative = False):
 def stack_halos_unpack(minput):
 	return stack_halos(*minput)
 
-def stack_halos_parallel(main_file,path,haloids,reduced = False,ncores=10):
+def stack_halos_parallel(main_file,path,haloids,
+                         reduced = False,iterative = False,
+                         ncores=10):
     
 
     if ncores > len(haloids):
