@@ -232,7 +232,7 @@ def stack_halos_parallel(main_file,path,haloids,
     entrada = np.array([mfile,path,hids_splitted,reduced,iterative],dtype=object).T
     
     pool = Pool(processes=(ncores))
-    salida=np.array(pool.map(stack_halos_unpack, entrada))
+    salida=np.array(pool.map(stack_halos_unpack, entrada),dtype=object)
     pool.terminate()
 
     x = np.array([])

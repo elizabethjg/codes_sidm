@@ -27,7 +27,7 @@ rock1      = pd.read_csv('/mnt/projects/lensing/SIDM_project/halo_props/halo_pro
 # path1 = '/mnt/projects/lensing/SIDM_project/Lentes/Eli_Agus/snapshot_050/rockstar/matcheados/SIDM1/'
 
 path  = '/mnt/projects/lensing/SIDM_project/cuadrados/CDM/'
-path1 = '/mnt/projects/lensing/SIDM_project/cuadrados/SIDM1/'
+path1 = '/mnt/projects/lensing/SIDM_project/cuadrados/SIDM/'
 
 # READ halos computed profperties
 main_file = '/mnt/projects/lensing/SIDM_project/halo_props/projections/v1_extend_halo_propsv2_rock2_match_cdm_z0_main.csv.bz2'
