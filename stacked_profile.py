@@ -23,11 +23,11 @@ rock       = pd.read_csv('/mnt/projects/lensing/SIDM_project/halo_props/halo_pro
 rock1      = pd.read_csv('/mnt/projects/lensing/SIDM_project/halo_props/halo_props_match_sidm1_z0_rock2.csv.bz2')
 
 # FOLDERS WHERE PARTICLES ARE SAVED
-path = '/mnt/projects/lensing/SIDM_project/Lentes/Eli_Agus/snapshot_050/rockstar/matcheados/CDM/'
-path1 = '/mnt/projects/lensing/SIDM_project/Lentes/Eli_Agus/snapshot_050/rockstar/matcheados/SIDM1/'
+# path = '/mnt/projects/lensing/SIDM_project/Lentes/Eli_Agus/snapshot_050/rockstar/matcheados/CDM/'
+# path1 = '/mnt/projects/lensing/SIDM_project/Lentes/Eli_Agus/snapshot_050/rockstar/matcheados/SIDM1/'
 
-# path  = '/mnt/projects/lensing/SIDM_project/cuadrados/CDM/'
-# path1 = '/mnt/projects/lensing/SIDM_project/cuadrados/SIDM1/'
+path  = '/mnt/projects/lensing/SIDM_project/cuadrados/CDM/'
+path1 = '/mnt/projects/lensing/SIDM_project/cuadrados/SIDM1/'
 
 # READ halos computed profperties
 main_file = '/mnt/projects/lensing/SIDM_project/halo_props/projections/v1_extend_halo_propsv2_rock2_match_cdm_z0_main.csv.bz2'
@@ -61,6 +61,21 @@ q2d1_it = np.concatenate((main1.b2D_it_xy/main1.a2D_it_xy,main1.b2D_it_zx/main1.
 q2dr_it  = np.concatenate((main.b2Dr_it_xy/main.a2Dr_it_xy,main.b2Dr_it_zx/main.a2Dr_it_zx,main.b2Dr_it_yz/main.a2Dr_it_yz))
 q2dr1_it = np.concatenate((main1.b2Dr_it_xy/main1.a2Dr_it_xy,main1.b2Dr_it_zx/main1.a2Dr_it_zx,main1.b2Dr_it_yz/main1.a2Dr_it_yz))
 
+rotang_s_it = np.rad2deg(np.concatenate((np.arctan(main.a2Dy_it_xy/main.a2Dx_it_xy),
+                           np.arctan(main.a2Dy_it_zx/main.a2Dx_it_zx),
+                           np.arctan(main.a2Dy_it_yz/main.a2Dx_it_yz))))
+
+rotang_s    = np.rad2deg(np.concatenate((np.arctan(main.a2Dy_xy/main.a2Dx_xy),
+                           np.arctan(main.a2Dy_zx/main.a2Dx_zx),
+                           np.arctan(main.a2Dy_yz/main.a2Dx_yz))))
+
+rotang_r_it = np.rad2deg(np.concatenate((np.arctan(main.a2Dry_it_xy/main.a2Drx_it_xy),
+                           np.arctan(main.a2Dry_it_zx/main.a2Drx_it_zx),
+                           np.arctan(main.a2Dry_it_yz/main.a2Drx_it_yz))))
+
+rotang_r    = np.rad2deg(np.concatenate((np.arctan(main.a2Dry_xy/main.a2Drx_xy),
+                           np.arctan(main.a2Dry_zx/main.a2Drx_zx),
+                           np.arctan(main.a2Dry_yz/main.a2Drx_yz))))
 
 Eratio  = (2.*main.EKin/abs(main.EPot))
 Eratio1 = (2.*main1.EKin/abs(main1.EPot))
@@ -69,7 +84,7 @@ Eratio1 = (2.*main1.EKin/abs(main1.EPot))
 # sname = 'subset'
 # m = (S_itr-S1_itr)/S_itr < -0.1
 
-sname = 'total_onlyhalo_standard_it'
+sname = 'total_allpart_standard'
 print('Sample name: ',sname)
 m = S_itr < 100.
 
@@ -81,8 +96,8 @@ nhalos = len(haloids)
 
 print('Rotating and stacking...')
 # ROTATE, STACK AND PROJECT PARTICLES    
-x,y,z,x2d,y2d      = stack_halos_parallel(main_file,path,haloids,reduced=False,iterative=True,ncores=ncores)   
-x1,y1,z1,x2d1,y2d1 = stack_halos_parallel(main_file1,path1,haloids1,reduced=False,iterative=True,ncores=ncores)
+x,y,z,x2d,y2d      = stack_halos_parallel(main_file,path,haloids,reduced=False,iterative=False,ncores=ncores)   
+x1,y1,z1,x2d1,y2d1 = stack_halos_parallel(main_file1,path1,haloids1,reduced=False,iterative=False,ncores=ncores)
 
 # SELECT ONLY PARTICLES WITHIN 4Mpc
 m3d = (abs(x) < 4.)*(abs(y) < 4.)*(abs(z) < 4.)
