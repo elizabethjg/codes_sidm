@@ -111,9 +111,9 @@ def stack_halos(main_file,path,haloids,reduced = False, iterative = False):
 
             if reduced:
             
-                a2Drx = np.concatenate((np.repeat(main.a2Drx_it_xy[j],10),
-                                np.repeat(main.a2Drx_it_zx[j],10),
-                                np.repeat(main.a2Drx_it_yz[j],10)))
+                a2Drx = np.concatenate((np.repeat(main.a2Drx_it_xy[j],len(X2d_it_xy)),
+                                np.repeat(main.a2Drx_it_zx[j],len(X2d_it_xy)),
+                                np.repeat(main.a2Drx_it_yz[j],len(X2d_it_xy))))
                                 
                 b2Drx = np.concatenate((np.repeat(main.b2Drx_it_xy[j],len(X2d_it_xy)),
                                 np.repeat(main.b2Drx_it_zx[j],len(X2d_it_xy)),
@@ -156,9 +156,9 @@ def stack_halos(main_file,path,haloids,reduced = False, iterative = False):
         else:
             if reduced:
             
-                a2Drx = np.concatenate((np.repeat(main.a2Drx_xy[j],10),
-                                np.repeat(main.a2Drx_zx[j],10),
-                                np.repeat(main.a2Drx_yz[j],10)))
+                a2Drx = np.concatenate((np.repeat(main.a2Drx_xy[j],len(X2d_it_xy)),
+                                np.repeat(main.a2Drx_zx[j],len(X2d_it_xy)),
+                                np.repeat(main.a2Drx_yz[j],len(X2d_it_xy)),))
                                 
                 b2Drx = np.concatenate((np.repeat(main.b2Drx_xy[j],len(X2d_xy)),
                                 np.repeat(main.b2Drx_zx[j],len(X2d_xy)),
