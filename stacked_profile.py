@@ -69,7 +69,8 @@ Eratio1 = (2.*main1.EKin/abs(main1.EPot))
 # sname = 'subset'
 # m = (S_itr-S1_itr)/S_itr < -0.1
 
-sname = 'total_onlyhalo_reduced'
+sname = 'total_onlyhalo_reduced_it'
+print('Sample name: ',sname)
 m = S_itr < 100.
 
 mask_2d = np.concatenate((m,m,m))
@@ -80,8 +81,8 @@ nhalos = len(haloids)
 
 print('Rotating and stacking...')
 # ROTATE, STACK AND PROJECT PARTICLES    
-x,y,z,x2d,y2d      = stack_halos_parallel(main_file,path,haloids,reduced=True,iterative=False,ncores=ncores)   
-x1,y1,z1,x2d1,y2d1 = stack_halos_parallel(main_file1,path1,haloids1,reduced=True,iterative=False,ncores=ncores)
+x,y,z,x2d,y2d      = stack_halos_parallel(main_file,path,haloids,reduced=True,iterative=True,ncores=ncores)   
+x1,y1,z1,x2d1,y2d1 = stack_halos_parallel(main_file1,path1,haloids1,reduced=True,iterative=True,ncores=ncores)
 
 # SELECT ONLY PARTICLES WITHIN 4Mpc
 m3d = (abs(x) < 4.)*(abs(y) < 4.)*(abs(z) < 4.)
