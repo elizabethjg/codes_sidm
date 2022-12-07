@@ -553,7 +553,7 @@ class fit_profiles(profile_from_map):
             
             mr = self.r < 1.
             
-            DS_fit = curve_fit(DS[mr],self.r[mr],self.DS_T[mr],sigma=self.eDS_T[mr],absolute_sigma=True,bounds=([12,2],[15,10]))
+            DS_fit = curve_fit(DS,self.r[mr],self.DS_T[mr],sigma=self.eDS_T[mr],absolute_sigma=True,bounds=([12,2],[15,10]))
             pcov    = DS_fit[1]
             perr    = np.sqrt(np.diag(pcov))
             e_lM200 = perr[0]

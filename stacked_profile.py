@@ -153,8 +153,8 @@ del(X1,Y1,Z1)
 
 
 # COMPUTE PROFILES USING PARTICLES
-# p_DM    = stack_profile(X,Y,Z,Xp,Yp,nhalos)
-# p_SIDM  = stack_profile(X1,Y1,Z1,Xp1,Yp1,nhalos)
+p_DM    = stack_profile(X,Y,Z,Xp,Yp,nhalos)
+p_SIDM  = stack_profile(X1,Y1,Z1,Xp1,Yp1,nhalos)
 
 print('Computing and fitting profiles...')
 # COMPUTE AND FIT PROFILES USING MAPS
