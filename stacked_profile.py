@@ -84,7 +84,7 @@ Eratio1 = (2.*main1.EKin/abs(main1.EPot))
 # sname = 'subset'
 # m = (S_itr-S1_itr)/S_itr < -0.1
 
-sname = 'total_reduced'
+sname = 'total_standard'
 print('Sample name: ',sname)
 m = S_itr < 100.
 
@@ -97,8 +97,8 @@ nhalos = len(haloids)
 print('First using halo particles')
 print('Rotating and stacking...')
 # ROTATE, STACK AND PROJECT PARTICLES    
-x,y,z,x2d,y2d      = stack_halos_parallel(main_file,path_oh,haloids,reduced=True,iterative=False,ncores=ncores)   
-x1,y1,z1,x2d1,y2d1 = stack_halos_parallel(main_file1,path1_oh,haloids1,reduced=True,iterative=False,ncores=ncores)
+x,y,z,x2d,y2d      = stack_halos_parallel(main_file,path_oh,haloids,reduced=False,iterative=False,ncores=ncores)   
+x1,y1,z1,x2d1,y2d1 = stack_halos_parallel(main_file1,path1_oh,haloids1,reduced=False,iterative=False,ncores=ncores)
 
 # SELECT ONLY PARTICLES WITHIN 4Mpc
 m3d = (abs(x) < 4.)*(abs(y) < 4.)*(abs(z) < 4.)
@@ -130,8 +130,8 @@ del(X1,Y1,Z1,Xp1,Yp1)
 print('Now using all the particles')
 print('Rotating and stacking...')
 # ROTATE, STACK AND PROJECT PARTICLES    
-x,y,z,x2d,y2d      = stack_halos_parallel(main_file,path,haloids,reduced=True,iterative=False,ncores=ncores)   
-x1,y1,z1,x2d1,y2d1 = stack_halos_parallel(main_file1,path1,haloids1,reduced=True,iterative=False,ncores=ncores)
+x,y,z,x2d,y2d      = stack_halos_parallel(main_file,path,haloids,reduced=False,iterative=False,ncores=ncores)   
+x1,y1,z1,x2d1,y2d1 = stack_halos_parallel(main_file1,path1,haloids1,reduced=False,iterative=False,ncores=ncores)
 
 # SELECT ONLY PARTICLES WITHIN 4Mpc
 m3d = (abs(x) < 4.)*(abs(y) < 4.)*(abs(z) < 4.)
