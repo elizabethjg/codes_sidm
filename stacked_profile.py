@@ -84,7 +84,7 @@ Eratio1 = (2.*main1.EKin/abs(main1.EPot))
 # sname = 'subset'
 # m = (S_itr-S1_itr)/S_itr < -0.1
 
-sname = 'total_standard'
+sname = 'total_standard_ROUT5'
 print('Sample name: ',sname)
 m = S_itr < 100.
 
@@ -133,12 +133,12 @@ print('Rotating and stacking...')
 x,y,z,x2d,y2d      = stack_halos_parallel(main_file,path,haloids,reduced=False,iterative=False,ncores=ncores)   
 x1,y1,z1,x2d1,y2d1 = stack_halos_parallel(main_file1,path1,haloids1,reduced=False,iterative=False,ncores=ncores)
 
-# SELECT ONLY PARTICLES WITHIN 4Mpc
-m3d = (abs(x) < 4.)*(abs(y) < 4.)*(abs(z) < 4.)
-m2d = (abs(x2d) < 4.)*(abs(y2d) < 4.)
+# SELECT ONLY PARTICLES WITHIN 6Mpc
+m3d = (abs(x) < 10.)*(abs(y) < 10.)*(abs(z) < 10.)
+m2d = (abs(x2d) < 10.)*(abs(y2d) < 10.)
 
-m3d1 = (abs(x1) < 4.)*(abs(y1) < 4.)*(abs(z1) < 4.)
-m2d1 = (abs(x2d1) < 4.)*(abs(y2d1) < 4.)
+m3d1 = (abs(x1) < 10.)*(abs(y1) < 10.)*(abs(z1) < 10.)
+m2d1 = (abs(x2d1) < 10.)*(abs(y2d1) < 10.)
 
 X,Y,Z = x[m3d]*1.e3,y[m3d]*1.e3,z[m3d]*1.e3 # 3D coordinates in kpc
 Xp,Yp = x2d[m2d]*1.e3,y2d[m2d]*1.e3 # 2D coordinates in kpc
@@ -158,8 +158,9 @@ del(X1,Y1,Z1)
 
 print('Computing and fitting profiles...')
 # COMPUTE AND FIT PROFILES USING MAPS
-pm_DM2h   = fit_profiles(Xp,Yp,nhalos*3,twohalo=True)
-pm_SIDM2h = fit_profiles(Xp1,Yp1,nhalos*3,twohalo=True)
+ROUT = 5000.
+pm_DM2h   = fit_profiles(Xp,Yp,nhalos*3,twohalo=True,ROUT=ROUT)
+pm_SIDM2h = fit_profiles(Xp1,Yp1,nhalos*3,twohalo=True,ROUT=ROUT)
 
 del(Xp,Yp)
 del(Xp1,Yp1)
@@ -178,21 +179,22 @@ plt.xscale('log')
 plt.xlabel('$R [Mpc]$')
 plt.ylabel(r'$\Sigma [M_\odot/pc^2]$')
 plt.legend()
-plt.axis([0.09,1.1,1,250])
+plt.axis([0.09,ROUT*1.e-3,1,250])
 plt.loglog()
 plt.savefig('../profile_S_'+sname+'.png')
 
 plt.figure()
-plt.plot(pm_SIDM.r,pm_SIDM.DS_fit,'C3--',alpha=0.5,label='$\log M_{200} =$'+str(np.round(pm_SIDM.lM200_s,2))+',$c_{200} =$'+str(np.round(pm_SIDM.c200_s,2)),lw=3)
+plt.plot(pm_SIDM.r,pm_SIDM.DS_T,'C3',label='SIDM',lw=4)
+plt.plot(pm_SIDM.r,pm_SIDM.DS_fit,'C3--',alpha=0.5,label='$\log M_{200} =$'+str(np.round(pm_SIDM.lM200_ds,2))+',$c_{200} =$'+str(np.round(pm_SIDM.c200_ds,2)),lw=3)
 plt.plot(pm_DM.r,pm_DM.DS_T,'k',label='CDM',lw=4)
-plt.plot(pm_DM.r,pm_DM.DS_fit,'k--',alpha=0.5,label='$\log M_{200} =$'+str(np.round(pm_DM.lM200_s,2))+',$c_{200} =$'+str(np.round(pm_DM.c200_s,2)),lw=3)
+plt.plot(pm_DM.r,pm_DM.DS_fit,'k--',alpha=0.5,label='$\log M_{200} =$'+str(np.round(pm_DM.lM200_ds,2))+',$c_{200} =$'+str(np.round(pm_DM.c200_ds,2)),lw=3)
 plt.plot(pm_SIDM.r,pm_SIDM2h.DS_T,'C5-.',label='SIDM - all part',lw=4)
 plt.plot(pm_DM.r,pm_DM2h.DS_T,'C7-.',label='CDM - all part',lw=4)
 plt.xscale('log')
 plt.xlabel('$R [Mpc]$')
 plt.ylabel(r'$\Delta \Sigma [M_\odot/pc^2]$')
 plt.legend()
-plt.axis([0.09,1.1,10,250])
+plt.axis([0.09,ROUT*1.e-3,10,250])
 plt.loglog()
 plt.savefig('../profile_DS_'+sname+'.png')
 
@@ -204,7 +206,7 @@ plt.plot(pm_DM.r,pm_DM.S2,'k',label='CDM',lw=4)
 plt.plot(pm_DM.r,pm_DM.S2_fit,'k--',alpha=0.5,lw=3)
 plt.plot(pm_SIDM.r,pm_SIDM2h.S2,'C5-.',label='SIDM - all part',lw=4)
 plt.plot(pm_DM.r,pm_DM2h.S2,'C7.',label='CDM - all part',lw=4)
-plt.axis([0.09,1.1,0.5,50])
+plt.axis([0.09,ROUT*1.e-3,0.5,50])
 plt.loglog()
 plt.xlabel('$R [Mpc]$')
 plt.ylabel(r'$\epsilon \times \Sigma_2 [M_\odot/pc^2]$')
@@ -226,7 +228,7 @@ plt.xscale('log')
 plt.xlabel('$R [Mpc]$')
 plt.ylabel(r'$\epsilon \times \Gamma_X [M_\odot/pc^2]$')
 plt.legend()
-plt.axis([0.09,1.1,-5,10])
+plt.axis([0.09,ROUT*1.e-3,-5,10])
 plt.savefig('../profile_GX_'+sname+'.png')
 
 plt.figure()
@@ -261,7 +263,7 @@ plt.plot(pm_DM2h.r,pm_DM2h.GX2h,'C7:',label='q2h_gt = '+str(np.round(pm_DM2h.q2h
 plt.plot(pm_DM2h.r,pm_DM2h.GX1h_fit2+pm_SIDM2h.GX2h_fit2,'k--',alpha=0.5,lw=3)
 plt.plot(pm_DM2h.r,pm_DM2h.GX1h_fit2,'C8--',label='q1h_2g = '+str(np.round(pm_DM2h.q1h_2g,2)))
 plt.plot(pm_DM2h.r,pm_DM2h.GX2h_fit2,'C8:',label='q2h_2g = '+str(np.round(pm_DM2h.q2h_2g,2)))
-plt.axis([0.09,1.1,-5,20])
+plt.axis([0.09,ROUT*1.e-3,-5,20])
 plt.xscale('log')
 plt.xlabel('$R [Mpc]$')
 plt.ylabel(r'$\epsilon \times \Gamma_X [M_\odot/pc^2]$')
@@ -283,7 +285,7 @@ plt.plot(pm_DM2h.r,pm_DM2h.GT2h,'C7:',label='q2h_gt = '+str(np.round(pm_DM2h.q2h
 plt.plot(pm_DM2h.r,pm_DM2h.GT1h_fit2+pm_SIDM2h.GT2h_fit2,'C7--',alpha=0.5,lw=2)
 plt.plot(pm_DM2h.r,pm_DM2h.GT1h_fit2,'C8--',label='q1h_2g = '+str(np.round(pm_DM2h.q1h_2g,2)))
 plt.plot(pm_DM2h.r,pm_DM2h.GT2h_fit2,'C8:',label='q2h_2g = '+str(np.round(pm_DM2h.q2h_2g,2)))
-plt.axis([0.09,1.1,1,60])
+plt.axis([0.09,ROUT*1.e-3,1,60])
 plt.loglog()
 plt.xlabel('$R [Mpc]$')
 plt.ylabel(r'$\epsilon \times \Gamma_T [M_\odot/pc^2]$')

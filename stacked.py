@@ -58,7 +58,7 @@ def fit_quadrupoles(R,gt,gx,egt,egx,GT,GX):
 
 def fit_quadrupoles_2terms(R,gt,gx,egt,egx,GT,GX,GT_2h,GX_2h,fit_components):
     
-    
+    print('fitting components: ',fit_components)
     def log_likelihood(data_model, R, profiles, eprofiles,
                        fit_components = 'both'):
         
@@ -419,7 +419,7 @@ class profile_from_map:
 
         # MAKE KAPPA MAP
         mp = 0.013398587e10
-        xedges = np.linspace(-2,2,resolution)
+        xedges = np.linspace(-8,8,resolution)
         lsize  = np.diff(xedges)[0]
         xb, yb = np.meshgrid(xedges[:-1],xedges[:-1])+(lsize/2.)
         
@@ -550,8 +550,10 @@ class fit_profiles(profile_from_map):
     
             def DS(R,logM200,c200):
                 return Delta_Sigma_NFW_2h(R,z,10**logM200,c200,cosmo_params=params)
-    
-            DS_fit = curve_fit(DS,self.r,self.DS_T,sigma=self.eDS_T,absolute_sigma=True,bounds=([12,2],[15,10]))
+            
+            mr = self.r < 1.
+            
+            DS_fit = curve_fit(DS[mr],self.r[mr],self.DS_T[mr],sigma=self.eDS_T[mr],absolute_sigma=True,bounds=([12,2],[15,10]))
             pcov    = DS_fit[1]
             perr    = np.sqrt(np.diag(pcov))
             e_lM200 = perr[0]
