@@ -494,3 +494,4 @@ plt.hist(Eratio_fof,np.linspace(0.5,2.5,50),histtype='step',density=True,label='
 plt.hist(Eratio_mice,np.linspace(0.5,2.5,50),histtype='step',density=True,label='MICE')
 plt.hist(Eratio,np.linspace(0.5,2.5,50),histtype='step',density=True,label='Rockstar')
 '''
+

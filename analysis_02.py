@@ -176,11 +176,11 @@ plt.figure()
 plt.xlabel('$\log M$')
 plt.ylabel('$S_r = c_r/a_r$')
 # CDM
-make_plot2(lgMr_cdm, Sr_cdm, nbins=nbins, color='C0', error=True, label='CDM Standard')
-make_plot2(lgMr_it_cdm, Sr_it_cdm, nbins=nbins, color='C1', error=True, label='CDM Iterative Standard')
+make_plot2(lgMr_cdm, Sr_cdm, nbins=nbins, color='C0', error=True, label='CDM Reduced')
+make_plot2(lgMr_it_cdm, Sr_it_cdm, nbins=nbins, color='C1', error=True, label='CDM Iterative Reduced')
 # SIDM1
-make_plot2(lgMr_sidm1, Sr_sidm1, nbins=nbins, color='C0', error=True, label='SIDM1 Standard', lt='--')
-make_plot2(lgMr_it_sidm1, Sr_it_sidm1, nbins=nbins, color='C1', error=True, label='SIDM1 Iterative Standard', lt='--')
+make_plot2(lgMr_sidm1, Sr_sidm1, nbins=nbins, color='C0', error=True, label='SIDM1 Reduced', lt='--')
+make_plot2(lgMr_it_sidm1, Sr_it_sidm1, nbins=nbins, color='C1', error=True, label='SIDM1 Iterative Reduced', lt='--')
 
 plt.axis([13.4,14.8,0.15,0.8])
 plt.legend(title='Rockstar Halos')
