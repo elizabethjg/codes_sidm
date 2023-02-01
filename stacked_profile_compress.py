@@ -31,7 +31,7 @@ def stack_halos(samp,haloids,ncores):
     path  = '/mnt/projects/lensing/SIDM_project/cuadrados/CDM/'
     path1 = '/mnt/projects/lensing/SIDM_project/cuadrados/SIDM/'
 
-    # READ halos computed profperties
+    # READ halos computed properties
     main_file = '/mnt/projects/lensing/SIDM_project/halo_props/projections/v1_extend_halo_propsv2_rock2_match_cdm_z0_main.csv.bz2'
     main_file1 = '/mnt/projects/lensing/SIDM_project/halo_props/projections/v1_extend_halo_propsv2_rock2_match_sidm1_z0_main.csv.bz2'
     main  = pd.read_csv(main_file)
@@ -60,11 +60,11 @@ def stack_halos(samp,haloids,ncores):
     x1,y1,z1,x2d1,y2d1 = stack_halos_parallel(main_file1,path1,haloids1,reduced=False,iterative=False,ncores=ncores)
 
     # SELECT ONLY PARTICLES WITHIN 6Mpc
-    m3d = (abs(x) < 10.)*(abs(y) < 10.)*(abs(z) < 10.)
-    m2d = (abs(x2d) < 10.)*(abs(y2d) < 10.)
+    m3d = (np.abs(x) < 10.)*(np.abs(y) < 10.)*(np.abs(z) < 10.)
+    m2d = (np.abs(x2d) < 10.)*(np.abs(y2d) < 10.)
 
-    m3d1 = (abs(x1) < 10.)*(abs(y1) < 10.)*(abs(z1) < 10.)
-    m2d1 = (abs(x2d1) < 10.)*(abs(y2d1) < 10.)
+    m3d1 = (np.abs(x1) < 10.)*(np.abs(y1) < 10.)*(np.abs(z1) < 10.)
+    m2d1 = (np.abs(x2d1) < 10.)*(np.abs(y2d1) < 10.)
 
     Xp,Yp = x2d[m2d]*1.e3,y2d[m2d]*1.e3 # 2D coordinates in kpc
     Xp1,Yp1  = x2d1[m2d1]*1.e3,y2d1[m2d1]*1.e3
@@ -92,11 +92,11 @@ def stack_halos(samp,haloids,ncores):
     x1,y1,z1,x2d1,y2d1 = stack_halos_parallel(main_file1,path1,haloids1,reduced=False,iterative=False,ncores=ncores)
 
     # SELECT ONLY PARTICLES WITHIN 6Mpc
-    m3d = (abs(x) < 10.)*(abs(y) < 10.)*(abs(z) < 10.)
-    m2d = (abs(x2d) < 10.)*(abs(y2d) < 10.)
+    m3d = (np.abs(x) < 10.)*(np.abs(y) < 10.)*(np.abs(z) < 10.)
+    m2d = (np.abs(x2d) < 10.)*(np.abs(y2d) < 10.)
 
-    m3d1 = (abs(x1) < 10.)*(abs(y1) < 10.)*(abs(z1) < 10.)
-    m2d1 = (abs(x2d1) < 10.)*(abs(y2d1) < 10.)
+    m3d1 = (np.abs(x1) < 10.)*(np.abs(y1) < 10.)*(np.abs(z1) < 10.)
+    m2d1 = (np.abs(x2d1) < 10.)*(np.abs(y2d1) < 10.)
 
     Xp,Yp = x2d[m2d]*1.e3,y2d[m2d]*1.e3 # 2D coordinates in kpc
     Xp1,Yp1  = x2d1[m2d1]*1.e3,y2d1[m2d1]*1.e3
@@ -115,28 +115,28 @@ def stack_halos(samp,haloids,ncores):
     del(Xp1,Yp1)
     
     # SAVING RESULTS
-    print('Saving results....'
+    print('Saving results....')
 
     CDM_res = [samp,pm_DM2h_st.lM200_ds,pm_DM2h_st.c200_ds,
-              np.mean(q2d),np.mean(q2d_it),
-              np.mean(q2dr),np.mean(q2dr_it),
-              pm_DM2h_st.q1h_2g,pm_DM2h_st.q2h_2g,
-              pm_DM2h_rd.q1h_2g,pm_DM2h_rd.q2h_2g,
-              pm_DM2h_st.q1h_gt,pm_DM2h_st.q2h_gt,
-              pm_DM2h_rd.q1h_gt,pm_DM2h_rd.q2h_gt,
-              pm_DM2h_st.q1h_gx,pm_DM2h_st.q2h_gx,
-              pm_DM2h_rd.q1h_gx,pm_DM2h_rd.q2h_gx]
+               np.mean(q2d),np.mean(q2d_it),
+               np.mean(q2dr),np.mean(q2dr_it),
+               pm_DM2h_st.q1h_2g,pm_DM2h_st.q2h_2g,
+               pm_DM2h_rd.q1h_2g,pm_DM2h_rd.q2h_2g,
+               pm_DM2h_st.q1h_gt,pm_DM2h_st.q2h_gt,
+               pm_DM2h_rd.q1h_gt,pm_DM2h_rd.q2h_gt,
+               pm_DM2h_st.q1h_gx,pm_DM2h_st.q2h_gx,
+               pm_DM2h_rd.q1h_gx,pm_DM2h_rd.q2h_gx]
               
 
     SIDM_res = [samp,pm_SIDM2h_st.lM200_ds,pm_SIDM2h_st.c200_ds,
-              np.mean(q2d1),np.mean(q2d1_it),
-              np.mean(q2dr1),np.mean(q2dr1_it),
-              pm_SIDM2h_st.q1h_2g,pm_SIDM2h_st.q2h_2g,
-              pm_SIDM2h_rd.q1h_2g,pm_SIDM2h_rd.q2h_2g,
-              pm_SIDM2h_st.q1h_gt,pm_SIDM2h_st.q2h_gt,
-              pm_SIDM2h_rd.q1h_gt,pm_SIDM2h_rd.q2h_gt,
-              pm_SIDM2h_st.q1h_gx,pm_SIDM2h_st.q2h_gx,
-              pm_SIDM2h_rd.q1h_gx,pm_SIDM2h_rd.q2h_gx]
+                np.mean(q2d1),np.mean(q2d1_it),
+                np.mean(q2dr1),np.mean(q2dr1_it),
+                pm_SIDM2h_st.q1h_2g,pm_SIDM2h_st.q2h_2g,
+                pm_SIDM2h_rd.q1h_2g,pm_SIDM2h_rd.q2h_2g,
+                pm_SIDM2h_st.q1h_gt,pm_SIDM2h_st.q2h_gt,
+                pm_SIDM2h_rd.q1h_gt,pm_SIDM2h_rd.q2h_gt,
+                pm_SIDM2h_st.q1h_gx,pm_SIDM2h_st.q2h_gx,
+                pm_SIDM2h_rd.q1h_gx,pm_SIDM2h_rd.q2h_gx]
               
 
     CDM_pro = [pm_DM2h_st.r,pm_DM2h_st.DS_T,
@@ -149,12 +149,12 @@ def stack_halos(samp,haloids,ncores):
                pm_DM2h_rd.GT2h,pm_DM2h_rd.GX2h]
 
     SIDM_pro = [pm_SIDM2h_st.r,pm_SIDM2h_st.DS_T,
-               pm_SIDM2h_st.GT,pm_SIDM2h_st.GX,
-               pm_SIDM2h_rd.GT,pm_SIDM2h_rd.GX,
-               pm_SIDM2h_st.DS_fit,
-               pm_SIDM2h_st.GT1h,pm_SIDM2h_st.GX1h,
-               pm_SIDM2h_st.GT2h,pm_SIDM2h_st.GX2h,
-               pm_SIDM2h_rd.GT1h,pm_SIDM2h_rd.GX1h,
-               pm_SIDM2h_rd.GT2h,pm_SIDM2h_rd.GX2h]
+                pm_SIDM2h_st.GT,pm_SIDM2h_st.GX,
+                pm_SIDM2h_rd.GT,pm_SIDM2h_rd.GX,
+                pm_SIDM2h_st.DS_fit,
+                pm_SIDM2h_st.GT1h,pm_SIDM2h_st.GX1h,
+                pm_SIDM2h_st.GT2h,pm_SIDM2h_st.GX2h,
+                pm_SIDM2h_rd.GT1h,pm_SIDM2h_rd.GX1h,
+                pm_SIDM2h_rd.GT2h,pm_SIDM2h_rd.GX2h]
 
     return CDM_res,CDM_pro,SIDM_res,SIDM_pro
