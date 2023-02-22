@@ -172,12 +172,8 @@ def stack_halos(main_file,path,haloids,reduced = False, iterative = False):
         
         X2d = np.concatenate((X2d_xy,X2d_zx,X2d_yz))
         Y2d = np.concatenate((Y2d_xy,Y2d_zx,Y2d_yz))
-    
-        m2d = (np.abs(X2d) < 10.) & (np.abs(Y2d) < 10.)
-        
-        X2d, Y2d = X2d[m2d], Y2d[m2d]
-        
-        nparts = len(X2d)/3
+            
+        nparts = len(X2d_xy)
 
         if iterative:
 
@@ -269,9 +265,11 @@ def stack_halos(main_file,path,haloids,reduced = False, iterative = False):
     
                 x2drot = (a2Dx*X2d)+(a2Dy*Y2d)
                 y2drot = (b2Dx*X2d)+(b2Dy*Y2d)
-        
-        x2d = np.append(x2d,x2drot)
-        y2d = np.append(y2d,y2drot)
+                
+        m2d = (np.abs(x2drot) < 10.) & (np.abs(y2drot) < 10.)
+                
+        x2d = np.append(x2d,x2drot[m2d])
+        y2d = np.append(y2d,y2drot[m2d])
         
     return x,y,z,x2d,y2d
 
