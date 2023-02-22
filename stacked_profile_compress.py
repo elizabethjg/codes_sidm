@@ -28,8 +28,8 @@ def stack_halos(samp,haloids,ncores):
     rock1      = pd.read_csv('/mnt/projects/lensing/SIDM_project/halo_props/halo_props_match_sidm1_z0_rock2.csv.bz2')
 
     # FOLDERS WHERE PARTICLES ARE SAVED
-    path  = '/mnt/projects/lensing/SIDM_project/cuadrados/CDM/'
-    path1 = '/mnt/projects/lensing/SIDM_project/cuadrados/SIDM/'
+    path  = '/mnt/projects/lensing/SIDM_project/cuadrados/CDM_10/'
+    path1 = '/mnt/projects/lensing/SIDM_project/cuadrados/SIDM_10/'
 
     # READ halos computed properties
     main_file = '/mnt/projects/lensing/SIDM_project/halo_props/projections/v1_extend_halo_propsv2_rock2_match_cdm_z0_main.csv.bz2'
@@ -57,7 +57,7 @@ def stack_halos(samp,haloids,ncores):
     print('Rotating according to standard orientation and stacking...')
     # ROTATE, STACK AND PROJECT PARTICLES    
     x,y,z,x2d,y2d      = stack_halos_parallel(main_file,path,haloids,reduced=False,iterative=False,ncores=ncores)   
-    x1,y1,z1,x2d1,y2d1 = stack_halos_parallel(main_file1,path1,haloids1,reduced=False,iterative=False,ncores=ncores)
+    x1,y1,z1,x2d1,y2d1 = stack_halos_parallel(main_file1,path1,haloids,reduced=False,iterative=False,ncores=ncores)
 
     # SELECT ONLY PARTICLES WITHIN 6Mpc
     m3d = (np.abs(x) < 10.)*(np.abs(y) < 10.)*(np.abs(z) < 10.)

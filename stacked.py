@@ -133,11 +133,13 @@ def stack_halos(main_file,path,haloids,reduced = False, iterative = False):
     for j in haloids:
         
         halo = h5py.File(path+'halo_'+str(j)+'.hdf5','r')       
+
         
         X = np.array(halo['X']) - main.xc_rc[j]/1.e3
         Y = np.array(halo['Y']) - main.yc_rc[j]/1.e3
         Z = np.array(halo['Z']) - main.zc_rc[j]/1.e3
         
+        ''' 3D
         if iterative:
             if reduced:
                 xrot = (main.a3Drx_it[j]*X)+(main.a3Dry_it[j]*Y)+(main.a3Drz_it[j]*Z);
@@ -160,11 +162,13 @@ def stack_halos(main_file,path,haloids,reduced = False, iterative = False):
         x = np.append(x,xrot)
         y = np.append(y,yrot)
         z = np.append(z,zrot)
-
+        '''
         
         X2d_xy,Y2d_xy = projected_coodinates(X,Y,Z,main.xc_rc[j],main.yc_rc[j],main.zc_rc[j])
         X2d_zx,Y2d_zx = projected_coodinates(Z,X,Y,main.xc_rc[j],main.yc_rc[j],main.zc_rc[j])
         X2d_yz,Y2d_yz = projected_coodinates(Y,Z,X,main.xc_rc[j],main.yc_rc[j],main.zc_rc[j])
+        
+        del(X,Y,Z)
         
         X2d = np.concatenate((X2d_xy,X2d_zx,X2d_yz))
         Y2d = np.concatenate((Y2d_xy,Y2d_zx,Y2d_yz))
