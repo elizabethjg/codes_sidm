@@ -177,7 +177,7 @@ def stack_halos(main_file,path,haloids,reduced = False, iterative = False):
         
         X2d, Y2d = X2d[m2d], Y2d[m2d]
         
-        nparts = len(X2d_xy)
+        nparts = len(X2d)/3
 
         if iterative:
 
