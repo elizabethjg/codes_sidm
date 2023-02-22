@@ -172,7 +172,11 @@ def stack_halos(main_file,path,haloids,reduced = False, iterative = False):
         
         X2d = np.concatenate((X2d_xy,X2d_zx,X2d_yz))
         Y2d = np.concatenate((Y2d_xy,Y2d_zx,Y2d_yz))
-
+    
+        m2d = (np.abs(X2d) < 10.) & (np.abs(Y2d) < 10.)
+        
+        X2d, Y2d = X2d[m2d], Y2d[m2d]
+        
         nparts = len(X2d_xy)
 
         if iterative:
