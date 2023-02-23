@@ -24,6 +24,12 @@ path1 = '/mnt/projects/lensing/SIDM_project/cuadrados/SIDM_10/'
 main_file = '/mnt/projects/lensing/SIDM_project/halo_props/projections/v1_extend_halo_propsv2_rock2_match_cdm_z0_main.csv.bz2'
 main_file1 = '/mnt/projects/lensing/SIDM_project/halo_props/projections/v1_extend_halo_propsv2_rock2_match_sidm1_z0_main.csv.bz2'
 
+samp = 'pru'
+lMmin = 12.
+lMmax = 15.
+Eratio_max = 3.0
+Riso = 1.
+ncores = 30. 
 
 def stack_halos(samp,haloids,halosid1,ncores):
 
