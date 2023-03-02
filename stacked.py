@@ -684,8 +684,6 @@ class fit_profiles():
         
         # COMPUTE PROFILES
         
-        profile_from_map.__init__(self, Xp,Yp,nhalos,RIN,ROUT,ndots,resolution)
-        
         if not twohalo:
         
         # FIT KAPPA PROFILE
