@@ -513,7 +513,7 @@ class profile_from_map:
         self.eGX   = eGAMMAXsin
         
 
-class fit_profiles(profile_from_map):
+class map_and_fit_profiles(profile_from_map):
 
     def __init__(self,Xp,Yp,nhalos,
                  RIN=100.,ROUT=1000.,ndots=20,
@@ -673,3 +673,163 @@ class fit_profiles(profile_from_map):
             self.GX1h        = e1h*GX
             self.GX2h        = e2h*GX_2h
 
+
+class fit_profiles():
+
+    def __init__(self,r,S,eS,
+                 S2,eS2,DS_T,eDS_T
+                 GT,eGT,GX,eGX,
+                 twohalo = False):
+        
+        
+        # COMPUTE PROFILES
+        
+        profile_from_map.__init__(self, Xp,Yp,nhalos,RIN,ROUT,ndots,resolution)
+        
+        if not twohalo:
+        
+        # FIT KAPPA PROFILE
+
+            def S_func(R,logM200,c200):
+                return Sigma_NFW_2h(R,z,10**logM200,c200,cosmo_params=params)
+    
+            S_fit = curve_fit(S_func,r,S,sigma=eS,absolute_sigma=True,bounds=([12,2],[15,10]))
+            pcov    = S_fit[1]
+            perr    = np.sqrt(np.diag(pcov))
+            e_lM200 = perr[0]
+            e_c200  = perr[1]
+            logM200 = S_fit[0][0]
+            c200    = S_fit[0][1]
+            
+            self.lM200_s = logM200
+            self.c200_s  = c200
+            self.S_fit   = S_func(r,logM200,c200)
+    
+            def S2_func(R,e):
+                return e*S2_quadrupole(R,z,10**logM200,c200,cosmo_params=params)
+                
+            S2_fit = curve_fit(S2_func,r,S2,sigma=eS2,absolute_sigma=True,bounds=(0,1))
+            e = S2_fit[0]
+            
+            self.q_s      = (1.-e)/(1.+e)
+            self.S2_fit   = S2_func(r,e)
+            # FIT SHEAR PROFILE
+    
+            def DS_func(R,logM200,c200):
+                return Delta_Sigma_NFW_2h(R,z,10**logM200,c200,cosmo_params=params)
+            
+            mr = r < 1.
+            
+            DS_fit = curve_fit(DS_func,r[mr],DS_T[mr],sigma=eDS_T[mr],absolute_sigma=True,bounds=([12,2],[15,10]))
+            pcov    = DS_fit[1]
+            perr    = np.sqrt(np.diag(pcov))
+            e_lM200 = perr[0]
+            e_c200  = perr[1]
+            logM200 = DS_fit[0][0]
+            c200    = DS_fit[0][1]
+            
+            self.DS_fit   = DS_func(r,logM200,c200)
+            self.lM200_ds = logM200
+            self.c200_ds  = c200
+        
+            # FIT SHEAR QUADRUPOLE PROFILES
+            # FIT THEM TOGETHER
+            
+            GT_func,GX_func = GAMMA_components(r,z,ellip=1.,M200 = 10**logM200,c200=c200,cosmo_params=params)
+                    
+            q_ds,mcmc_out = fit_quadrupoles(r,GT,GX,eGT,eGX,GT_func,GX_func)
+            
+            e = (1. - q_ds)/(1. + q_ds)
+            
+            self.q_2g     = q_ds
+            self.mcmc_out = mcmc_out
+            self.GT_fit2 = e*GT_func
+            self.GX_fit2 = e*GX_func
+            
+            # FIT THEM SEPARATELY
+            
+            def GT_func(R,e):
+                GT,GX = GAMMA_components(R,z,ellip=e,M200 = 10**logM200,c200=c200,cosmo_params=params)
+                return GT
+                
+            GT_fit = curve_fit(GT_func,r,GT,sigma=eGT,absolute_sigma=True,bounds=(0,1))
+            e = GT_fit[0]
+            
+            self.q_gt     = (1.-e)/(1.+e)
+            self.GT_fit   = GT_func(r,e)
+    
+            def GX_func(R,e):
+                GT,GX = GAMMA_components(R,z,ellip=e,M200 = 10**logM200,c200=c200,cosmo_params=params)
+                return GX
+                
+            GX_fit = curve_fit(GX_func,r,GX,sigma=eGX,absolute_sigma=True,bounds=(0,1))
+            e = GX_fit[0]
+            
+            self.q_gx     = (1.-e)/(1.+e)
+            self.GX_fit   = GX_func(r,e)
+
+        if twohalo:
+
+            # FIT SHEAR PROFILE
+    
+            def DS_func(R,logM200,c200):
+                return Delta_Sigma_NFW_2h(R,z,10**logM200,c200,cosmo_params=params)
+    
+            DS_fit = curve_fit(DS,r,DS_T,sigma=eDS_T,absolute_sigma=True,bounds=([12,2],[15,10]))
+            pcov    = DS_fit[1]
+            perr    = np.sqrt(np.diag(pcov))
+            e_lM200 = perr[0]
+            e_c200  = perr[1]
+            logM200 = DS_fit[0][0]
+            c200    = DS_fit[0][1]
+            
+            self.DS_fit   = DS_func(r,logM200,c200)
+            self.lM200_ds = logM200
+            self.c200_ds  = c200
+                    
+            # FIT SHEAR QUADRUPOLE PROFILES
+            
+            GT_func,GX_func = GAMMA_components(r,z,ellip=1.,M200 = 10**logM200,c200=c200,cosmo_params=params,terms='1h')
+            GT_2h_func,GX_2h_func = GAMMA_components(r,z,ellip=1.,M200 = 10**logM200,c200=c200,cosmo_params=params,terms='2h')            
+            
+            # FIT THEM TOGETHER
+                    
+            q1h,q2h,mcmc_q1h,mcmc_q2h = fit_quadrupoles_2terms(r,GT,GX,eGT,eGX,GT_func,GX_func,GT_2h_func,GX_2h_func,'both')
+            
+            e1h = (1. - q1h)/(1. + q1h)
+            e2h = (1. - q2h)/(1. + q2h)
+            
+            self.q1h_2g      = q1h
+            self.q2h_2g      = q2h
+            self.mcmc_q1h_2g = mcmc_q1h
+            self.mcmc_q2h_2g = mcmc_q2h
+            self.GT1h_fit2   = e1h*GT_func
+            self.GX1h_fit2   = e1h*GX_func
+            self.GT2h_fit2   = e2h*GT_2h_func
+            self.GX2h_fit2   = e2h*GX_2h_func
+            
+            # FIT THEM SEPARATELY
+                    
+            q1h,q2h,mcmc_q1h,mcmc_q2h = fit_quadrupoles_2terms(r,GT,GX,eGT,eGX,GT_func,GX_func,GT_2h_func,GX_2h_func,'tangential')
+            
+            e1h = (1. - q1h)/(1. + q1h)
+            e2h = (1. - q2h)/(1. + q2h)
+            
+            self.q1h_gt      = q1h
+            self.q2h_gt      = q2h
+            self.mcmc_q1h_gt = mcmc_q1h
+            self.mcmc_q2h_gt = mcmc_q2h
+            self.GT1h        = e1h*GT_func
+            self.GT2h        = e2h*GT_2h_func
+
+            q1h,q2h,mcmc_q1h,mcmc_q2h = fit_quadrupoles_2terms(r,GT,GX,eGT,eGX,GT_func,GX_func,GT_2h_func,GX_2h_func,'cross')
+            
+            e1h = (1. - q1h)/(1. + q1h)
+            e2h = (1. - q2h)/(1. + q2h)
+            
+            self.q1h_gx      = q1h
+            self.q2h_gx      = q2h
+            self.mcmc_q1h_gx = mcmc_q1h
+            self.mcmc_q2h_gx = mcmc_q2h
+            self.GX1h        = e1h*GX_func
+            self.GX2h        = e2h*GX_2h_func
