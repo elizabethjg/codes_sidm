@@ -116,7 +116,53 @@ def fit_quadrupoles_2terms(R,gt,gx,egt,egx,GT,GX,GT_2h,GX_2h,fit_components):
     mcmc_out = sampler.get_chain(flat=True).T
     
     return np.median(mcmc_out[0][1500:]),np.median(mcmc_out[1][1500:]),mcmc_out[0],mcmc_out[1]
+    
 
+def fit_Delta_Sigma_2h(R,ds,eds,ncores):
+    
+    print('fitting Delta_Sigma')
+    
+    def log_likelihood_DS(data_model, R, ds, eds):
+    
+        lM200, c200 = data_model
+        
+        DS   = Delta_Sigma_NFW_2h_parallel(R,zmean,M200 = 10**lM200,c200=c200,cosmo_params=params,terms='1h+2h',ncores=ncores)
+        
+        sigma2 = eds**2
+        
+        L = -0.5 * np.sum((DS - ds)**2 / sigma2 + np.log(2.*np.pi*sigma2))
+
+        return L
+    
+    def log_probability_DS(data_model, R, profiles, iCOV):
+        
+        lM200,c200 = data_model
+        
+        if 12.5 < lM200 < 16.0 and 1 < c200 < 7:
+            return log_likelihood_DS(data_model, R, profiles, iCOV)
+            
+        return -np.inf
+        
+    # initializing
+
+    pos = np.array([np.random.uniform(12.5,15.5,15),
+                    np.random.uniform(1,5,15)]).T
+    nwalkers, ndim = pos.shape
+    
+    sampler_DS = emcee.EnsembleSampler(nwalkers, ndim, log_probability_DS, 
+                                    args=(p.Rp,ds,eds))
+                                    
+    sampler_DS.run_mcmc(pos, 250, progress=True)
+    
+    mcmc_out_DS = sampler_DS.get_chain(flat=True).T
+    lM     = np.percentile(mcmc_out_DS[0][1500:], [16, 50, 84])
+    c200   = np.percentile(mcmc_out_DS[1][1500:], [16, 50, 84])
+    t2 = time.time()
+    
+    print('TIME DS')    
+    print((t2-t1)/60.)
+    
+    return lM,c200,mcmc_out_DS[0],mcmc_out_DS[1]
 
 
 def stack_halos(main_file,path,haloids,reduced = False, iterative = False):
@@ -518,7 +564,8 @@ class map_and_fit_profiles(profile_from_map):
     def __init__(self,Xp,Yp,nhalos,
                  RIN=100.,ROUT=1000.,ndots=20,
                  resolution=500,params=params,z=0.,
-                 twohalo = False):
+                 twohalo = False,
+                 ncores = 36):
         
         
         # COMPUTE PROFILES
@@ -611,20 +658,20 @@ class map_and_fit_profiles(profile_from_map):
 
             # FIT SHEAR PROFILE
     
-            def DS(R,logM200,c200):
-                return Delta_Sigma_NFW_2h(R,z,10**logM200,c200,cosmo_params=params)
-    
-            DS_fit = curve_fit(DS,self.r,self.DS_T,sigma=self.eDS_T,absolute_sigma=True,bounds=([12,2],[15,10]))
-            pcov    = DS_fit[1]
-            perr    = np.sqrt(np.diag(pcov))
-            e_lM200 = perr[0]
-            e_c200  = perr[1]
-            logM200 = DS_fit[0][0]
-            c200    = DS_fit[0][1]
+            lM,cfit,mcmc_ds_lM,mcmc_ds_c200 = fit_Delta_Sigma_2h(r,DS_T,eDS_T,ncores)
+
+            e_lM200 = np.diff(lM)
+            e_c200  = np.diff(cfit)
+            logM200 = lM[1]
+            c200    = cfit[1]
             
-            self.DS_fit   = DS(self.r,logM200,c200)
+            self.DS_fit   = Delta_Sigma_NFW_2h_parallel(R,zmean,M200 = 10**logM200,c200=c200,cosmo_params=params,terms='1h+2h',ncores=ncores)
             self.lM200_ds = logM200
             self.c200_ds  = c200
+            self.e_c200_ds  = e_c200
+            self.e_lM200_ds  = e_lM200
+            self.mcmc_ds_lM  = mcmc_ds_lM
+            self.mcmc_ds_c200  = mcmc_ds_c200
                     
             # FIT SHEAR QUADRUPOLE PROFILES
             
@@ -679,7 +726,8 @@ class fit_profiles():
     def __init__(self,r,S,eS,
                  S2,eS2,DS_T,eDS_T
                  GT,eGT,GX,eGX,
-                 twohalo = False):
+                 twohalo = False,
+                 ncores = 36):
         
         
         # COMPUTE PROFILES
@@ -770,20 +818,21 @@ class fit_profiles():
 
             # FIT SHEAR PROFILE
     
-            def DS_func(R,logM200,c200):
-                return Delta_Sigma_NFW_2h(R,z,10**logM200,c200,cosmo_params=params)
     
-            DS_fit = curve_fit(DS,r,DS_T,sigma=eDS_T,absolute_sigma=True,bounds=([12,2],[15,10]))
-            pcov    = DS_fit[1]
-            perr    = np.sqrt(np.diag(pcov))
-            e_lM200 = perr[0]
-            e_c200  = perr[1]
-            logM200 = DS_fit[0][0]
-            c200    = DS_fit[0][1]
+            lM,cfit,mcmc_ds_lM,mcmc_ds_c200 = fit_Delta_Sigma_2h(r,DS_T,eDS_T,ncores)
+
+            e_lM200 = np.diff(lM)
+            e_c200  = np.diff(cfit)
+            logM200 = lM[1]
+            c200    = cfit[1]
             
-            self.DS_fit   = DS_func(r,logM200,c200)
+            self.DS_fit   = Delta_Sigma_NFW_2h_parallel(R,zmean,M200 = 10**logM200,c200=c200,cosmo_params=params,terms='1h+2h',ncores=ncores)
             self.lM200_ds = logM200
             self.c200_ds  = c200
+            self.e_c200_ds  = e_c200
+            self.e_lM200_ds  = e_lM200
+            self.mcmc_ds_lM  = mcmc_ds_lM
+            self.mcmc_ds_c200  = mcmc_ds_c200
                     
             # FIT SHEAR QUADRUPOLE PROFILES
             
