@@ -116,7 +116,6 @@ def fit_quadrupoles_2terms(R,gt,gx,egt,egx,GT,GX,GT_2h,GX_2h,fit_components):
     mcmc_out = sampler.get_chain(flat=True).T
     
     return np.median(mcmc_out[0][1500:]),np.median(mcmc_out[1][1500:]),mcmc_out[0],mcmc_out[1]
-    
 
 def fit_Delta_Sigma_2h(R,ds,eds,ncores):
     
@@ -150,7 +149,7 @@ def fit_Delta_Sigma_2h(R,ds,eds,ncores):
     nwalkers, ndim = pos.shape
     
     sampler_DS = emcee.EnsembleSampler(nwalkers, ndim, log_probability_DS, 
-                                    args=(p.Rp,ds,eds))
+                                    args=(R,ds,eds))
                                     
     sampler_DS.run_mcmc(pos, 250, progress=True)
     
@@ -164,7 +163,6 @@ def fit_Delta_Sigma_2h(R,ds,eds,ncores):
     
     return lM,c200,mcmc_out_DS[0],mcmc_out_DS[1]
 
-
 def stack_halos(main_file,path,haloids,reduced = False, iterative = False):
 
     main = pd.read_csv(main_file)
@@ -172,10 +170,10 @@ def stack_halos(main_file,path,haloids,reduced = False, iterative = False):
     x = np.array([])
     y = np.array([])
     z = np.array([])
-    
+
     x2d = np.array([])
-    y2d = np.array([])    
-    
+    y2d = np.array([])
+
     for j in haloids:
         
         halo = h5py.File(path+'halo_'+str(j)+'.hdf5','r')       
@@ -346,7 +344,7 @@ def stack_halos_parallel(main_file,path,haloids,
     entrada = np.array([mfile,path,hids_splitted,reduced,iterative],dtype=object).T
     
     pool = Pool(processes=(ncores))
-    salida=np.array(pool.map(stack_halos_unpack, entrada),dtype=object)
+    salida = list(pool.map(stack_halos_unpack, entrada))
     pool.terminate()
 
     x = np.array([])
@@ -355,8 +353,8 @@ def stack_halos_parallel(main_file,path,haloids,
     x2d = np.array([])
     y2d = np.array([])
     
-    for s in salida:
-        X,Y,Z,X2d,Y2d = s
+    while len(salida) > 0:
+        X,Y,Z,X2d,Y2d = salida[0]
         
         x = np.append(x,X)
         y = np.append(y,Y)
@@ -364,7 +362,9 @@ def stack_halos_parallel(main_file,path,haloids,
         
         x2d = np.append(x2d,X2d)
         y2d = np.append(y2d,Y2d)
-            
+
+        salida.pop(0)
+    
     return x,y,z,x2d,y2d
     
 
@@ -474,8 +474,21 @@ class profile_from_map:
         xedges = np.linspace(-8,8,resolution)
         lsize  = np.diff(xedges)[0]
         xb, yb = np.meshgrid(xedges[:-1],xedges[:-1])+(lsize/2.)
-        
-        H, xedges, xedges = np.histogram2d(Xp*1.e-3, Yp*1.e-3, bins=(xedges,xedges))
+
+        H = np.zeros((resolution-1, resolution-1))
+        Nelements = len(Xp)
+        Nchunck = 10
+        indices = np.array_split(np.arange(Nelements), Nchunck)
+
+        idx = 0
+        while len(indices) > 0:
+          index = indices[0]
+          print("Histogram.. %d/%d - %d/%d" % (idx,Nchunck,len(index),Nelements))
+          tmp_H, _, _ = np.histogram2d(Xp[index]*1.e-3, Yp[index]*1.e-3, bins=(xedges,xedges))
+          H += tmp_H
+          idx += 1
+          indices.pop(0)
+
         kE = (H*mp)/(nhalos*((lsize*1.e6)**2))
         kB = np.zeros(kE.shape)
         
@@ -574,7 +587,7 @@ class map_and_fit_profiles(profile_from_map):
         
         if not twohalo:
         
-        # FIT KAPPA PROFILE
+            # FIT KAPPA PROFILE
 
             def S(R,logM200,c200):
                 return Sigma_NFW_2h(R,z,10**logM200,c200,cosmo_params=params)
@@ -599,6 +612,7 @@ class map_and_fit_profiles(profile_from_map):
             
             self.q_s      = (1.-e)/(1.+e)
             self.S2_fit   = S2(self.r,e)
+
             # FIT SHEAR PROFILE
     
             def DS(R,logM200,c200):
@@ -621,7 +635,7 @@ class map_and_fit_profiles(profile_from_map):
             # FIT SHEAR QUADRUPOLE PROFILES
             # FIT THEM TOGETHER
             
-            GT,GX = GAMMA_components(self.r,z,ellip=1.,M200 = 10**logM200,c200=c200,cosmo_params=params)
+            GT, GX = GAMMA_components(self.r,z,ellip=1.,M200 = 10**logM200,c200=c200,cosmo_params=params)
                     
             q_ds,mcmc_out = fit_quadrupoles(self.r,self.GT,self.GX,self.eGT,self.eGX,GT,GX)
             
@@ -723,18 +737,17 @@ class map_and_fit_profiles(profile_from_map):
 
 class fit_profiles():
 
-    def __init__(self,r,S,eS,
-                 S2,eS2,DS_T,eDS_T
+    def __init__(self,z,r,S,eS,
+                 S2,eS2,DS_T,eDS_T,
                  GT,eGT,GX,eGX,
                  twohalo = False,
                  ncores = 36):
-        
         
         # COMPUTE PROFILES
         
         if not twohalo:
         
-        # FIT KAPPA PROFILE
+            # FIT KAPPA PROFILE
 
             def S_func(R,logM200,c200):
                 return Sigma_NFW_2h(R,z,10**logM200,c200,cosmo_params=params)
@@ -759,6 +772,7 @@ class fit_profiles():
             
             self.q_s      = (1.-e)/(1.+e)
             self.S2_fit   = S2_func(r,e)
+
             # FIT SHEAR PROFILE
     
             def DS_func(R,logM200,c200):
@@ -817,7 +831,6 @@ class fit_profiles():
         if twohalo:
 
             # FIT SHEAR PROFILE
-    
     
             lM,cfit,mcmc_ds_lM,mcmc_ds_c200 = fit_Delta_Sigma_2h(r,DS_T,eDS_T,ncores)
 
