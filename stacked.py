@@ -117,7 +117,7 @@ def fit_quadrupoles_2terms(R,gt,gx,egt,egx,GT,GX,GT_2h,GX_2h,fit_components):
     
     return np.median(mcmc_out[0][1500:]),np.median(mcmc_out[1][1500:]),mcmc_out[0],mcmc_out[1]
 
-def fit_Delta_Sigma_2h(R,ds,eds,ncores):
+def fit_Delta_Sigma_2h(R,zmean,ds,eds,ncores):
     
     print('fitting Delta_Sigma')
     
@@ -166,13 +166,13 @@ def fit_Delta_Sigma_2h(R,ds,eds,ncores):
 def stack_halos(main_file,path,haloids,reduced = False, iterative = False):
 
     main = pd.read_csv(main_file)
-    
-    x = np.array([])
-    y = np.array([])
-    z = np.array([])
 
-    x2d = np.array([])
-    y2d = np.array([])
+    x = np.array([], dtype=np.float32)
+    y = np.array([], dtype=np.float32)
+    z = np.array([], dtype=np.float32)
+
+    x2d = np.array([], dtype=np.float32)
+    y2d = np.array([], dtype=np.float32)
 
     for j in haloids:
         
@@ -203,9 +203,9 @@ def stack_halos(main_file,path,haloids,reduced = False, iterative = False):
                 yrot = (main.b3Dx[j]*X)+(main.b3Dy[j]*Y)+(main.b3Dz[j]*Z);
                 zrot = (main.c3Dx[j]*X)+(main.c3Dy[j]*Y)+(main.c3Dz[j]*Z);
         
-        x = np.append(x,xrot)
-        y = np.append(y,yrot)
-        z = np.append(z,zrot)
+        x = np.append(x,np.float32(xrot)) 
+        y = np.append(y,np.float32(yrot))
+        z = np.append(z,np.float32(zrot))
         '''
         
         X2d_xy,Y2d_xy = projected_coodinates(X,Y,Z,main.xc_rc[j],main.yc_rc[j],main.zc_rc[j])
@@ -312,8 +312,8 @@ def stack_halos(main_file,path,haloids,reduced = False, iterative = False):
                 
         m2d = (np.abs(x2drot) < 10.) & (np.abs(y2drot) < 10.)
                 
-        x2d = np.append(x2d,x2drot[m2d])
-        y2d = np.append(y2d,y2drot[m2d])
+        x2d = np.append(x2d,np.float32(x2drot[m2d]))
+        y2d = np.append(y2d,np.float32(y2drot[m2d]))
         
     return x,y,z,x2d,y2d
 
@@ -327,7 +327,6 @@ def stack_halos_parallel(main_file,path,haloids,
 
     if ncores > len(haloids):
         ncores = len(haloids)
-    
     
     slicer = int(round(len(haloids)/float(ncores), 0))
     slices = ((np.arange(ncores-1)+1)*slicer).astype(int)
@@ -347,21 +346,21 @@ def stack_halos_parallel(main_file,path,haloids,
     salida = list(pool.map(stack_halos_unpack, entrada))
     pool.terminate()
 
-    x = np.array([])
-    y = np.array([])
-    z = np.array([])
-    x2d = np.array([])
-    y2d = np.array([])
+    x   = np.array([], dtype=np.float32)
+    y   = np.array([], dtype=np.float32)
+    z   = np.array([], dtype=np.float32)
+    x2d = np.array([], dtype=np.float32)
+    y2d = np.array([], dtype=np.float32)
     
     while len(salida) > 0:
         X,Y,Z,X2d,Y2d = salida[0]
+
+        x = np.append(x,np.float32(X))
+        y = np.append(y,np.float32(Y))
+        z = np.append(z,np.float32(Z))
         
-        x = np.append(x,X)
-        y = np.append(y,Y)
-        z = np.append(z,Z)
-        
-        x2d = np.append(x2d,X2d)
-        y2d = np.append(y2d,Y2d)
+        x2d = np.append(x2d,np.float32(X2d))
+        y2d = np.append(y2d,np.float32(Y2d))
 
         salida.pop(0)
     
@@ -383,7 +382,7 @@ class stack_profile:
         rhop = np.zeros(nrings)
         
         Sp  = np.zeros(nrings)
-        DSp  = np.zeros(nrings)
+        DSp = np.zeros(nrings)
         Sp2 = np.zeros(nrings)        
         
         DSp_cos  = np.zeros(nrings)
@@ -411,7 +410,6 @@ class stack_profile:
             rpart_E_out = (X**2/r_out**2 + Y**2/r_out**2 + Z**2/r_out**2)
             
             V    = (4./3.)*np.pi*(r_out**3 - r_in**3)
-            
             
             mask = (rpart_E_in >= 1)*(rpart_E_out < 1)
             rhop[ring] = (mask.sum()*mp)/V
@@ -578,7 +576,7 @@ class map_and_fit_profiles(profile_from_map):
                  RIN=100.,ROUT=1000.,ndots=20,
                  resolution=500,params=params,z=0.,
                  twohalo = False,
-                 ncores = 36):
+                 ncores=36):
         
         
         # COMPUTE PROFILES
@@ -672,14 +670,14 @@ class map_and_fit_profiles(profile_from_map):
 
             # FIT SHEAR PROFILE
     
-            lM,cfit,mcmc_ds_lM,mcmc_ds_c200 = fit_Delta_Sigma_2h(r,DS_T,eDS_T,ncores)
+            lM,cfit,mcmc_ds_lM,mcmc_ds_c200 = fit_Delta_Sigma_2h(r,z,DS_T,eDS_T,ncores)
 
             e_lM200 = np.diff(lM)
             e_c200  = np.diff(cfit)
             logM200 = lM[1]
             c200    = cfit[1]
             
-            self.DS_fit   = Delta_Sigma_NFW_2h_parallel(R,zmean,M200 = 10**logM200,c200=c200,cosmo_params=params,terms='1h+2h',ncores=ncores)
+            self.DS_fit   = Delta_Sigma_NFW_2h_parallel(R,z,M200 = 10**logM200,c200=c200,cosmo_params=params,terms='1h+2h',ncores=ncores)
             self.lM200_ds = logM200
             self.c200_ds  = c200
             self.e_c200_ds  = e_c200
@@ -832,14 +830,14 @@ class fit_profiles():
 
             # FIT SHEAR PROFILE
     
-            lM,cfit,mcmc_ds_lM,mcmc_ds_c200 = fit_Delta_Sigma_2h(r,DS_T,eDS_T,ncores)
+            lM,cfit,mcmc_ds_lM,mcmc_ds_c200 = fit_Delta_Sigma_2h(r,z,DS_T,eDS_T,ncores)
 
             e_lM200 = np.diff(lM)
             e_c200  = np.diff(cfit)
             logM200 = lM[1]
             c200    = cfit[1]
             
-            self.DS_fit   = Delta_Sigma_NFW_2h_parallel(R,zmean,M200 = 10**logM200,c200=c200,cosmo_params=params,terms='1h+2h',ncores=ncores)
+            self.DS_fit   = Delta_Sigma_NFW_2h_parallel(R,z,M200 = 10**logM200,c200=c200,cosmo_params=params,terms='1h+2h',ncores=ncores)
             self.lM200_ds = logM200
             self.c200_ds  = c200
             self.e_c200_ds  = e_c200
