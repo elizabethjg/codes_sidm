@@ -144,6 +144,7 @@ def fit_Delta_Sigma_2h(R,zmean,ds,eds,ncores):
         
     # initializing
 
+    t1 = time.time()
     pos = np.array([np.random.uniform(12.5,15.5,15),
                     np.random.uniform(1,5,15)]).T
     nwalkers, ndim = pos.shape
@@ -670,14 +671,14 @@ class map_and_fit_profiles(profile_from_map):
 
             # FIT SHEAR PROFILE
     
-            lM,cfit,mcmc_ds_lM,mcmc_ds_c200 = fit_Delta_Sigma_2h(r,z,DS_T,eDS_T,ncores)
+            lM,cfit,mcmc_ds_lM,mcmc_ds_c200 = fit_Delta_Sigma_2h(self.r,z,DS_T,eDS_T,ncores)
 
             e_lM200 = np.diff(lM)
             e_c200  = np.diff(cfit)
             logM200 = lM[1]
             c200    = cfit[1]
             
-            self.DS_fit   = Delta_Sigma_NFW_2h_parallel(R,z,M200 = 10**logM200,c200=c200,cosmo_params=params,terms='1h+2h',ncores=ncores)
+            self.DS_fit   = Delta_Sigma_NFW_2h_parallel(self.r,z,M200 = 10**logM200,c200=c200,cosmo_params=params,terms='1h+2h',ncores=ncores)
             self.lM200_ds = logM200
             self.c200_ds  = c200
             self.e_c200_ds  = e_c200
@@ -837,7 +838,7 @@ class fit_profiles():
             logM200 = lM[1]
             c200    = cfit[1]
             
-            self.DS_fit   = Delta_Sigma_NFW_2h_parallel(R,z,M200 = 10**logM200,c200=c200,cosmo_params=params,terms='1h+2h',ncores=ncores)
+            self.DS_fit   = Delta_Sigma_NFW_2h_parallel(r,z,M200 = 10**logM200,c200=c200,cosmo_params=params,terms='1h+2h',ncores=ncores)
             self.lM200_ds = logM200
             self.c200_ds  = c200
             self.e_c200_ds  = e_c200
