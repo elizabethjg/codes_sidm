@@ -830,8 +830,6 @@ class fit_profiles():
         if twohalo:
 
             # FIT SHEAR PROFILE
-
-            print(r.shape,DS_T.shape,eDS_T.shape)
     
             lM,cfit,mcmc_ds_lM,mcmc_ds_c200 = fit_Delta_Sigma_2h(r,z,DS_T,eDS_T,ncores)
 
@@ -840,8 +838,6 @@ class fit_profiles():
             logM200 = lM[1]
             c200    = cfit[1]
 
-            print(logM200, c200)
-            
             self.DS_fit   = Delta_Sigma_NFW_2h_parallel(r,z,M200 = 10**logM200,c200=c200,cosmo_params=params,terms='1h+2h',ncores=ncores)
             self.lM200_ds = logM200
             self.c200_ds  = c200
