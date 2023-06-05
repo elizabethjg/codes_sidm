@@ -172,14 +172,14 @@ for idx, name_tensor in enumerate(typetensor):
     ax_dist_it[0,0].legend(loc=3,frameon=False,fontsize=10)
     ax_distr_it[0,0].legend(loc=3,frameon=False,fontsize=10)
 
-    f.savefig('../final_plots/profile_'+name_tensor+'.pdf',bbox_inches='tight')
-    fcomp.savefig('../final_plots/compare_'+name_tensor+'.pdf',bbox_inches='tight')
-    fcomp2.savefig('../final_plots/compare2_'+name_tensor+'.pdf',bbox_inches='tight')
+    f.savefig('../final_plots/profile_'+name_tensor+'_v2.pdf',bbox_inches='tight')
+    fcomp.savefig('../final_plots/compare_'+name_tensor+'_v2.pdf',bbox_inches='tight')
+    fcomp2.savefig('../final_plots/compare2_'+name_tensor+'_v2.pdf',bbox_inches='tight')
     # fdist.savefig('../final_plots/dist_std_'+name_tensor+'.png',bbox_inches='tight')
     fdist_it.savefig('../final_plots/dist_std_it_'+name_tensor+'.png',bbox_inches='tight')
     # fdistr.savefig('../final_plots/dist_red_'+name_tensor+'.png',bbox_inches='tight')
     fdistr_it.savefig('../final_plots/dist_red_it_'+name_tensor+'.png',bbox_inches='tight')
-    fdistr_it.savefig('../final_plots/dist_red_it_'+name_tensor+'.pdf',bbox_inches='tight')
+    fdistr_it.savefig('../final_plots/dist_red_it_'+name_tensor+'_v2.pdf',bbox_inches='tight')
     
 tf = time.time()
 print("Total Time %.2f\n" % (tf-ti))
