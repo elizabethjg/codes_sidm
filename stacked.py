@@ -164,61 +164,36 @@ def fit_Delta_Sigma_2h(R,zmean,ds,eds,ncores):
     
     return lM,c200,mcmc_out_DS[0],mcmc_out_DS[1]
 
-def stack_halos(main_file,path,haloids,reduced = False, iterative = False):
+def stack_halos(main_file,path,haloids,reduced = False, iterative = False, resolution=500):
 
     main = pd.read_csv(main_file)
 
-    x = np.array([], dtype=np.float32)
-    y = np.array([], dtype=np.float32)
-    z = np.array([], dtype=np.float32)
-
-    x2d = np.array([], dtype=np.float32)
-    y2d = np.array([], dtype=np.float32)
-
+    H = np.zeros((resolution-1, resolution-1))
+    
+    xedges = np.linspace(-8,8,resolution)
+    lsize  = np.diff(xedges)[0]
+    xb, yb = np.meshgrid(xedges[:-1],xedges[:-1])+(lsize/2.)
+ 
     for j in haloids:
         
         halo = h5py.File(path+'halo_'+str(j)+'.hdf5','r')       
-
         
         X = np.array(halo['X']) - main.xc_rc[j]/1.e3
         Y = np.array(halo['Y']) - main.yc_rc[j]/1.e3
         Z = np.array(halo['Z']) - main.zc_rc[j]/1.e3
         
-        ''' 3D
-        if iterative:
-            if reduced:
-                xrot = (main.a3Drx_it[j]*X)+(main.a3Dry_it[j]*Y)+(main.a3Drz_it[j]*Z);
-                yrot = (main.b3Drx_it[j]*X)+(main.b3Dry_it[j]*Y)+(main.b3Drz_it[j]*Z);
-                zrot = (main.c3Drx_it[j]*X)+(main.c3Dry_it[j]*Y)+(main.c3Drz_it[j]*Z);
-            else:
-                xrot = (main.a3Dx_it[j]*X)+(main.a3Dy_it[j]*Y)+(main.a3Dz_it[j]*Z);
-                yrot = (main.b3Dx_it[j]*X)+(main.b3Dy_it[j]*Y)+(main.b3Dz_it[j]*Z);
-                zrot = (main.c3Dx_it[j]*X)+(main.c3Dy_it[j]*Y)+(main.c3Dz_it[j]*Z);
-        else:
-            if reduced:
-                xrot = (main.a3Drx[j]*X)+(main.a3Dry[j]*Y)+(main.a3Drz[j]*Z);
-                yrot = (main.b3Drx[j]*X)+(main.b3Dry[j]*Y)+(main.b3Drz[j]*Z);
-                zrot = (main.c3Drx[j]*X)+(main.c3Dry[j]*Y)+(main.c3Drz[j]*Z);
-            else:
-                xrot = (main.a3Dx[j]*X)+(main.a3Dy[j]*Y)+(main.a3Dz[j]*Z);
-                yrot = (main.b3Dx[j]*X)+(main.b3Dy[j]*Y)+(main.b3Dz[j]*Z);
-                zrot = (main.c3Dx[j]*X)+(main.c3Dy[j]*Y)+(main.c3Dz[j]*Z);
-        
-        x = np.append(x,np.float32(xrot)) 
-        y = np.append(y,np.float32(yrot))
-        z = np.append(z,np.float32(zrot))
-        '''
-        
-        X2d_xy,Y2d_xy = projected_coodinates(X,Y,Z,main.xc_rc[j],main.yc_rc[j],main.zc_rc[j])
-        X2d_zx,Y2d_zx = projected_coodinates(Z,X,Y,main.xc_rc[j],main.yc_rc[j],main.zc_rc[j])
-        X2d_yz,Y2d_yz = projected_coodinates(Y,Z,X,main.xc_rc[j],main.yc_rc[j],main.zc_rc[j])
+        Xp_xy,Yp_xy = projected_coodinates(X,Y,Z,main.xc_rc[j],main.yc_rc[j],main.zc_rc[j])
+        Xp_zx,Yp_zx = projected_coodinates(Z,X,Y,main.xc_rc[j],main.yc_rc[j],main.zc_rc[j])
+        Xp_yz,Yp_yz = projected_coodinates(Y,Z,X,main.xc_rc[j],main.yc_rc[j],main.zc_rc[j])
         
         del(X,Y,Z)
         
-        X2d = np.concatenate((X2d_xy,X2d_zx,X2d_yz))
-        Y2d = np.concatenate((Y2d_xy,Y2d_zx,Y2d_yz))
-            
-        nparts = len(X2d_xy)
+        Xp = np.concatenate((Xp_xy,Xp_zx,Xp_yz))
+        Yp = np.concatenate((Yp_xy,Yp_zx,Yp_yz))
+        
+        nparts = len(Xp_xy)
+
+        del(Xp_xy,Yp_xy,Xp_zx,Yp_zx,Xp_yz,Yp_yz)
 
         if iterative:
 
@@ -240,8 +215,8 @@ def stack_halos(main_file,path,haloids,reduced = False, iterative = False):
                                 np.repeat(main.b2Dry_it_zx[j],nparts),
                                 np.repeat(main.b2Dry_it_yz[j],nparts)))
     
-                x2drot = (a2Drx*X2d)+(a2Dry*Y2d)
-                y2drot = (b2Drx*X2d)+(b2Dry*Y2d)
+                x2drot = (a2Drx*Xp)+(a2Dry*Yp)
+                y2drot = (b2Drx*Xp)+(b2Dry*Yp)
     
             else:
             
@@ -263,8 +238,8 @@ def stack_halos(main_file,path,haloids,reduced = False, iterative = False):
                                 np.repeat(main.b2Dy_it_yz[j],nparts)))
     
     
-                x2drot = (a2Dx*X2d)+(a2Dy*Y2d)
-                y2drot = (b2Dx*X2d)+(b2Dy*Y2d)
+                x2drot = (a2Dx*Xp)+(a2Dy*Yp)
+                y2drot = (b2Dx*Xp)+(b2Dy*Yp)
         
         else:
             if reduced:
@@ -285,8 +260,8 @@ def stack_halos(main_file,path,haloids,reduced = False, iterative = False):
                                 np.repeat(main.b2Dry_zx[j],nparts),
                                 np.repeat(main.b2Dry_yz[j],nparts)))
     
-                x2drot = (a2Drx*X2d)+(a2Dry*Y2d)
-                y2drot = (b2Drx*X2d)+(b2Dry*Y2d)
+                x2drot = (a2Drx*Xp)+(a2Dry*Yp)
+                y2drot = (b2Drx*Xp)+(b2Dry*Yp)
     
             else:
             
@@ -308,22 +283,41 @@ def stack_halos(main_file,path,haloids,reduced = False, iterative = False):
                                 np.repeat(main.b2Dy_yz[j],nparts)))
     
     
-                x2drot = (a2Dx*X2d)+(a2Dy*Y2d)
-                y2drot = (b2Dx*X2d)+(b2Dy*Y2d)
+                x2drot = (a2Dx*Xp)+(a2Dy*Yp)
+                y2drot = (b2Dx*Xp)+(b2Dy*Yp)
                 
         m2d = (np.abs(x2drot) < 10.) & (np.abs(y2drot) < 10.)
-                
-        x2d = np.append(x2d,np.float32(x2drot[m2d]))
-        y2d = np.append(y2d,np.float32(y2drot[m2d]))
+
+        Xp, Yp   = x2drot[m2d],   y2drot[m2d] # 2D coordinates in kpc
+
+        del(x2drot, y2drot)
         
-    return x,y,z,x2d,y2d
+        tmp_H, _, _ = np.histogram2d(Xp, Yp, bins=(xedges,xedges))
+        H += tmp_H
+
+        # MAKE KAPPA MAP
+       
+        ###Nchunck = 10
+        ###Nelements = len(Xp)
+        ###indices = np.array_split(np.arange(Nelements), Nchunck)
+
+        ###idx = 0
+        ###while len(indices) > 0:
+        ###  index = indices[0]
+        ###  #print("Histogram.. %d/%d - %d/%d" % (idx,Nchunck,len(index),Nelements))
+        ###  tmp_H, _, _ = np.histogram2d(Xp[index], Yp[index], bins=(xedges,xedges))
+        ###  H += tmp_H
+        ###  idx += 1
+        ###  indices.pop(0)
+    
+    return H 
 
 def stack_halos_unpack(minput):
 	return stack_halos(*minput)
 
 def stack_halos_parallel(main_file,path,haloids,
                          reduced = False,iterative = False,
-                         ncores=10):
+                         ncores=10, resolution=500):
     
 
     if ncores > len(haloids):
@@ -336,37 +330,26 @@ def stack_halos_parallel(main_file,path,haloids,
     
     ncores = len(hids_splitted)
     
-    mfile     = [main_file]*ncores
-    path      = [path]*ncores
-    reduced   = [reduced]*ncores
-    iterative = [iterative]*ncores
+    list_mfile      = [main_file]*ncores
+    list_path       = [path]*ncores
+    list_reduced    = [reduced]*ncores
+    list_iterative  = [iterative]*ncores
+    list_resolution = [resolution]*ncores
             
-    entrada = np.array([mfile,path,hids_splitted,reduced,iterative],dtype=object).T
+    entrada = np.array([list_mfile,list_path,hids_splitted,list_reduced,list_iterative,list_resolution],dtype=object).T
     
     pool = Pool(processes=(ncores))
     salida = list(pool.map(stack_halos_unpack, entrada))
     pool.terminate()
 
-    x   = np.array([], dtype=np.float32)
-    y   = np.array([], dtype=np.float32)
-    z   = np.array([], dtype=np.float32)
-    x2d = np.array([], dtype=np.float32)
-    y2d = np.array([], dtype=np.float32)
-    
+    H = np.zeros((resolution-1, resolution-1))
+
     while len(salida) > 0:
-        X,Y,Z,X2d,Y2d = salida[0]
-
-        x = np.append(x,np.float32(X))
-        y = np.append(y,np.float32(Y))
-        z = np.append(z,np.float32(Z))
-        
-        x2d = np.append(x2d,np.float32(X2d))
-        y2d = np.append(y2d,np.float32(Y2d))
-
+        tmp_H = salida[0]
+        H += tmp_H
         salida.pop(0)
     
-    return x,y,z,x2d,y2d
-    
+    return H 
 
 class stack_profile:
 
@@ -466,27 +449,13 @@ class stack_profile:
 
 class profile_from_map:
 
-    def __init__(self,Xp,Yp,nhalos,RIN=100.,ROUT=1500.,ndots=20,resolution=500):
+    def __init__(self,H,nhalos,RIN=100.,ROUT=1500.,ndots=20,resolution=500):
 
         # MAKE KAPPA MAP
         mp = 0.013398587e10
         xedges = np.linspace(-8,8,resolution)
         lsize  = np.diff(xedges)[0]
         xb, yb = np.meshgrid(xedges[:-1],xedges[:-1])+(lsize/2.)
-
-        H = np.zeros((resolution-1, resolution-1))
-        Nelements = len(Xp)
-        Nchunck = 10
-        indices = np.array_split(np.arange(Nelements), Nchunck)
-
-        idx = 0
-        while len(indices) > 0:
-          index = indices[0]
-          print("Histogram.. %d/%d - %d/%d" % (idx,Nchunck,len(index),Nelements))
-          tmp_H, _, _ = np.histogram2d(Xp[index]*1.e-3, Yp[index]*1.e-3, bins=(xedges,xedges))
-          H += tmp_H
-          idx += 1
-          indices.pop(0)
 
         kE = (H*mp)/(nhalos*((lsize*1.e6)**2))
         kB = np.zeros(kE.shape)
@@ -573,7 +542,7 @@ class profile_from_map:
 
 class map_and_fit_profiles(profile_from_map):
 
-    def __init__(self,Xp,Yp,nhalos,
+    def __init__(self,H,nhalos,
                  RIN=100.,ROUT=1000.,ndots=20,
                  resolution=500,params=params,z=0.,
                  twohalo = False,
@@ -582,7 +551,7 @@ class map_and_fit_profiles(profile_from_map):
         
         # COMPUTE PROFILES
         
-        profile_from_map.__init__(self, Xp,Yp,nhalos,RIN,ROUT,ndots,resolution)
+        profile_from_map.__init__(self,H,nhalos,RIN,ROUT,ndots,resolution)
         
         if not twohalo:
         
