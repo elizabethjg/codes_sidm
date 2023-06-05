@@ -23,6 +23,8 @@ class pack():
       # self.main es el dataframe de los halos maskareado para ese tipo de muestra
 
       f = open(self.name, 'rb')
+      self.DS1h_fit     = np.load(f) 
+      self.DS2h_fit     = np.load(f) 
       self.DS_fit       = np.load(f) 
       self.lM200_ds     = np.load(f)      
       self.c200_ds      = np.load(f)       

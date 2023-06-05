@@ -840,8 +840,8 @@ class fit_profiles():
             logM200 = lM[1]
             c200    = cfit[1]
 
-            self.DS1h_fit   = Delta_Sigma_NFW_2h_parallel(self.r,z,M200 = 10**logM200,c200=c200,cosmo_params=params,terms='1h',ncores=ncores)
-            self.DS2h_fit   = Delta_Sigma_NFW_2h_parallel(self.r,z,M200 = 10**logM200,c200=c200,cosmo_params=params,terms='2h',ncores=ncores)
+            self.DS1h_fit   = Delta_Sigma_NFW_2h_parallel(r,z,M200 = 10**logM200,c200=c200,cosmo_params=params,terms='1h',ncores=ncores)
+            self.DS2h_fit   = Delta_Sigma_NFW_2h_parallel(r,z,M200 = 10**logM200,c200=c200,cosmo_params=params,terms='2h',ncores=ncores)
             self.DS_fit     = self.DS1h_fit + self.DS2h_fit
             self.lM200_ds = logM200
             self.c200_ds  = c200
