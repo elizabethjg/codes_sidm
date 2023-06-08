@@ -164,50 +164,6 @@ def fit_Delta_Sigma_2h(R,zmean,ds,eds,ncores):
     
     return lM,c200,mcmc_out_DS[0],mcmc_out_DS[1]
 
-def stack_halo_shape_profile(main_file,path,haloids,reduced = False, iterative = False, nbins=10):
-
-    main = pd.read_csv(main_file)
-    
-    x = np.array([])
-    y = np.array([])
-    z = np.array([])
-        
-    for j in haloids:
-        
-        halo = h5py.File(path+'halo_'+str(j)+'.hdf5','r')       
-        
-        X = np.array(halo['X']) - main.xc_rc[j]/1.e3
-        Y = np.array(halo['Y']) - main.yc_rc[j]/1.e3
-        Z = np.array(halo['Z']) - main.zc_rc[j]/1.e3
-        
-        ##3D
-        
-        if iterative:
-            if reduced:
-                xrot = (main.a3Drx_it[j]*X)+(main.a3Dry_it[j]*Y)+(main.a3Drz_it[j]*Z);
-                yrot = (main.b3Drx_it[j]*X)+(main.b3Dry_it[j]*Y)+(main.b3Drz_it[j]*Z);
-                zrot = (main.c3Drx_it[j]*X)+(main.c3Dry_it[j]*Y)+(main.c3Drz_it[j]*Z);
-            else:
-                xrot = (main.a3Dx_it[j]*X)+(main.a3Dy_it[j]*Y)+(main.a3Dz_it[j]*Z);
-                yrot = (main.b3Dx_it[j]*X)+(main.b3Dy_it[j]*Y)+(main.b3Dz_it[j]*Z);
-                zrot = (main.c3Dx_it[j]*X)+(main.c3Dy_it[j]*Y)+(main.c3Dz_it[j]*Z);
-        else:
-            if reduced:
-                xrot = (main.a3Drx[j]*X)+(main.a3Dry[j]*Y)+(main.a3Drz[j]*Z);
-                yrot = (main.b3Drx[j]*X)+(main.b3Dry[j]*Y)+(main.b3Drz[j]*Z);
-                zrot = (main.c3Drx[j]*X)+(main.c3Dry[j]*Y)+(main.c3Drz[j]*Z);
-            else:
-                xrot = (main.a3Dx[j]*X)+(main.a3Dy[j]*Y)+(main.a3Dz[j]*Z);
-                yrot = (main.b3Dx[j]*X)+(main.b3Dy[j]*Y)+(main.b3Dz[j]*Z);
-                zrot = (main.c3Dx[j]*X)+(main.c3Dy[j]*Y)+(main.c3Dz[j]*Z);
-        
-        x = np.append(x,xrot)
-        y = np.append(y,yrot)
-        z = np.append(z,zrot)
-    
-    r = np.sqrt(x**2+y**2+z**2)
-    
-
 def rotate_for_halo(j,path,main,reduced=False,iterative=False):
     
         halo = h5py.File(path+'halo_'+str(j)+'.hdf5','r')       
@@ -326,7 +282,12 @@ def rotate_for_halo(j,path,main,reduced=False,iterative=False):
 
         del(x2drot, y2drot)
         
-        return Xp, Yp
+        return Xp, Yp    
+
+def rotate_for_halo_unpack(*minput):
+    halos,path,main,reduced,iterative = minput
+    for j in halos:
+        rotate_for_halo(j,path,main,reduced,iterative)
 
 def make_shape_profile(main_file,path,haloids,reduced = False, iterative = False, nbins=10):
 
@@ -334,7 +295,7 @@ def make_shape_profile(main_file,path,haloids,reduced = False, iterative = False
         
         Xp, Yp = rotate_for_halo(j,path,main,reduced,iterative)
 
-    r = np.sqrt(Xp,Yp)
+    r = np.sqrt(Xp**2+Yp**2)
     
     q_profile  = np.array([])
     qr_profile  = np.array([])
@@ -353,6 +314,8 @@ def make_shape_profile(main_file,path,haloids,reduced = False, iterative = False
         T2D[1,0] = np.sum(wp*xp*yp)
         T2D[1,1] = np.sum(wp*yp**2)
         
+        T2D /= float(m.sum())
+        
         w2d,v2d =np.linalg.eig(T2D)
         
         j = np.flip(np.argsort(w2d))
@@ -367,6 +330,8 @@ def make_shape_profile(main_file,path,haloids,reduced = False, iterative = False
         T2D[1,0] = np.sum(wp*xp*yp)
         T2D[1,1] = np.sum(wp*yp**2)
         
+        T2D /= float(m.sum())
+        
         w2d,v2d =np.linalg.eig(T2D)
         
         j = np.flip(np.argsort(w2d))
@@ -375,6 +340,80 @@ def make_shape_profile(main_file,path,haloids,reduced = False, iterative = False
      
      return rlims, q_profile, qr_profile        
     
+def make_shape_profile_parallel(main_file,path,haloids,reduced = False, iterative = False, nbins=10,ncores):
+
+    if ncores > len(haloids):
+        ncores = len(haloids)
+    
+    hids_splitted = np.array_split(haloids,ncores)
+    
+    ncores = len(hids_splitted)
+    
+    list_mfile      = [main_file]*ncores
+    list_path       = [path]*ncores
+    list_reduced    = [reduced]*ncores
+    list_iterative  = [iterative]*ncores
+        
+    entrada = np.array([hids_splitted,list_path,list_mfile,list_reduced,list_iterative],dtype=object).T
+    
+    pool = Pool(processes=(ncores))
+    salida = list(pool.map(rotate_for_halo_unpack, entrada))
+    pool.terminate()
+
+
+    Xp = np.array([])
+    Yp = np.array([])
+        
+    while len(salida) > 0:
+        xp, yp = salida[0]
+        Xp = np.append(Xp,xp)
+        Yp = np.append(Yp,xp)
+        salida.pop(0)
+
+    r = np.sqrt(Xp**2+Yp**2)
+    
+    q_profile  = np.array([])
+    qr_profile  = np.array([])
+    rlims = np.linspace(0.2,2,nbins)
+    
+    for i in range(nbins):
+
+        m = (r <= rlims[i])
+        xp, yp = Xp[m], Yp[m]
+        # -----------------------------------------------
+        wp = 1.
+        T2D = np.zeros((2,2))
+        
+        T2D[0,0] = np.sum(wp*xp**2)
+        T2D[0,1] = np.sum(wp*xp*yp)
+        T2D[1,0] = np.sum(wp*xp*yp)
+        T2D[1,1] = np.sum(wp*yp**2)
+        
+        T2D /= float(m.sum())
+        
+        w2d,v2d =np.linalg.eig(T2D)
+        
+        j = np.flip(np.argsort(w2d))
+        q_profile = np.append(q_profile,np.sqrt(w2d[j][1])/np.sqrt(w2d[j][0])) 
+
+        # -----------------------------------------------
+        wp = (1./r**2)[m]
+        T2D = np.zeros((2,2))
+        
+        T2D[0,0] = np.sum(wp*xp**2)
+        T2D[0,1] = np.sum(wp*xp*yp)
+        T2D[1,0] = np.sum(wp*xp*yp)
+        T2D[1,1] = np.sum(wp*yp**2)
+        
+        T2D /= float(m.sum())
+        
+        w2d,v2d =np.linalg.eig(T2D)
+        
+        j = np.flip(np.argsort(w2d))
+        qr_profile = np.append(qr_profile,np.sqrt(w2d[j][1])/np.sqrt(w2d[j][0])) 
+
+     
+     return rlims, q_profile, qr_profile        
     
 
 def stack_halos_2DH(main_file,path,haloids,reduced = False, iterative = False, resolution=500):
@@ -411,8 +450,8 @@ def stack_halos_2DH(main_file,path,haloids,reduced = False, iterative = False, r
     
     return H 
 
-def stack_halos_unpack(minput):
-	return stack_halos(*minput)
+def stack_halos_2DH_unpack(minput):
+	return stack_halos_2DH(*minput)
 
 def stack_halos_parallel(main_file,path,haloids,
                          reduced = False,iterative = False,
@@ -438,7 +477,7 @@ def stack_halos_parallel(main_file,path,haloids,
     entrada = np.array([list_mfile,list_path,hids_splitted,list_reduced,list_iterative,list_resolution],dtype=object).T
     
     pool = Pool(processes=(ncores))
-    salida = list(pool.map(stack_halos_unpack, entrada))
+    salida = list(pool.map(stack_halos_2DH_unpack, entrada))
     pool.terminate()
 
     H = np.zeros((resolution-1, resolution-1))
