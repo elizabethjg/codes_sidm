@@ -284,136 +284,85 @@ def rotate_for_halo(j,path,main,reduced=False,iterative=False):
         
         return Xp, Yp    
 
-def rotate_for_halo_unpack(*minput):
-    halos,path,main,reduced,iterative = minput
-    for j in halos:
-        rotate_for_halo(j,path,main,reduced,iterative)
+def make_shape_profile(main_file,path,haloids,rlims,reduced,iterative):
 
-def make_shape_profile(main_file,path,haloids,reduced = False, iterative = False, nbins=10):
+    nbins = len(rlims)
+    count = np.zeros(nbins)
+    T2D   = np.zeros((nbins,2,2))
+    main  = pd.read_csv(main_file)
 
     for j in haloids:
         
-        Xp, Yp = rotate_for_halo(j,path,main,reduced,iterative)
+      Xp, Yp = rotate_for_halo(j,path,main,reduced,iterative)
 
-    r = np.sqrt(Xp**2+Yp**2)
-    
-    q_profile  = np.array([])
-    qr_profile  = np.array([])
-    rlims = np.linspace(0.2,2,nbins)
-    
-    for i in range(nbins):
+      r = np.sqrt(Xp**2+Yp**2)
+      
+      if reduced:
+          Wp = (1./r**2)
+      else:
+          Wp = np.ones(len(r))
+ 
+      for i in range(nbins):
 
         m = (r <= rlims[i])
-        xp, yp = Xp[m], Yp[m]
-        # -----------------------------------------------
-        wp = 1.
-        T2D = np.zeros((2,2))
+        xp, yp, wp = Xp[m], Yp[m], Wp[m]
         
-        T2D[0,0] = np.sum(wp*xp**2)
-        T2D[0,1] = np.sum(wp*xp*yp)
-        T2D[1,0] = np.sum(wp*xp*yp)
-        T2D[1,1] = np.sum(wp*yp**2)
-        
-        T2D /= float(m.sum())
-        
-        w2d,v2d =np.linalg.eig(T2D)
-        
-        j = np.flip(np.argsort(w2d))
-        q_profile = np.append(q_profile,np.sqrt(w2d[j][1])/np.sqrt(w2d[j][0])) 
+        T2D[i,0,0] += np.sum(wp*xp**2)
+        T2D[i,0,1] += np.sum(wp*xp*yp)
+        T2D[i,1,0] += np.sum(wp*xp*yp)
+        T2D[i,1,1] += np.sum(wp*yp**2)
+        count[i]   += float(m.sum())
+       
+    return count, T2D        
+ 
+def make_shape_profile_unpack(minput):
+	return make_shape_profile(*minput)
 
-        # -----------------------------------------------
-        wp = (1./r**2)[m]
-        T2D = np.zeros((2,2))
-        
-        T2D[0,0] = np.sum(wp*xp**2)
-        T2D[0,1] = np.sum(wp*xp*yp)
-        T2D[1,0] = np.sum(wp*xp*yp)
-        T2D[1,1] = np.sum(wp*yp**2)
-        
-        T2D /= float(m.sum())
-        
-        w2d,v2d =np.linalg.eig(T2D)
-        
-        j = np.flip(np.argsort(w2d))
-        qr_profile = np.append(qr_profile,np.sqrt(w2d[j][1])/np.sqrt(w2d[j][0])) 
-
-     
-     return rlims, q_profile, qr_profile        
-    
-def make_shape_profile_parallel(main_file,path,haloids,reduced = False, iterative = False, nbins=10,ncores):
+def make_shape_profile_parallel(main_file,path,haloids,reduced = False, iterative = False, nbins=10, ncores=10):
 
     if ncores > len(haloids):
         ncores = len(haloids)
     
     hids_splitted = np.array_split(haloids,ncores)
-    
     ncores = len(hids_splitted)
+    
+    rlims = np.linspace(0.2,2,nbins)
+    b_profile = np.zeros(nbins)
+    a_profile = np.zeros(nbins)
+    count = np.zeros(nbins)
+    T2D   = np.zeros((nbins,2,2))
     
     list_mfile      = [main_file]*ncores
     list_path       = [path]*ncores
+    list_rlims      = [rlims]*ncores
     list_reduced    = [reduced]*ncores
     list_iterative  = [iterative]*ncores
-        
-    entrada = np.array([hids_splitted,list_path,list_mfile,list_reduced,list_iterative],dtype=object).T
+    
+    entrada = np.array([list_mfile,list_path,hids_splitted,list_rlims,list_reduced,list_iterative],dtype=object).T
     
     pool = Pool(processes=(ncores))
-    salida = list(pool.map(rotate_for_halo_unpack, entrada))
+    salida = list(pool.map(make_shape_profile_unpack, entrada))
     pool.terminate()
-
-
-    Xp = np.array([])
-    Yp = np.array([])
-        
+     
     while len(salida) > 0:
-        xp, yp = salida[0]
-        Xp = np.append(Xp,xp)
-        Yp = np.append(Yp,xp)
-        salida.pop(0)
-
-    r = np.sqrt(Xp**2+Yp**2)
-    
-    q_profile  = np.array([])
-    qr_profile  = np.array([])
-    rlims = np.linspace(0.2,2,nbins)
+      tmp_count, tmp_T2D = salida[0]
+      count += tmp_count
+      T2D   += tmp_T2D
+      salida.pop(0)
     
     for i in range(nbins):
 
-        m = (r <= rlims[i])
-        xp, yp = Xp[m], Yp[m]
-        # -----------------------------------------------
-        wp = 1.
-        T2D = np.zeros((2,2))
-        
-        T2D[0,0] = np.sum(wp*xp**2)
-        T2D[0,1] = np.sum(wp*xp*yp)
-        T2D[1,0] = np.sum(wp*xp*yp)
-        T2D[1,1] = np.sum(wp*yp**2)
-        
-        T2D /= float(m.sum())
-        
-        w2d,v2d =np.linalg.eig(T2D)
-        
-        j = np.flip(np.argsort(w2d))
-        q_profile = np.append(q_profile,np.sqrt(w2d[j][1])/np.sqrt(w2d[j][0])) 
+      if count[i] == 0:
+        continue
 
-        # -----------------------------------------------
-        wp = (1./r**2)[m]
-        T2D = np.zeros((2,2))
-        
-        T2D[0,0] = np.sum(wp*xp**2)
-        T2D[0,1] = np.sum(wp*xp*yp)
-        T2D[1,0] = np.sum(wp*xp*yp)
-        T2D[1,1] = np.sum(wp*yp**2)
-        
-        T2D /= float(m.sum())
-        
-        w2d,v2d =np.linalg.eig(T2D)
-        
-        j = np.flip(np.argsort(w2d))
-        qr_profile = np.append(qr_profile,np.sqrt(w2d[j][1])/np.sqrt(w2d[j][0])) 
+      T2D[i] /= count[i]
+      w2d, v2d = np.linalg.eig(T2D[i])
+       
+      j = np.flip(np.argsort(w2d))
+      a_profile[i] = np.sqrt(w2d[j][0])
+      b_profile[i] = np.sqrt(w2d[j][1])
 
-     
-     return rlims, q_profile, qr_profile        
+    return rlims, a_profile, b_profile
     
 
 def stack_halos_2DH(main_file,path,haloids,reduced = False, iterative = False, resolution=500):
