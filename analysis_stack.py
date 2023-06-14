@@ -5,6 +5,201 @@ import numpy as np
 import matplotlib.pyplot as plt
 import time
 from make_plots import *
+# from stacked import fit_quadrupoles_2terms_qrfunc
+import emcee
+from models_profiles import GAMMA_components_parallel
+params = {'flat': True, 'H0': 70.0, 'Om0': 0.25, 'Ob0': 0.044, 'sigma8': 0.8, 'ns': 0.95}
+
+
+def fit_quadrupoles_GX(R,gt,gx,egt,egx,GT,GX,GT_2h,GX_2h,fit_components):
+    
+    print('fitting components: ',fit_components)
+    def log_likelihood(data_model, R, profiles, eprofiles,
+                       fit_components = 'both'):
+        
+        q1h, q2h = data_model
+        
+        gx   = profiles
+        egx = eprofiles
+        
+        e1h   = (1.-q1h)/(1.+q1h)
+        e2h   = (1.-q2h)/(1.+q2h)
+                
+        mGX = e1h*GX + e2h*GX_2h
+        sigma2 = egx**2
+        LGX = -0.5 * np.sum((mGX - gx)**2 / sigma2 + np.log(2.*np.pi*sigma2))
+        
+        return LGX
+    
+    
+    def log_probability(data_model, R, profiles, eprofiles):
+        
+        q1h, q2h = data_model
+        
+        if 0. < q1h < 1. and 0. < q2h < 1.:
+            return log_likelihood(data_model, R, profiles, eprofiles)
+            
+        return -np.inf
+    
+    # initializing
+    
+    pos = np.array([np.random.uniform(0.6,0.9,15),
+                    np.random.uniform(0.1,0.5,15)]).T
+    
+    nwalkers, ndim = pos.shape
+    
+    #-------------------
+    # running emcee
+    
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, 
+                                    args=(R,gx,egx))
+                                    # pool = pool)
+                    
+    sampler.run_mcmc(pos, 250, progress=True)
+    
+    mcmc_out = sampler.get_chain(flat=True).T
+    
+    return np.median(mcmc_out[0][1500:]),np.median(mcmc_out[1][1500:]),mcmc_out[0],mcmc_out[1]
+
+def fit_quadrupoles_2terms(R,gt,gx,egt,egx,GT,GX,GT_2h,GX_2h,fit_components):
+    
+    print('fitting components: ',fit_components)
+    def log_likelihood(data_model, R, profiles, eprofiles,
+                       fit_components = 'both'):
+        
+        q1h, q2h = data_model
+        
+        gt, gx   = profiles
+        egt, egx = eprofiles
+        
+        e1h   = (1.-q1h)/(1.+q1h)
+        e2h   = (1.-q2h)/(1.+q2h)
+        
+        sigma2 = egt**2
+        mGT = e1h*GT + e2h*GT_2h
+        LGT = -0.5 * np.sum((mGT - gt)**2 / sigma2 + np.log(2.*np.pi*sigma2))
+        
+        mGX = e1h*GX + e2h*GX_2h
+        sigma2 = egx**2
+        LGX = -0.5 * np.sum((mGX - gx)**2 / sigma2 + np.log(2.*np.pi*sigma2))
+        
+        if fit_components == 'both':
+            L = LGT +  LGX
+        if fit_components == 'tangential':
+            L = LGT
+        if fit_components == 'cross':
+            L = LGX
+
+        return L
+    
+    
+    def log_probability(data_model, R, profiles, eprofiles):
+        
+        q1h, q2h = data_model
+        
+        if 0. < q1h < 1. and 0. < q2h < 1.:
+            return log_likelihood(data_model, R, profiles, eprofiles)
+            
+        return -np.inf
+    
+    # initializing
+    
+    pos = np.array([np.random.uniform(0.6,0.9,15),
+                    np.random.uniform(0.1,0.5,15)]).T
+    
+    nwalkers, ndim = pos.shape
+    
+    #-------------------
+    # running emcee
+    
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, 
+                                    args=(R,[gt,gx],[egt,egx]))
+                                    # pool = pool)
+                    
+    sampler.run_mcmc(pos, 250, progress=True)
+    
+    mcmc_out = sampler.get_chain(flat=True).T
+    
+    return np.median(mcmc_out[0][1500:]),np.median(mcmc_out[1][1500:]),mcmc_out[0],mcmc_out[1]
+
+def fit_quadrupoles_2terms_qrfunc(R,gt,gx,egt,egx,GT,GX,GT_2h,GX_2h,fit_components):
+    
+    print('fitting components: ',fit_components)
+    def log_likelihood(data_model, R, profiles, eprofiles,
+                       fit_components = 'both'):
+        
+        a, b, q2h = data_model
+        q1h = b*R**a
+        
+        gt, gx   = profiles
+        egt, egx = eprofiles
+        
+        e1h   = (1.-q1h)/(1.+q1h)
+        e2h   = (1.-q2h)/(1.+q2h)
+        
+        sigma2 = egt**2
+        mGT = e1h*GT + e2h*GT_2h
+        LGT = -0.5 * np.sum((mGT - gt)**2 / sigma2 + np.log(2.*np.pi*sigma2))
+        
+        mGX = e1h*GX + e2h*GX_2h
+        sigma2 = egx**2
+        LGX = -0.5 * np.sum((mGX - gx)**2 / sigma2 + np.log(2.*np.pi*sigma2))
+        
+        if fit_components == 'both':
+            L = LGT +  LGX
+        if fit_components == 'tangential':
+            L = LGT
+        if fit_components == 'cross':
+            L = LGX
+
+        return L
+    
+    
+    def log_probability(data_model, R, profiles, eprofiles):
+        
+        a, b, q2h = data_model
+        
+        if -0.5 < a < 0. and 0. < b < 1. and 0. < q2h < 1.:
+            return log_likelihood(data_model, R, profiles, eprofiles)
+            
+        return -np.inf
+    
+    # initializing
+    
+    pos = np.array([np.random.uniform(-0.1,0.,15),
+                    np.random.uniform(0.6,0.9,15),
+                    np.random.uniform(0.1,0.5,15)]).T
+    
+    nwalkers, ndim = pos.shape
+    
+    #-------------------
+    # running emcee
+    
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, 
+                                    args=(R,[gt,gx],[egt,egx]))
+                                    # pool = pool)
+                    
+    sampler.run_mcmc(pos, 1000, progress=True)
+    
+    mcmc_out = sampler.get_chain(flat=True).T
+    
+    return np.median(mcmc_out[0][1500:]),np.median(mcmc_out[1][1500:]),np.median(mcmc_out[2][1500:]),mcmc_out[0],mcmc_out[1],mcmc_out[2]
+
+
+def fit_gamma_components(DF):
+
+    # FIT SHEAR QUADRUPOLE PROFILES
+            
+    GT_func,GX_func = GAMMA_components(DF.r,0.,ellip=1.,M200 = 10**DF.lM200_ds,c200=DF.c200_ds,cosmo_params=params,terms='1h')
+    GT_2h_func,GX_2h_func = GAMMA_components(DF.r,0.,ellip=1.,M200 = 10**DF.lM200_ds,c200=DF.c200_ds,cosmo_params=params,terms='2h')
+    
+    # FIT THEM TOGETHER
+    q1h,q2h,mcmc_q1h,mcmc_q2h = fit_quadrupoles_2terms(DF.r,DF.GT,DF.GX,DF.e_GT,DF.e_GX,GT_func,GX_func,GT_2h_func,GX_2h_func,'both')
+            
+    a,b,q2h,mcmc_a,mcmc_b,mcmc_q2h = fit_quadrupoles_2terms_qrfunc(DF.r,DF.GT,DF.GX,DF.e_GT,DF.e_GX,GT_func,GX_func,GT_2h_func,GX_2h_func,'cross')
+    
+    return a,b,q2h,mcmc_a,mcmc_b,mcmc_q2h
+
 
 class pack():
 
@@ -86,6 +281,100 @@ lhs = ["Total", "Relaxed", \
 input_folder  = "./arreglos/"      
 
 ti = time.time()
+
+# FIT QUADRUPOLES
+def analyse_new_model():
+    
+    a_dm   = []
+    b_dm   = []
+    q2h_dm = []
+    mcmc_a_dm   = []
+    mcmc_b_dm   = []
+    mcmc_q2h_dm = []
+    
+    a_sidm   = []
+    b_sidm   = []
+    q2h_sidm = []
+    mcmc_a_sidm = []
+    mcmc_b_sidm = []
+    mcmc_q2h_sidm = []
+
+    
+    for idx, name_tensor in enumerate(typetensor):
+
+        f, ax_all = plt.subplots(6,3, figsize=(14,16),sharex = True)
+        f.subplots_adjust(hspace=0)                
+
+        
+        for jdx, name_folder in enumerate(folders_list):
+            
+            row, col = jdx // 2, jdx % 2
+        
+            filename_DM = input_folder + "%s_DM_%s.npy" % (name_folder, name_tensor)
+            # llama a la clase pack que lee el archivo y lo carga
+            DM = pack(filename_DM)
+            
+            a,b,q2h,mcmc_a,mcmc_b,mcmc_q2h = fit_gamma_components(DM)
+            
+            data_model_dm = [a,b,q2h]
+            
+            a_dm   += [a]
+            b_dm   += [b]
+            q2h_dm += [q2h]
+            mcmc_a_dm   += [mcmc_a]
+            mcmc_b_dm   += [mcmc_b]
+            mcmc_q2h_dm += [mcmc_q2h]
+    
+        
+            filename_SIDM = input_folder + "%s_SIDM_%s.npy" % (name_folder, name_tensor)
+            # llama a la clase pack que lee el archivo y lo carga
+            SIDM = pack(filename_SIDM)
+            a,b,q2h,mcmc_a,mcmc_b,mcmc_q2h = fit_gamma_components(SIDM)
+            data_model_sidm = [a,b,q2h]
+            
+            a_sidm   += [a]
+            b_sidm   += [b]
+            q2h_sidm += [q2h]
+            mcmc_a_sidm   += [mcmc_a]
+            mcmc_b_sidm   += [mcmc_b]
+            mcmc_q2h_sidm += [mcmc_q2h]
+            
+            ax_all[jdx,0].text(1,100,lhs[jdx],fontsize=14)
+            plt_profile_fitted_final_new(DM,SIDM,0,5000,ax_all[jdx],data_model_dm, data_model_sidm)
+            ax_all[0,0].legend(loc=3,frameon=False,fontsize=10)
+            ax_all[0,1].legend(loc=3,frameon=False,fontsize=10)
+        
+        f.savefig('../final_plots/profile_'+name_tensor+'_new_model_cross.pdf',bbox_inches='tight')
+    
+
+    
+    fa, axa = plt.subplots(6,2, figsize=(14,16),sharex = True, sharey = True)
+    fa.subplots_adjust(hspace=0,wspace=0)
+    axa = axa.flatten()
+    fb, axb = plt.subplots(6,2, figsize=(14,16),sharex = True, sharey = True)
+    fb.subplots_adjust(hspace=0,wspace=0)
+    axb = axb.flatten()
+    fq2h, axq2h = plt.subplots(6,2, figsize=(14,16),sharex = True, sharey = True)
+    fq2h.subplots_adjust(hspace=0,wspace=0)
+    axq2h = axq2h.flatten()
+
+
+    for j in range(12):
+        axa[j].plot(mcmc_a_dm[j],alpha=0.5)
+        axa[j].plot(mcmc_a_sidm[j],alpha=0.5)
+        axb[j].plot(mcmc_b_dm[j],alpha=0.5)
+        axb[j].plot(mcmc_b_sidm[j],alpha=0.5)
+        axq2h[j].plot(mcmc_q2h_dm[j],alpha=0.5)
+        axq2h[j].plot(mcmc_q2h_sidm[j],alpha=0.5)
+        
+        
+        axa[j].set_ylabel('a')
+        axa[j].set_xlabel('N')
+        axb[j].set_ylabel('b')
+        axb[j].set_xlabel('N')
+        axq2h[j].set_ylabel('q2h')
+        axq2h[j].set_xlabel('N')
+    
 
 # El primer for es sobre una lista que tiene los tipos de tensores
 # standard o reducido

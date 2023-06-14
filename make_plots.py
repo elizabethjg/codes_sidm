@@ -7,7 +7,7 @@ from matplotlib import cm
 from binned_plots import make_plot2
 from models_profiles import *
 import matplotlib.pyplot as plt
-
+params = {'flat': True, 'H0': 70.0, 'Om0': 0.25, 'Ob0': 0.044, 'sigma8': 0.8, 'ns': 0.95}
 folder = '../profiles3/'
 
 def plot_zdist():
@@ -184,7 +184,7 @@ def corner_result(DM,SIDM,sname,name_tensor):
     
     
  
-def plt_profile_fitted_final(DM,SIDM,RIN,ROUT,axx3,fittype='_2h_2q'):
+def plt_profile_fitted_final(DM,SIDM,RIN,ROUT,axx3):
 
     ax,ax1,ax2 = axx3
             
@@ -258,3 +258,93 @@ def plt_profile_fitted_final(DM,SIDM,RIN,ROUT,axx3,fittype='_2h_2q'):
     ax2.xaxis.set_ticks([0.1,1,5])
     ax2.set_xticklabels([0.1,1,5])
 
+def plt_profile_fitted_final_new(DM,SIDM,RIN,ROUT,axx3,data_model_dm, data_model_sidm):
+
+    GT_dm,GX_dm = GAMMA_components_parallel(DM.r,0.,ellip=1.,M200 = 10**DM.lM200_ds,c200=DM.c200_ds,cosmo_params=params,terms='1h',ncores=10)
+    GT_2h_dm,GX_2h_dm = GAMMA_components_parallel(DM.r,0.,ellip=1.,M200 = 10**DM.lM200_ds,c200=DM.c200_ds,cosmo_params=params,terms='2h',ncores=10)          
+
+    GT_sidm,GX_sidm = GAMMA_components_parallel(SIDM.r,0.,ellip=1.,M200 = 10**SIDM.lM200_ds,c200=SIDM.c200_ds,cosmo_params=params,terms='1h',ncores=10)
+    GT_2h_sidm,GX_2h_sidm = GAMMA_components_parallel(SIDM.r,0.,ellip=1.,M200 = 10**SIDM.lM200_ds,c200=SIDM.c200_ds,cosmo_params=params,terms='2h',ncores=10)          
+
+    a_dm, b_dm, q2h_dm = data_model_dm
+    q1h_dm = b_dm*DM.r**a_dm
+    e1h_dm   = (1.-q1h_dm)/(1.+q1h_dm)
+    e2h_dm   = (1.-q2h_dm)/(1.+q2h_dm)
+        
+    a_sidm, b_sidm, q2h_sidm = data_model_sidm
+    q1h_sidm = b_sidm*SIDM.r**a_sidm
+    e1h_sidm   = (1.-q1h_sidm)/(1.+q1h_sidm)
+    e2h_sidm   = (1.-q2h_sidm)/(1.+q2h_sidm)
+
+
+    ax,ax1,ax2 = axx3
+            
+    ##############    
+
+    ax.plot(DM.r,DM.DS_T,'C7',label='CDM')
+    # ax.plot(rplot,DS1h,'C1',label='1h')
+    # ax.plot(rplot,DS2h,'C8',label='2h')
+    ax.plot(DM.r,DM.DS_fit,'C3')
+    ax.fill_between(DM.r,DM.DS_T+DM.e_DS_T,DM.DS_T-DM.e_DS_T,color='C7',alpha=0.4)
+    ax.plot(SIDM.r,SIDM.DS_T,'C6--',label='SIDM')
+    # ax.plot(rplot,DS1h,'C1',label='1h')
+    # ax.plot(rplot,DS2h,'C8',label='2h')
+    ax.plot(SIDM.r,SIDM.DS_fit,'C3--')
+    ax.fill_between(SIDM.r,SIDM.DS_T+SIDM.e_DS_T,SIDM.DS_T-SIDM.e_DS_T,color='C6',alpha=0.4)
+    ax.set_xscale('log')
+    ax.set_yscale('log')
+    ax.set_ylabel(r'$\Delta\Sigma [h M_\odot/pc^2]$',labelpad=2)
+    ax.set_xlabel('r [$h^{-1}$ Mpc]')
+    ax.set_ylim(0.5,200)
+    ax.set_xlim(0.1,5)
+    ax.xaxis.set_ticks([0.1,1,5])
+    ax.set_xticklabels([0.1,1,5])
+    ax.yaxis.set_ticks([1,10,100])
+    ax.set_yticklabels([1,10,100])
+    ax.axvline(RIN/1000.,color='k',ls=':')
+    ax.axvline(ROUT/1000.,color='k',ls=':')
+    # ax.legend(loc=3,frameon=False,ncol=2)
+    
+    
+    ax1.plot(DM.r,DM.GT,'C7')
+    ax1.plot(DM.r,e1h_dm*GT_dm+e2h_dm*GT_2h_dm,'C3',label='1h+2h')
+    ax1.plot(DM.r,e1h_dm*GT_dm,'C1',label='1h')
+    ax1.plot(DM.r,e2h_dm*GT_2h_dm,'C8',label='2h')
+    ax1.plot(SIDM.r,SIDM.GT,'C6--')    
+    ax1.plot(SIDM.r,e1h_sidm*GT_dm+e2h_sidm*GT_2h_sidm,'C3--')
+    ax1.plot(SIDM.r,e1h_sidm*GT_sidm,'C1--')
+    ax1.plot(SIDM.r,e2h_sidm*GT_2h_sidm,'C8--')
+    ax1.fill_between(DM.r,DM.GT+DM.e_GT,DM.GT-DM.e_GT,color='C7',alpha=0.4)
+    ax1.fill_between(SIDM.r,SIDM.GT+SIDM.e_GT,SIDM.GT-SIDM.e_GT,color='C6',alpha=0.4)
+    ax1.set_xscale('log')
+    ax1.set_yscale('log')
+    ax1.set_xlabel('r [$h^{-1}$ Mpc]')
+    ax1.set_ylabel(r'$\Gamma_T [h M_\odot/pc^2]$',labelpad=1.2)
+    ax1.set_ylim(0.5,100)
+    ax1.set_xlim(0.1,5)
+    ax1.xaxis.set_ticks([0.1,1,5])
+    ax1.set_xticklabels([0.1,1,5])
+    ax1.yaxis.set_ticks([1,10,100])
+    ax1.set_yticklabels([1,10,100])
+    ax1.axvline(RIN/1000.,color='k',ls=':')
+    ax1.axvline(ROUT/1000.,color='k',ls=':')
+        
+    ax2.plot([0,10],[0,0],'k')
+    ax2.plot(DM.r,DM.GX,'C7',label='standard')
+    ax2.plot(DM.r,e1h_dm*GX_dm+e2h_dm*GX_2h_dm,'C3')
+    ax2.plot(DM.r,e1h_dm*GX_dm,'C1')
+    ax2.plot(DM.r,e2h_dm*GX_2h_dm,'C8')
+    ax2.plot(SIDM.r,SIDM.GX,'C6--',label='reduced')    
+    ax2.plot(SIDM.r,e1h_dm*GX_sidm+e2h_dm*GX_2h_sidm,'C3--')
+    ax2.plot(SIDM.r,e1h_dm*GX_sidm,'C1--')
+    ax2.plot(SIDM.r,e2h_dm*GX_2h_sidm,'C8--')
+    # ax2.legend(loc=3,frameon=False)
+    ax2.fill_between(DM.r,DM.GX+DM.e_GX,DM.GX-DM.e_GX,color='C7',alpha=0.4)
+    ax2.fill_between(SIDM.r,SIDM.GX+SIDM.e_GX,SIDM.GX-SIDM.e_GX,color='C6',alpha=0.4)
+    ax2.set_xlabel('r [$h^{-1}$ Mpc]')
+    ax2.set_ylabel(r'$\Gamma_\times [h M_\odot/pc^2]$',labelpad=1.2)
+    ax2.set_xscale('log')
+    ax2.set_xlim(0.1,5)
+    ax2.set_ylim(-16,17)
+    ax2.xaxis.set_ticks([0.1,1,5])
+    ax2.set_xticklabels([0.1,1,5])
