@@ -59,7 +59,8 @@ def fit_quadrupoles(R,gt,gx,egt,egx,GT,GX):
 def fit_quadrupoles_2terms(R,gt,gx,egt,egx,GT,GX,GT_2h,GX_2h,fit_components):
     
     print('fitting components: ',fit_components)
-    def log_likelihood(data_model, R, profiles, eprofiles):
+    def log_likelihood(data_model, R, profiles, eprofiles,
+                       fit_components = 'both'):
         
         q1h, q2h = data_model
         
