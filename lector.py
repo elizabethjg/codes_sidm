@@ -62,6 +62,9 @@ class pack():
       self.e_S          = np.load(f)
       self.S2           = np.load(f)
       self.e_S2         = np.load(f)
+      self.rs           = np.load(f) 
+      self.qs           = np.load(f) 
+      self.err_qs       = np.load(f) 
       self.main         = pickle.loads(np.load(f, allow_pickle=True).item())
       f.close()
 
