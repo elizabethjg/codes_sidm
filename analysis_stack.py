@@ -11,61 +11,10 @@ from models_profiles import GAMMA_components_parallel
 params = {'flat': True, 'H0': 70.0, 'Om0': 0.25, 'Ob0': 0.044, 'sigma8': 0.8, 'ns': 0.95}
 
 
-def fit_quadrupoles_GX(R,gt,gx,egt,egx,GT,GX,GT_2h,GX_2h,fit_components):
-    
-    print('fitting components: ',fit_components)
-    def log_likelihood(data_model, R, profiles, eprofiles,
-                       fit_components = 'both'):
-        
-        q1h, q2h = data_model
-        
-        gx   = profiles
-        egx = eprofiles
-        
-        e1h   = (1.-q1h)/(1.+q1h)
-        e2h   = (1.-q2h)/(1.+q2h)
-                
-        mGX = e1h*GX + e2h*GX_2h
-        sigma2 = egx**2
-        LGX = -0.5 * np.sum((mGX - gx)**2 / sigma2 + np.log(2.*np.pi*sigma2))
-        
-        return LGX
-    
-    
-    def log_probability(data_model, R, profiles, eprofiles):
-        
-        q1h, q2h = data_model
-        
-        if 0. < q1h < 1. and 0. < q2h < 1.:
-            return log_likelihood(data_model, R, profiles, eprofiles)
-            
-        return -np.inf
-    
-    # initializing
-    
-    pos = np.array([np.random.uniform(0.6,0.9,15),
-                    np.random.uniform(0.1,0.5,15)]).T
-    
-    nwalkers, ndim = pos.shape
-    
-    #-------------------
-    # running emcee
-    
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, 
-                                    args=(R,gx,egx))
-                                    # pool = pool)
-                    
-    sampler.run_mcmc(pos, 250, progress=True)
-    
-    mcmc_out = sampler.get_chain(flat=True).T
-    
-    return np.median(mcmc_out[0][1500:]),np.median(mcmc_out[1][1500:]),mcmc_out[0],mcmc_out[1]
-
 def fit_quadrupoles_2terms(R,gt,gx,egt,egx,GT,GX,GT_2h,GX_2h,fit_components):
     
     print('fitting components: ',fit_components)
-    def log_likelihood(data_model, R, profiles, eprofiles,
-                       fit_components = 'both'):
+    def log_likelihood(data_model, R, profiles, eprofiles):
         
         q1h, q2h = data_model
         
@@ -125,8 +74,7 @@ def fit_quadrupoles_2terms(R,gt,gx,egt,egx,GT,GX,GT_2h,GX_2h,fit_components):
 def fit_quadrupoles_2terms_qrfunc(R,gt,gx,egt,egx,GT,GX,GT_2h,GX_2h,fit_components):
     
     print('fitting components: ',fit_components)
-    def log_likelihood(data_model, R, profiles, eprofiles,
-                       fit_components = 'both'):
+    def log_likelihood(data_model, R, profiles, eprofiles):
         
         a, b, q2h = data_model
         q1h = b*R**a
