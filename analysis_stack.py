@@ -64,8 +64,7 @@ def fit_quadrupoles_GX(R,gt,gx,egt,egx,GT,GX,GT_2h,GX_2h,fit_components):
 def fit_quadrupoles_2terms(R,gt,gx,egt,egx,GT,GX,GT_2h,GX_2h,fit_components):
     
     print('fitting components: ',fit_components)
-    def log_likelihood(data_model, R, profiles, eprofiles,
-                       fit_components = 'both'):
+    def log_likelihood(data_model, R, profiles, eprofiles):
         
         q1h, q2h = data_model
         
@@ -84,11 +83,14 @@ def fit_quadrupoles_2terms(R,gt,gx,egt,egx,GT,GX,GT_2h,GX_2h,fit_components):
         LGX = -0.5 * np.sum((mGX - gx)**2 / sigma2 + np.log(2.*np.pi*sigma2))
         
         if fit_components == 'both':
-            L = LGT +  LGX
+            print('1',fit_components)
+            L = LGX*LGT
         if fit_components == 'tangential':
             L = LGT
+            print('2',fit_components)
         if fit_components == 'cross':
             L = LGX
+            print('3',fit_components)
 
         return L
     
@@ -190,8 +192,8 @@ def fit_gamma_components(DF):
 
     # FIT SHEAR QUADRUPOLE PROFILES
             
-    GT_func,GX_func = GAMMA_components(DF.r,0.,ellip=1.,M200 = 10**DF.lM200_ds,c200=DF.c200_ds,cosmo_params=params,terms='1h')
-    GT_2h_func,GX_2h_func = GAMMA_components(DF.r,0.,ellip=1.,M200 = 10**DF.lM200_ds,c200=DF.c200_ds,cosmo_params=params,terms='2h')
+    GT_func,GX_func = GAMMA_components_parallel(DF.r,0.,ellip=1.,M200 = 10**DF.lM200_ds,c200=DF.c200_ds,cosmo_params=params,terms='1h',ncores=10)
+    GT_2h_func,GX_2h_func = GAMMA_components_parallel(DF.r,0.,ellip=1.,M200 = 10**DF.lM200_ds,c200=DF.c200_ds,cosmo_params=params,terms='2h',ncores=10)
     
     # FIT THEM TOGETHER
     q1h,q2h,mcmc_q1h,mcmc_q2h = fit_quadrupoles_2terms(DF.r,DF.GT,DF.GX,DF.e_GT,DF.e_GX,GT_func,GX_func,GT_2h_func,GX_2h_func,'both')
