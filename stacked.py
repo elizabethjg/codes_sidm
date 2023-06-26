@@ -116,6 +116,69 @@ def fit_quadrupoles_2terms(R,gt,gx,egt,egx,GT,GX,GT_2h,GX_2h,fit_components):
     
     return np.median(mcmc_out[0][1500:]),np.median(mcmc_out[1][1500:]),mcmc_out[0],mcmc_out[1]
 
+def fit_quadrupoles_2terms_qrfunc(R,gt,gx,egt,egx,GT,GX,GT_2h,GX_2h,fit_components):
+    
+    print('fitting components: ',fit_components)
+    def log_likelihood(data_model, R, profiles, eprofiles):
+        
+        a, b, q2h = data_model
+        q1h = b*R**a
+        
+        gt, gx   = profiles
+        egt, egx = eprofiles
+        
+        e1h   = (1.-q1h)/(1.+q1h)
+        e2h   = (1.-q2h)/(1.+q2h)
+        
+        sigma2 = egt**2
+        mGT = e1h*GT + e2h*GT_2h
+        LGT = -0.5 * np.sum((mGT - gt)**2 / sigma2 + np.log(2.*np.pi*sigma2))
+        
+        mGX = e1h*GX + e2h*GX_2h
+        sigma2 = egx**2
+        LGX = -0.5 * np.sum((mGX - gx)**2 / sigma2 + np.log(2.*np.pi*sigma2))
+        
+        if fit_components == 'both':
+            L = LGT +  LGX
+        if fit_components == 'tangential':
+            L = LGT
+        if fit_components == 'cross':
+            L = LGX
+
+        return L
+    
+    
+    def log_probability(data_model, R, profiles, eprofiles):
+        
+        a, b, q2h = data_model
+        
+        if -0.5 < a < 0. and 0. < b < 1. and 0. < q2h < 1.:
+            return log_likelihood(data_model, R, profiles, eprofiles)
+            
+        return -np.inf
+    
+    # initializing
+    
+    pos = np.array([np.random.uniform(-0.1,0.,15),
+                    np.random.uniform(0.6,0.9,15),
+                    np.random.uniform(0.1,0.5,15)]).T
+    
+    nwalkers, ndim = pos.shape
+    
+    #-------------------
+    # running emcee
+    
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, 
+                                    args=(R,[gt,gx],[egt,egx]))
+                                    # pool = pool)
+                    
+    sampler.run_mcmc(pos, 1000, progress=True)
+    
+    mcmc_out = sampler.get_chain(flat=True).T
+    
+    return np.median(mcmc_out[0][1500:]),np.median(mcmc_out[1][1500:]),np.median(mcmc_out[2][1500:]),mcmc_out[0],mcmc_out[1],mcmc_out[2]
+
+
 def fit_Delta_Sigma_2h(R,zmean,ds,eds,ncores):
     
     print('fitting Delta_Sigma')
@@ -560,7 +623,7 @@ class profile_from_map:
         #get tangential ellipticities 
         et = (-e1.flatten()*np.cos(2*theta)-e2.flatten()*np.sin(2*theta))
         #get cross ellipticities
-        ex = (-e1.flatten()*np.sin(2*theta)+e2.flatten()*np.cos(2*theta))
+        ex = (e1.flatten()*np.sin(2*theta)-e2.flatten()*np.cos(2*theta))
 
         #get tangential ellipticities 
         eet = (-ee1.flatten()*np.cos(2*theta)-ee2.flatten()*np.sin(2*theta))
@@ -625,7 +688,7 @@ class profile_from_map:
         self.eGT   = -1.*eGAMMATcos
         self.eGX   = eGAMMAXsin
         
-
+'''
 class map_and_fit_profiles(profile_from_map):
 
     def __init__(self,H,nhalos,
@@ -789,7 +852,7 @@ class map_and_fit_profiles(profile_from_map):
             self.mcmc_q2h_gx = mcmc_q2h
             self.GX1h        = e1h*GX
             self.GX2h        = e2h*GX_2h
-
+'''
 
 class fit_profiles():
 
@@ -885,7 +948,8 @@ class fit_profiles():
             self.GX_fit   = GX_func(r,e)
 
         if twohalo:
-
+            
+            ##################
             # FIT SHEAR PROFILE
     
             lM,cfit,mcmc_ds_lM,mcmc_ds_c200 = fit_Delta_Sigma_2h(r,z,DS_T,eDS_T,ncores)
@@ -904,7 +968,9 @@ class fit_profiles():
             self.e_lM200_ds  = e_lM200
             self.mcmc_ds_lM  = mcmc_ds_lM
             self.mcmc_ds_c200  = mcmc_ds_c200
-                    
+            
+            
+            ##################        
             # FIT SHEAR QUADRUPOLE PROFILES
             
             GT_func,GX_func = GAMMA_components(r,z,ellip=1.,M200 = 10**logM200,c200=c200,cosmo_params=params,terms='1h')
@@ -951,3 +1017,63 @@ class fit_profiles():
             self.mcmc_q2h_gx = mcmc_q2h
             self.GX1h        = e1h*GX_func
             self.GX2h        = e2h*GX_2h_func
+
+
+            ##################        
+            # FIT SHEAR QUADRUPOLE PROFILES WITH RADIAL VARIATION
+                        
+            # FIT THEM TOGETHER
+                    
+            a,b,q2hr,mcmc_a,mcmc_b,mcmc_q2hr = fit_quadrupoles_2terms_qrfunc(DF.r,DF.GT,DF.GX,DF.e_GT,DF.e_GX,GT_func,GX_func,GT_2h_func,GX_2h_func,'both')
+            
+            q1h = b*DF.r**a
+            e1h = (1. - q1h)/(1. + q1h)
+            e2h = (1. - q2hr)/(1. + q2hr)
+            
+            self.a_2g         = a
+            self.b_2g         = b
+            self.q2hr_2g      = q2hr
+            
+            self.mcmc_a_2g    = mcmc_a
+            self.mcmc_b_2g    = mcmc_b
+            self.mcmc_q2hr_2g = mcmc_q2hr
+            
+            self.GT1h_fit2   = e1h*GT_func
+            self.GX1h_fit2   = e1h*GX_func
+            self.GT2h_fit2   = e2h*GT_2h_func
+            self.GX2h_fit2   = e2h*GX_2h_func
+            
+            # FIT THEM SEPARATELY
+            a,b,q2hr,mcmc_a,mcmc_b,mcmc_q2hr = fit_quadrupoles_2terms_qrfunc(DF.r,DF.GT,DF.GX,DF.e_GT,DF.e_GX,GT_func,GX_func,GT_2h_func,GX_2h_func,'cross')
+            
+            q1h = b*DF.r**a
+            e1h = (1. - q1h)/(1. + q1h)
+            e2h = (1. - q2hr)/(1. + q2hr)
+            
+            self.a_gx         = a
+            self.b_gx         = b
+            self.q2hr_gx      = q2hr
+            
+            self.mcmc_a_gx    = mcmc_a
+            self.mcmc_b_gx    = mcmc_b
+            self.mcmc_q2hr_gx = mcmc_q2hr
+            
+            self.GX1h   = e1h*GX_func
+            self.GX2h   = e2h*GX_2h_func
+
+            a,b,q2hr,mcmc_a,mcmc_b,mcmc_q2hr = fit_quadrupoles_2terms_qrfunc(DF.r,DF.GT,DF.GX,DF.e_GT,DF.e_GX,GT_func,GX_func,GT_2h_func,GX_2h_func,'tangential')
+            
+            q1h = b*DF.r**a
+            e1h = (1. - q1h)/(1. + q1h)
+            e2h = (1. - q2hr)/(1. + q2hr)
+            
+            self.a_gt         = a
+            self.b_gt         = b
+            self.q2hr_gt      = q2hr
+            
+            self.mcmc_a_gt    = mcmc_a
+            self.mcmc_b_gt    = mcmc_b
+            self.mcmc_q2hr_gt = mcmc_q2hr
+            
+            self.GT1h   = e1h*GT_func
+            self.GT2h   = e2h*GT_2h_func
