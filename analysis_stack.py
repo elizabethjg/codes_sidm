@@ -10,25 +10,20 @@ import emcee
 from models_profiles import GAMMA_components_parallel
 params = {'flat': True, 'H0': 70.0, 'Om0': 0.25, 'Ob0': 0.044, 'sigma8': 0.8, 'ns': 0.95}
 
-
-def fit_quadrupoles_GX(R,gt,gx,egt,egx,GT,GX,GT_2h,GX_2h,fit_components):
+def fit_S2_2terms(R,s2,e_s2,S2,S2_2h):
     
-    print('fitting components: ',fit_components)
-    def log_likelihood(data_model, R, profiles, eprofiles):
+    def log_likelihood(data_model, R, s2, e_s2):
         
         q1h, q2h = data_model
-        
-        gx   = profiles
-        egx = eprofiles
-        
+                
         e1h   = (1.-q1h)/(1.+q1h)
         e2h   = (1.-q2h)/(1.+q2h)
-                
-        mGX = e1h*GX + e2h*GX_2h
-        sigma2 = egx**2
-        LGX = -0.5 * np.sum((mGX - gx)**2 / sigma2 + np.log(2.*np.pi*sigma2))
         
-        return LGX
+        sigma2 = e_s2**2
+        model = e1h*S2 + e2h*S2_2h
+        L = -0.5 * np.sum((model - s2)**2 / sigma2 + np.log(2.*np.pi*sigma2))
+
+        return L
     
     
     def log_probability(data_model, R, profiles, eprofiles):
@@ -51,7 +46,7 @@ def fit_quadrupoles_GX(R,gt,gx,egt,egx,GT,GX,GT_2h,GX_2h,fit_components):
     # running emcee
     
     sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, 
-                                    args=(R,gx,egx))
+                                    args=(R,s2,e_s2))
                                     # pool = pool)
                     
     sampler.run_mcmc(pos, 250, progress=True)
@@ -59,6 +54,7 @@ def fit_quadrupoles_GX(R,gt,gx,egt,egx,GT,GX,GT_2h,GX_2h,fit_components):
     mcmc_out = sampler.get_chain(flat=True).T
     
     return np.median(mcmc_out[0][1500:]),np.median(mcmc_out[1][1500:]),mcmc_out[0],mcmc_out[1]
+
 
 def fit_quadrupoles_2terms(R,gt,gx,egt,egx,GT,GX,GT_2h,GX_2h,fit_components):
     
@@ -123,8 +119,7 @@ def fit_quadrupoles_2terms(R,gt,gx,egt,egx,GT,GX,GT_2h,GX_2h,fit_components):
 def fit_quadrupoles_2terms_qrfunc(R,gt,gx,egt,egx,GT,GX,GT_2h,GX_2h,fit_components):
     
     print('fitting components: ',fit_components)
-    def log_likelihood(data_model, R, profiles, eprofiles,
-                       fit_components = 'both'):
+    def log_likelihood(data_model, R, profiles, eprofiles):
         
         a, b, q2h = data_model
         q1h = b*R**a
@@ -190,8 +185,21 @@ def fit_gamma_components(DF):
             
     GT_func,GX_func = GAMMA_components_parallel(DF.r,0.,ellip=1.,M200 = 10**DF.lM200_ds,c200=DF.c200_ds,cosmo_params=params,terms='1h',ncores=10)
     GT_2h_func,GX_2h_func = GAMMA_components_parallel(DF.r,0.,ellip=1.,M200 = 10**DF.lM200_ds,c200=DF.c200_ds,cosmo_params=params,terms='2h',ncores=10)
-                
-    a,b,q2h,mcmc_a,mcmc_b,mcmc_q2h = fit_quadrupoles_2terms_qrfunc(DF.r,DF.GT,DF.GX,DF.e_GT,DF.e_GX,GT_func,GX_func,GT_2h_func,GX_2h_func,'cross')
+    S2    = S2_quadrupole(DF.r,0.,M200 = 10**DF.lM200_ds,c200=DF.c200_ds,terms='1h',cosmo_params=params)
+    S2_2h = S2_quadrupole(DF.r,0.,M200 = 10**DF.lM200_ds,c200=DF.c200_ds,terms='2h',cosmo_params=params)
+                                                                             
+    q_s2,q2h_q_s2,mcmc_q_s2,mcmc_q2h_q_s2 = fit_S2_2terms(DF.r,DF.S2,DF.e_S2,S2,S2_2h)
+    
+    q_x,q2h_q_x,mcmc_q_x,mcmc_q2h_q_x = fit_quadrupoles_2terms(DF.r,DF.GT,DF.GX,DF.e_GT,DF.e_GX,GT_func,GX_func,GT_2h_func,GX_2h_func,'cross')
+    a_x,b_x,q2h_ab_x,mcmc_a_x,mcmc_b_x,mcmc_q2h_ab_x = fit_quadrupoles_2terms_qrfunc(DF.r,DF.GT,DF.GX,DF.e_GT,DF.e_GX,GT_func,GX_func,GT_2h_func,GX_2h_func,'cross')
+
+    q_t,q2h_q_t,mcmc_q_t,mcmc_q2h_q_t = fit_quadrupoles_2terms(DF.r,DF.GT,DF.GX,DF.e_GT,DF.e_GX,GT_func,GX_func,GT_2h_func,GX_2h_func,'tangential')
+    a_t,b_t,q2h_ab_t,mcmc_a_t,mcmc_b_t,mcmc_q2h_ab_t = fit_quadrupoles_2terms_qrfunc(DF.r,DF.GT,DF.GX,DF.e_GT,DF.e_GX,GT_func,GX_func,GT_2h_func,GX_2h_func,'tangential')
+
+    q,q2h_q,mcmc_q,mcmc_q2h_q = fit_quadrupoles_2terms(DF.r,DF.GT,DF.GX,DF.e_GT,DF.e_GX,GT_func,GX_func,GT_2h_func,GX_2h_func,'both')
+    a,b,q2h_ab,mcmc_a,mcmc_b,mcmc_q2h_ab = fit_quadrupoles_2terms_qrfunc(DF.r,DF.GT,DF.GX,DF.e_GT,DF.e_GX,GT_func,GX_func,GT_2h_func,GX_2h_func,'both')
+    a,b,q2h,mcmc_a,mcmc_b,mcmc_q2h = fit_quadrupoles_2terms_qrfunc(DF.r,DF.GT,DF.GX,DF.e_GT,DF.e_GX,GT_func,GX_func,GT_2h_func,GX_2h_func,'both')
+    
     
     return a,b,q2h,mcmc_a,mcmc_b,mcmc_q2h
 
