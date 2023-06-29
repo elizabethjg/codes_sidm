@@ -147,40 +147,64 @@ def compare_q(DM,SIDM,ax,j):
 
 def corner_result(DM,SIDM,sname,name_tensor):
 
-    mcmc_DM = np.array([DM.mcmc_q1h_gt[1500:],DM.mcmc_q2h_gt[1500:]]).T
-    mcmc_SIDM = np.array([SIDM.mcmc_q1h_gt[1500:],SIDM.mcmc_q2h_gt[1500:]]).T
+    mcmc_DM = np.array([DM.mcmc_q1h_gx[1500:],DM.mcmc_q2h_gx[1500:]]).T
+    mcmc_SIDM = np.array([SIDM.mcmc_q1h_gx[1500:],SIDM.mcmc_q2h_gx[1500:]]).T
+    # mcmc_DMr = np.array([DM.mcmc_a_2g[1500:],DM.mcmc_b_2g[1500:],DM.mcmc_q2hr_2g[1500:]]).T
+    # mcmc_SIDMr = np.array([SIDM.mcmc_a_2g[1500:],SIDM.mcmc_b_2g[1500:],SIDM.mcmc_q2hr_2g[1500:]]).T
     mcmc_DM_ds = np.array([DM.mcmc_ds_lM[1500:],DM.mcmc_ds_c200[1500:]]).T
     mcmc_SIDM_ds = np.array([SIDM.mcmc_ds_lM[1500:],SIDM.mcmc_ds_c200[1500:]]).T
-
+    
+    ##########
     f = corner.corner(mcmc_DM,labels=['$q_{1h}$','$q_{2h}$'],
                   smooth=1.,label_kwargs=({'fontsize':16}),
                   color='C7',truths=np.median(mcmc_DM,axis=0),truth_color='C7',
                   hist_kwargs=({'density':True}), levels=(0.99,0.9,0.6,0.3),
-                  range=[(0.6,0.85),(0.12,0.75)])
+                  range=[(0.,1.),(0.,1.)])
     f = corner.corner(mcmc_SIDM,
                   smooth=1.,label_kwargs=({'fontsize':16}),
                   color='C6',truths=np.median(mcmc_SIDM,axis=0),truth_color='C6',
                   hist_kwargs=({'density':True}), levels=(0.99,0.9,0.6,0.3),
-                  range=[(0.6,0.85),(0.12,0.75)],fig=f)
+                  range=[(0.,1.),(0.,1.)],fig=f)
 
     axes = f.axes
     axes[1].text(0.5,0.5,sname,fontsize=16)
     f.savefig('../final_plots/corner_'+sname+'_'+name_tensor+'_v2.pdf',bbox_inches='tight')
+    f.savefig('../final_plots/corner_'+sname+'_'+name_tensor+'_v2.png',bbox_inches='tight')
+    
+    ##########
+    # f = corner.corner(mcmc_DM,labels=['$a$','$b$','$q_{2h}$'],
+                  # smooth=1.,label_kwargs=({'fontsize':16}),
+                  # color='C7',truths=np.median(mcmc_DM,axis=0),truth_color='C7',
+                  # hist_kwargs=({'density':True}), levels=(0.99,0.9,0.6,0.3),
+                  # range=[(-0.1,0.),(0.4,0.85),(0.12,0.95)])
+    # f = corner.corner(mcmc_SIDM,
+                  # smooth=1.,label_kwargs=({'fontsize':16}),
+                  # color='C6',truths=np.median(mcmc_SIDM,axis=0),truth_color='C6',
+                  # hist_kwargs=({'density':True}), levels=(0.99,0.9,0.6,0.3),
+                  # range=[(-0.1,0.),(0.4,0.85),(0.12,0.95)],fig=f)
+
+    # axes = f.axes
+    # axes[1].text(0.5,0.5,sname,fontsize=16)
+    # f.savefig('../final_plots/corner_'+sname+'_'+name_tensor+'_r_v2.pdf',bbox_inches='tight')
+    # f.savefig('../final_plots/corner_'+sname+'_'+name_tensor+'_r_v2.png',bbox_inches='tight')
+
+    ##########
 
     f = corner.corner(mcmc_DM_ds,labels=['$\log M_{200}$','$c_{200}$'],
                   smooth=1.,label_kwargs=({'fontsize':16}),
                   color='C7',truths=np.median(mcmc_DM_ds,axis=0),truth_color='C7',
                   hist_kwargs=({'density':True}), levels=(0.99,0.9,0.6,0.3),
-                  range=[(12,15),(4,8.2)])
+                  range=[(12,15),(3.5,8.2)])
     f = corner.corner(mcmc_SIDM_ds,
                   smooth=1.,label_kwargs=({'fontsize':16}),
                   color='C6',truths=np.median(mcmc_SIDM_ds,axis=0),truth_color='C6',
                   hist_kwargs=({'density':True}), levels=(0.99,0.9,0.6,0.3),
-                  range=[(12,15),(4,8.2)],fig=f)
+                  range=[(12,15),(3.5,8.2)],fig=f)
 
     axes = f.axes
     axes[1].text(0.5,0.5,sname,fontsize=16)
     f.savefig('../final_plots/corner_'+sname+'_v2.pdf',bbox_inches='tight')
+    f.savefig('../final_plots/corner_'+sname+'_v2.png',bbox_inches='tight')
     
     
  
@@ -216,15 +240,23 @@ def plt_profile_fitted_final(DM,SIDM,RIN,ROUT,axx3):
     
     
     ax1.plot(DM.r,DM.GT,'C7')
+    ax1.plot(SIDM.r,SIDM.GT,'C6--')    
+    ax1.fill_between(DM.r,DM.GT+DM.e_GT,DM.GT-DM.e_GT,color='C7',alpha=0.4)
+    ax1.fill_between(SIDM.r,SIDM.GT+SIDM.e_GT,SIDM.GT-SIDM.e_GT,color='C6',alpha=0.4)
+    
     ax1.plot(DM.r,DM.GT1h+DM.GT2h,'C3',label='1h+2h')
     ax1.plot(DM.r,DM.GT1h,'C1',label='1h')
     ax1.plot(DM.r,DM.GT2h,'C8',label='2h')
-    ax1.plot(SIDM.r,SIDM.GT,'C6--')    
     ax1.plot(SIDM.r,SIDM.GT1h+SIDM.GT2h,'C3--')
     ax1.plot(SIDM.r,SIDM.GT1h,'C1--')
     ax1.plot(SIDM.r,SIDM.GT2h,'C8--')
-    ax1.fill_between(DM.r,DM.GT+DM.e_GT,DM.GT-DM.e_GT,color='C7',alpha=0.4)
-    ax1.fill_between(SIDM.r,SIDM.GT+SIDM.e_GT,SIDM.GT-SIDM.e_GT,color='C6',alpha=0.4)
+    # ax1.plot(DM.r,DM.GT1h_fit2+DM.GT2h_fit2,'C3',label='1h+2h')
+    # ax1.plot(DM.r,DM.GT1h_fit2,'C1',label='1h')
+    # ax1.plot(DM.r,DM.GT2h_fit2,'C8',label='2h')
+    # ax1.plot(SIDM.r,SIDM.GT1h_fit2+SIDM.GT2h_fit2,'C3--')
+    # ax1.plot(SIDM.r,SIDM.GT1h_fit2,'C1--')
+    # ax1.plot(SIDM.r,SIDM.GT2h_fit2,'C8--')
+    
     ax1.set_xscale('log')
     ax1.set_yscale('log')
     ax1.set_xlabel('r [$h^{-1}$ Mpc]')
@@ -240,16 +272,24 @@ def plt_profile_fitted_final(DM,SIDM,RIN,ROUT,axx3):
         
     ax2.plot([0,10],[0,0],'k')
     ax2.plot(DM.r,DM.GX,'C7',label='standard')
+    ax2.plot(SIDM.r,SIDM.GX,'C6--',label='reduced')    
+    ax2.fill_between(DM.r,DM.GX+DM.e_GX,DM.GX-DM.e_GX,color='C7',alpha=0.4)
+    ax2.fill_between(SIDM.r,SIDM.GX+SIDM.e_GX,SIDM.GX-SIDM.e_GX,color='C6',alpha=0.4)
+    
     ax2.plot(DM.r,DM.GX1h+DM.GX2h,'C3')
     ax2.plot(DM.r,DM.GX1h,'C1')
     ax2.plot(DM.r,DM.GX2h,'C8')
-    ax2.plot(SIDM.r,SIDM.GX,'C6--',label='reduced')    
     ax2.plot(SIDM.r,SIDM.GX1h+SIDM.GX2h,'C3--')
     ax2.plot(SIDM.r,SIDM.GX1h,'C1--')
     ax2.plot(SIDM.r,SIDM.GX2h,'C8--')
+    # ax2.plot(DM.r,DM.GX1h_fit2+DM.GX2h_fit2,'C3')
+    # ax2.plot(DM.r,DM.GX1h_fit2,'C1')
+    # ax2.plot(DM.r,DM.GX2h_fit2,'C8')
+    # ax2.plot(SIDM.r,SIDM.GX1h_fit2+SIDM.GX2h_fit2,'C3--')
+    # ax2.plot(SIDM.r,SIDM.GX1h_fit2,'C1--')
+    # ax2.plot(SIDM.r,SIDM.GX2h_fit2,'C8--')
+    
     # ax2.legend(loc=3,frameon=False)
-    ax2.fill_between(DM.r,DM.GX+DM.e_GX,DM.GX-DM.e_GX,color='C7',alpha=0.4)
-    ax2.fill_between(SIDM.r,SIDM.GX+SIDM.e_GX,SIDM.GX-SIDM.e_GX,color='C6',alpha=0.4)
     ax2.set_xlabel('r [$h^{-1}$ Mpc]')
     ax2.set_ylabel(r'$\Gamma_\times [h M_\odot/pc^2]$',labelpad=1.2)
     ax2.set_xscale('log')

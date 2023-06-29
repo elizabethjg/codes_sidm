@@ -50,11 +50,11 @@ def fit_quadrupoles(R,gt,gx,egt,egx,GT,GX):
                                     args=(R,[gt,gx],[egt,egx]))
                                     # pool = pool)
                     
-    sampler.run_mcmc(pos, 250, progress=True)
+    sampler.run_mcmc(pos, 1000, progress=True)
     
     mcmc_out = sampler.get_chain(flat=True)
     
-    return np.median(mcmc_out[1500:]),mcmc_out
+    return np.median(mcmc_out[3000:]),mcmc_out
 
 def fit_quadrupoles_2terms(R,gt,gx,egt,egx,GT,GX,GT_2h,GX_2h,fit_components):
     
@@ -110,11 +110,11 @@ def fit_quadrupoles_2terms(R,gt,gx,egt,egx,GT,GX,GT_2h,GX_2h,fit_components):
                                     args=(R,[gt,gx],[egt,egx]))
                                     # pool = pool)
                     
-    sampler.run_mcmc(pos, 250, progress=True)
+    sampler.run_mcmc(pos, 1000, progress=True)
     
     mcmc_out = sampler.get_chain(flat=True).T
     
-    return np.median(mcmc_out[0][1500:]),np.median(mcmc_out[1][1500:]),mcmc_out[0],mcmc_out[1]
+    return np.median(mcmc_out[0][3000:]),np.median(mcmc_out[1][3000:]),mcmc_out[0],mcmc_out[1]
 
 def fit_quadrupoles_2terms_qrfunc(R,gt,gx,egt,egx,GT,GX,GT_2h,GX_2h,fit_components):
     
@@ -176,7 +176,7 @@ def fit_quadrupoles_2terms_qrfunc(R,gt,gx,egt,egx,GT,GX,GT_2h,GX_2h,fit_componen
     
     mcmc_out = sampler.get_chain(flat=True).T
     
-    return np.median(mcmc_out[0][1500:]),np.median(mcmc_out[1][1500:]),np.median(mcmc_out[2][1500:]),mcmc_out[0],mcmc_out[1],mcmc_out[2]
+    return np.median(mcmc_out[0][3000:]),np.median(mcmc_out[1][3000:]),np.median(mcmc_out[2][3000:]),mcmc_out[0],mcmc_out[1],mcmc_out[2]
 
 
 def fit_Delta_Sigma_2h(R,zmean,ds,eds,ncores):
@@ -623,7 +623,7 @@ class profile_from_map:
         #get tangential ellipticities 
         et = (-e1.flatten()*np.cos(2*theta)-e2.flatten()*np.sin(2*theta))
         #get cross ellipticities
-        ex = (e1.flatten()*np.sin(2*theta)-e2.flatten()*np.cos(2*theta))
+        ex = (-1.*e1.flatten()*np.sin(2*theta)+e2.flatten()*np.cos(2*theta))
 
         #get tangential ellipticities 
         eet = (-ee1.flatten()*np.cos(2*theta)-ee2.flatten()*np.sin(2*theta))
@@ -1038,10 +1038,10 @@ class fit_profiles():
             self.mcmc_b_2g    = mcmc_b
             self.mcmc_q2hr_2g = mcmc_q2hr
             
-            self.GT1h_fit2   = e1h*GT_func
-            self.GX1h_fit2   = e1h*GX_func
-            self.GT2h_fit2   = e2h*GT_2h_func
-            self.GX2h_fit2   = e2h*GX_2h_func
+            self.GT1hr_fit2   = e1h*GT_func
+            self.GX1hr_fit2   = e1h*GX_func
+            self.GT2hr_fit2   = e2h*GT_2h_func
+            self.GX2hr_fit2   = e2h*GX_2h_func
             
             # FIT THEM SEPARATELY
             a,b,q2hr,mcmc_a,mcmc_b,mcmc_q2hr = fit_quadrupoles_2terms_qrfunc(DF.r,DF.GT,DF.GX,DF.e_GT,DF.e_GX,GT_func,GX_func,GT_2h_func,GX_2h_func,'cross')
@@ -1058,8 +1058,8 @@ class fit_profiles():
             self.mcmc_b_gx    = mcmc_b
             self.mcmc_q2hr_gx = mcmc_q2hr
             
-            self.GX1h   = e1h*GX_func
-            self.GX2h   = e2h*GX_2h_func
+            self.GX1hr   = e1h*GX_func
+            self.GX2hr   = e2h*GX_2h_func
 
             a,b,q2hr,mcmc_a,mcmc_b,mcmc_q2hr = fit_quadrupoles_2terms_qrfunc(DF.r,DF.GT,DF.GX,DF.e_GT,DF.e_GX,GT_func,GX_func,GT_2h_func,GX_2h_func,'tangential')
             
@@ -1075,5 +1075,5 @@ class fit_profiles():
             self.mcmc_b_gt    = mcmc_b
             self.mcmc_q2hr_gt = mcmc_q2hr
             
-            self.GT1h   = e1h*GT_func
-            self.GT2h   = e2h*GT_2h_func
+            self.GT1hr   = e1h*GT_func
+            self.GT2hr   = e2h*GT_2h_func
