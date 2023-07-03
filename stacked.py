@@ -623,7 +623,7 @@ class profile_from_map:
         #get tangential ellipticities 
         et = (-e1.flatten()*np.cos(2*theta)-e2.flatten()*np.sin(2*theta))
         #get cross ellipticities
-        ex = (-1.*e1.flatten()*np.sin(2*theta)+e2.flatten()*np.cos(2*theta))
+        ex = (-e1.flatten()*np.sin(2*theta)+e2.flatten()*np.cos(2*theta))
 
         #get tangential ellipticities 
         eet = (-ee1.flatten()*np.cos(2*theta)-ee2.flatten()*np.sin(2*theta))
@@ -1024,9 +1024,9 @@ class fit_profiles():
                         
             # FIT THEM TOGETHER
                     
-            a,b,q2hr,mcmc_a,mcmc_b,mcmc_q2hr = fit_quadrupoles_2terms_qrfunc(DF.r,DF.GT,DF.GX,DF.e_GT,DF.e_GX,GT_func,GX_func,GT_2h_func,GX_2h_func,'both')
+            a,b,q2hr,mcmc_a,mcmc_b,mcmc_q2hr = fit_quadrupoles_2terms_qrfunc(r,GT,GX,eGT,eGX,GT_func,GX_func,GT_2h_func,GX_2h_func,'both')
             
-            q1h = b*DF.r**a
+            q1h = b*r**a
             e1h = (1. - q1h)/(1. + q1h)
             e2h = (1. - q2hr)/(1. + q2hr)
             
@@ -1044,9 +1044,9 @@ class fit_profiles():
             self.GX2hr_fit2   = e2h*GX_2h_func
             
             # FIT THEM SEPARATELY
-            a,b,q2hr,mcmc_a,mcmc_b,mcmc_q2hr = fit_quadrupoles_2terms_qrfunc(DF.r,DF.GT,DF.GX,DF.e_GT,DF.e_GX,GT_func,GX_func,GT_2h_func,GX_2h_func,'cross')
+            a,b,q2hr,mcmc_a,mcmc_b,mcmc_q2hr = fit_quadrupoles_2terms_qrfunc(r,GT,GX,eGT,eGX,GT_func,GX_func,GT_2h_func,GX_2h_func,'cross')
             
-            q1h = b*DF.r**a
+            q1h = b*r**a
             e1h = (1. - q1h)/(1. + q1h)
             e2h = (1. - q2hr)/(1. + q2hr)
             
@@ -1061,9 +1061,9 @@ class fit_profiles():
             self.GX1hr   = e1h*GX_func
             self.GX2hr   = e2h*GX_2h_func
 
-            a,b,q2hr,mcmc_a,mcmc_b,mcmc_q2hr = fit_quadrupoles_2terms_qrfunc(DF.r,DF.GT,DF.GX,DF.e_GT,DF.e_GX,GT_func,GX_func,GT_2h_func,GX_2h_func,'tangential')
+            a,b,q2hr,mcmc_a,mcmc_b,mcmc_q2hr = fit_quadrupoles_2terms_qrfunc(r,GT,GX,eGT,eGX,GT_func,GX_func,GT_2h_func,GX_2h_func,'tangential')
             
-            q1h = b*DF.r**a
+            q1h = b*r**a
             e1h = (1. - q1h)/(1. + q1h)
             e2h = (1. - q2hr)/(1. + q2hr)
             
