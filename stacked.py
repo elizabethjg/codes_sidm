@@ -8,7 +8,7 @@ from lenspack.image.inversion import ks93inv
 from models_profiles import *
 import emcee
 from scipy.optimize import curve_fit
-params = {'flat': True, 'H0': 70.0, 'Om0': 0.25, 'Ob0': 0.044, 'sigma8': 0.8, 'ns': 0.95}
+params = {'flat': True, 'H0': 70.0, 'Om0': 0.3, 'Ob0': 0.045, 'sigma8': 0.811, 'ns': 0.96}
 
 def fit_quadrupoles(R,gt,gx,egt,egx,GT,GX):
     
@@ -427,13 +427,14 @@ def make_shape_profile_parallel(main_file,path,haloids,reduced = False, iterativ
     return rlims, a_profile, b_profile
     
 
-def stack_halos_2DH(main_file,path,haloids,reduced = False, iterative = False, resolution=500):
+def stack_halos_2DH(main_file,path,haloids,reduced = False, iterative = False, resolution=1000):
 
     main = pd.read_csv(main_file)
 
     H = np.zeros((resolution-1, resolution-1))
     
     xedges = np.linspace(-8,8,resolution)
+    xedges = xedges[abs(xedges)>0.001]
     lsize  = np.diff(xedges)[0]
     xb, yb = np.meshgrid(xedges[:-1],xedges[:-1])+(lsize/2.)
  
@@ -466,7 +467,7 @@ def stack_halos_2DH_unpack(minput):
 
 def stack_halos_parallel(main_file,path,haloids,
                          reduced = False,iterative = False,
-                         ncores=10, resolution=500):
+                         ncores=10, resolution=1000):
     
 
     if ncores > len(haloids):
@@ -598,11 +599,12 @@ class stack_profile:
 
 class profile_from_map:
 
-    def __init__(self,H,nhalos,RIN=100.,ROUT=1500.,ndots=20,resolution=500):
+    def __init__(self,H,nhalos,RIN=100.,ROUT=1500.,ndots=20,resolution=1000):
 
         # MAKE KAPPA MAP
         mp = 0.013398587e10
         xedges = np.linspace(-8,8,resolution)
+        xedges = xedges[abs(xedges)>0.001]
         lsize  = np.diff(xedges)[0]
         xb, yb = np.meshgrid(xedges[:-1],xedges[:-1])+(lsize/2.)
 
@@ -693,7 +695,7 @@ class map_and_fit_profiles(profile_from_map):
 
     def __init__(self,H,nhalos,
                  RIN=100.,ROUT=1000.,ndots=20,
-                 resolution=500,params=params,z=0.,
+                 resolution=1000,params=params,z=0.,
                  twohalo = False,
                  ncores=36):
         

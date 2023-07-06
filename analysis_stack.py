@@ -122,11 +122,33 @@ input_folder  = "./arreglos/"
 
 ti = time.time()
 
+q_1h_T_dm = np.array([])
+q_1h_X_dm = np.array([])
+q_2h_T_dm = np.array([])
+q_2h_X_dm = np.array([])
+q_1h_T_sidm = np.array([])
+q_1h_X_sidm = np.array([])
+q_2h_T_sidm = np.array([])
+q_2h_X_sidm = np.array([])
+
+a_T_dm = np.array([])
+a_X_dm = np.array([])
+b_T_dm = np.array([])
+b_X_dm = np.array([])
+q_2hr_T_dm = np.array([])
+q_2hr_X_dm = np.array([])
+a_T_sidm = np.array([])
+a_X_sidm = np.array([])
+b_T_sidm = np.array([])
+b_X_sidm = np.array([])
+q_2hr_T_sidm = np.array([])
+q_2hr_X_sidm = np.array([])
     
 
 # El primer for es sobre una lista que tiene los tipos de tensores
 # standard o reducido
 for idx, name_tensor in enumerate(typetensor):
+    
     
     f, ax_all = plt.subplots(6,3, figsize=(14,16),sharex = True)
     f.subplots_adjust(hspace=0)
@@ -186,6 +208,28 @@ for idx, name_tensor in enumerate(typetensor):
         filename_SIDM = input_folder + "%s_SIDM_%s.npy" % (name_folder, name_tensor)
         # llama a la clase pack que lee el archivo y lo carga
         SIDM = pack(filename_SIDM)
+        
+        q_1h_T_dm = np.append(q_1h_T_dm,DM.q1h_gt)
+        q_1h_X_dm = np.append(q_1h_X_dm,DM.q1h_gx)
+        q_2h_T_dm = np.append(q_2h_T_dm,DM.q2h_gt)
+        q_2h_X_dm = np.append(q_2h_X_dm,DM.q2h_gx)
+        q_1h_T_sidm = np.append(q_1h_T_sidm,SIDM.q1h_gt)
+        q_1h_X_sidm = np.append(q_1h_X_sidm,SIDM.q1h_gx)
+        q_2h_T_sidm = np.append(q_2h_T_sidm,SIDM.q2h_gt)
+        q_2h_X_sidm = np.append(q_2h_X_sidm,SIDM.q2h_gx)
+
+        a_T_dm       = np.append(a_T_dm,DM.a_gt)
+        a_X_dm       = np.append(a_X_dm,DM.a_gx)
+        b_T_dm       = np.append(b_T_dm,DM.b_gt)
+        b_X_dm       = np.append(b_X_dm,DM.b_gx)
+        q_2hr_T_dm   = np.append(q_2hr_T_dm,DM.q2hr_gt)
+        q_2hr_X_dm   = np.append(q_2hr_X_dm,DM.q2hr_gx)
+        a_T_sidm     = np.append(a_T_sidm,SIDM.a_gt)
+        a_X_sidm     = np.append(a_X_sidm,SIDM.a_gx)
+        b_T_sidm     = np.append(b_T_sidm,SIDM.b_gt)
+        b_X_sidm     = np.append(b_X_sidm,SIDM.b_gx)
+        q_2hr_T_sidm = np.append(q_2hr_T_sidm,SIDM.q2hr_gt)
+        q_2hr_X_sidm = np.append(q_2hr_X_sidm,SIDM.q2hr_gx)
         
         corner_result(DM,SIDM,lhs[jdx],name_tensor)
             
@@ -248,10 +292,9 @@ for idx, name_tensor in enumerate(typetensor):
     fdist_it.savefig('../final_plots/dist_'+name_tensor+'.png',bbox_inches='tight')
     fdistr_it.savefig('../final_plots/dist_'+name_tensor+'_r.png',bbox_inches='tight')
 
-    f.savefig('../final_plots/profile_'+name_tensor+'.png',bbox_inches='tight')
-    f2.savefig('../final_plots/profile_'+name_tensor+'_v2.png',bbox_inches='tight')
+    f.savefig('../final_plots/profile2_'+name_tensor+'.png',bbox_inches='tight')
+    f2.savefig('../final_plots/profile2_'+name_tensor+'_v2.png',bbox_inches='tight')
     # fcomp_2g.savefig('../final_plots/compare_'+name_tensor+'_v2.pdf',bbox_inches='tight')
-    f.savefig('../final_plots/profile_'+name_tensor+'_v2.png',bbox_inches='tight')
     fcomp_2g.savefig('../final_plots/compare_'+name_tensor+'.png',bbox_inches='tight')
     fcomp_t.savefig('../final_plots/compare_'+name_tensor+'_t.png',bbox_inches='tight')
     fcomp_x.savefig('../final_plots/compare_'+name_tensor+'_x.png',bbox_inches='tight')
