@@ -8,7 +8,7 @@ from make_plots import *
 # from stacked import fit_quadrupoles_2terms_qrfunc
 import emcee
 from models_profiles import GAMMA_components_parallel
-params = {'flat': True, 'H0': 70.0, 'Om0': 0.25, 'Ob0': 0.044, 'sigma8': 0.8, 'ns': 0.95}
+params = {'flat': True, 'H0': 70.0, 'Om0': 0.3, 'Ob0': 0.045, 'sigma8': 0.811, 'ns': 0.96}
 
 
 
@@ -100,7 +100,7 @@ class pack():
       self.err_qs       = np.load(f)
       self.main         = pickle.loads(np.load(f, allow_pickle=True).item())
       f.close()
-      
+
       # guardo estos atributos extras para graficarlos
       self.q2d          = np.concatenate((self.main.b2D_xy/self.main.a2D_xy,self.main.b2D_zx/self.main.a2D_zx,self.main.b2D_yz/self.main.a2D_yz))
       self.q2dr         = np.concatenate((self.main.b2Dr_xy/self.main.a2Dr_xy,self.main.b2Dr_zx/self.main.a2Dr_zx,self.main.b2Dr_yz/self.main.a2Dr_yz))

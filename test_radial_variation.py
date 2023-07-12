@@ -5,7 +5,7 @@ from models_profiles import *
 import matplotlib.pyplot as plt
 from make_grid import Grilla
 from lenspack.image.inversion import ks93inv
-params = {'flat': True, 'H0': 70.0, 'Om0': 0.25, 'Ob0': 0.044, 'sigma8': 0.8, 'ns': 0.95}
+params = {'flat': True, 'H0': 70.0, 'Om0': 0.3, 'Ob0': 0.045, 'sigma8': 0.811, 'ns': 0.96}
 
 mp = 1.
 nhalos = 1.

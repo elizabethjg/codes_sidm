@@ -8,7 +8,7 @@ from binned_plots import make_plot2
 from models_profiles import *
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
-params = {'flat': True, 'H0': 70.0, 'Om0': 0.25, 'Ob0': 0.044, 'sigma8': 0.8, 'ns': 0.95}
+params = {'flat': True, 'H0': 70.0, 'Om0': 0.3, 'Ob0': 0.045, 'sigma8': 0.811, 'ns': 0.96}
 folder = '../profiles3/'
 
 def fit_qr(r,q,err_q):

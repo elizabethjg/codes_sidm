@@ -12,7 +12,7 @@ from models_profiles import *
 from colossus.halo import concentration
 from colossus.cosmology import cosmology  
 from colossus.halo import mass_defs
-params = {'flat': True, 'H0': 70.0, 'Om0': 0.25, 'Ob0': 0.044, 'sigma8': 0.8, 'ns': 0.95}
+params = {'flat': True, 'H0': 70.0, 'Om0': 0.3, 'Ob0': 0.045, 'sigma8': 0.811, 'ns': 0.96}
 cosmology.addCosmology('MICE', params)
 cosmo = cosmology.setCosmology('MICE')
 
