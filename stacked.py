@@ -599,7 +599,7 @@ class stack_profile:
 
 class profile_from_map:
 
-    def __init__(self,H,nhalos,RIN=100.,ROUT=1500.,ndots=20,resolution=1000):
+    def __init__(self,H,nhalos,RIN=100.,ROUT=5000.,ndots=20,resolution=1000):
 
         # MAKE KAPPA MAP
         mp = 0.013398587e10
@@ -1079,3 +1079,148 @@ class fit_profiles():
             
             self.GT1hr   = e1h*GT_func
             self.GT2hr   = e2h*GT_2h_func
+
+
+class quadrupoles_from_map_model:
+    
+    def __init__(self,M200,c200,
+                RIN,ROUT,ndots,
+                z=0,resolution=2000,
+                cosmo_params=params):
+        
+        
+        # MAKE KAPPA MAP
+        xedges = np.linspace(-8,8,resolution)
+        xedges = xedges[abs(xedges)>0.001]
+        lsize  = np.diff(xedges)[0]
+        xb, yb = np.meshgrid(xedges[:-1],xedges[:-1])+(lsize/2.)
+
+        r = np.sqrt(xb**2+yb**2)
+        theta  = np.arctan2(yb,xb)
+        
+        self.r     = r
+        self.theta = theta
+        self.M200  = M200
+        self.c200  = c200
+        self.z     = z
+        self.params = params
+        self.ndots  = ndots
+
+        xb = xb.flatten()
+        yb = yb.flatten()
+
+        self.rp     = np.sqrt(xb**2+yb**2)
+        self.thetap = np.arctan2(yb,xb)
+
+        bines = np.round(np.logspace(np.log10(RIN),np.log10(ROUT),num=ndots+1),0)
+        self.dig = np.digitize(self.rp*1.e3,bines)
+        self.R = (bines[:-1] + np.diff(bines)*0.5)*1.e-3
+        
+        GT_2h,GX_2h = GAMMA_components(self.R,self.z,ellip=1.,
+                                        M200 = self.M200,c200=self.c200,
+                                        cosmo_params=self.params,terms='2h')
+                                        
+        self.GT_2h = GT_2h
+        self.GX_2h = GX_2h
+
+    
+    def __call__(self,a,b):
+
+        qr = b*self.r**a
+        Rellip = np.sqrt((self.r**2)*(qr*(np.cos(self.theta))**2 + (1./qr)*(np.sin(self.theta))**2))                
+        Sellip = Sigma_NFW_2h(Rellip,self.z,self.M200,self.c200,cosmo_params=self.params)
+
+        kE = Sellip 
+        kB = np.zeros(kE.shape)
+
+        e1, e2   = ks93inv(kE, kB)
+
+        #get tangential ellipticities 
+        et = (-e1.flatten()*np.cos(2*self.thetap)-e2.flatten()*np.sin(2*self.thetap))
+        #get cross ellipticities
+        ex = (-e1.flatten()*np.sin(2*self.thetap)+e2.flatten()*np.cos(2*self.thetap))
+        # get kappa
+
+        
+        
+        GAMMATcos = []
+        GAMMAXsin = []
+                                
+        for nbin in range(self.ndots):
+            mbin = self.dig == nbin+1              
+                        
+            GAMMATcos = np.append(GAMMATcos,np.sum(et[mbin]*np.cos(2.*self.thetap[mbin]))/np.sum(np.cos(2.*self.thetap[mbin])**2))
+            GAMMAXsin = np.append(GAMMAXsin,np.sum(ex[mbin]*np.sin(2.*self.thetap[mbin]))/np.sum(np.sin(2.*self.thetap[mbin])**2))
+       
+        return {'GT' : GAMMATcos,
+                'GX' : -1*GAMMAXsin,
+                }
+        
+def fit_quadrupoles_2terms_qrfunc_from_map(R,gt,gx,egt,egx,
+                                           M200,c200,z=0,
+                                           RIN=100.,ROUT=5000.,ndots=20,
+                                           resolution=2000,
+                                           cosmo_params=params):
+    
+    Gterms = quadrupoles_from_map_model(M200=M200,c200=c200,
+                                        resolution=resolution,
+                                        RIN=RIN,ROUT=ROUT,
+                                        ndots=ndots)
+    
+    def log_likelihood(data_model, R, profiles, eprofiles):
+        
+        a, b, q2h = data_model
+        q1h = b*R**a
+        
+        gt, gx   = profiles
+        egt, egx = eprofiles
+        
+        G1h = Gterms(a,b)
+        
+        e2h   = (1.-q2h)/(1.+q2h)
+        
+        sigma2 = egt**2
+        mGT = G1h['GT'] + e2h*Gterms.GT_2h
+        LGT = -0.5 * np.sum((mGT - gt)**2 / sigma2 + np.log(2.*np.pi*sigma2))
+        
+        mGX = G1h['GX'] + e2h*Gterms.GX_2h
+        sigma2 = egx**2
+        LGX = -0.5 * np.sum((mGX - gx)**2 / sigma2 + np.log(2.*np.pi*sigma2))
+        
+        L = LGT +  LGX
+
+        return L
+    
+    
+    def log_probability(data_model, R, profiles, eprofiles):
+        
+        a, b, q2h = data_model
+        
+        if -0.5 < a < 0.2 and 0. < b < 1. and 0. < q2h < 1.:
+            return log_likelihood(data_model, R, profiles, eprofiles)
+            
+        return -np.inf
+    
+    # initializing
+    
+    pos = np.array([np.random.uniform(-0.1,0.,15),
+                    np.random.uniform(0.6,0.9,15),
+                    np.random.uniform(0.1,0.5,15)]).T
+    
+    nwalkers, ndim = pos.shape
+    
+    #-------------------
+    # running emcee
+    
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, log_probability, 
+                                    args=(R,[gt,gx],[egt,egx]))
+                                    # pool = pool)
+                    
+    sampler.run_mcmc(pos, 1000, progress=True)
+    
+    mcmc_out = sampler.get_chain(flat=True).T
+    
+    # a_2g, b_2g, q2hr_2g, mcmc_a_2g, mcmc_b_2g, mcmc_q2hr_2g
+
+    return np.median(mcmc_out[0][3000:]),np.median(mcmc_out[1][3000:]),np.median(mcmc_out[2][3000:]),mcmc_out[0],mcmc_out[1],mcmc_out[2]
+
