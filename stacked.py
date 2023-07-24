@@ -1157,10 +1157,11 @@ class quadrupoles_from_map_model:
                 }
         
 def fit_quadrupoles_2terms_qrfunc_from_map(R,gt,gx,egt,egx,
-                                           M200,c200,z=0,
+                                           lM200,c200,z=0,
                                            RIN=100.,ROUT=5000.,ndots=20,
                                            resolution=2000,
                                            cosmo_params=params):
+    M200 = 10**lM200
     
     Gterms = quadrupoles_from_map_model(M200=M200,c200=c200,
                                         resolution=resolution,
@@ -1224,3 +1225,5 @@ def fit_quadrupoles_2terms_qrfunc_from_map(R,gt,gx,egt,egx,
 
     return np.median(mcmc_out[0][3000:]),np.median(mcmc_out[1][3000:]),np.median(mcmc_out[2][3000:]),mcmc_out[0],mcmc_out[1],mcmc_out[2]
 
+
+#fit_quadrupoles_2terms_qrfunc_from_map(DM.r,DM.GT,DM.GX,DM.e_GT,DM.e_GX,DM.lM200_ds,DM.c200_ds)

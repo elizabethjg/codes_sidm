@@ -106,6 +106,17 @@ class pack():
       self.q2dr         = np.concatenate((self.main.b2Dr_xy/self.main.a2Dr_xy,self.main.b2Dr_zx/self.main.a2Dr_zx,self.main.b2Dr_yz/self.main.a2Dr_yz))
       self.q2d_it       = np.concatenate((self.main.b2D_it_xy/self.main.a2D_it_xy,self.main.b2D_it_zx/self.main.a2D_it_zx,self.main.b2D_it_yz/self.main.a2D_it_yz))
       self.q2dr_it      = np.concatenate((self.main.b2Dr_it_xy/self.main.a2Dr_it_xy,self.main.b2Dr_it_zx/self.main.a2Dr_it_zx,self.main.b2Dr_it_yz/self.main.a2Dr_it_yz))
+'''
+f = open(filename_DM, 'rb')
+r = np.load(f)
+DM2h_a_2g = np.load(f)
+DM2h_b_2g = np.load(f)
+DM2h_q2hr_2g = np.load(f)
+DM2h_mcmc_a_2g = np.load(f)
+DM2h_mcmc_b_2g = np.load(f)
+DM2h_mcmc_q2hr_2g = np.load(f)
+f.close()
+'''
 
 # Globales
 typetensor = ['standard', 'reduced']
