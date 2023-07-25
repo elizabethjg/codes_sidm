@@ -243,16 +243,16 @@ def corner_result(DM,SIDM,sname,name_tensor):
         mcmc_DM = np.array([eval('DM.mcmc_a_'+method)[3000:],eval('DM.mcmc_b_'+method)[3000:],eval('DM.mcmc_q2h_'+method)[3000:]]).T
         mcmc_SIDM = np.array([eval('SIDM.mcmc_a_'+method)[3000:],eval('SIDM.mcmc_b_'+method)[3000:],eval('SIDM.mcmc_q2h_'+method)[3000:]]).T
 
-        f = corner.corner(mcmc_DM,labels=['$a$','$b$','$q_{2h}$'],
+        f1 = corner.corner(mcmc_DM,labels=['$a$','$b$','$q_{2h}$'],
                     smooth=1.,label_kwargs=({'fontsize':16}),
                     color='C7',truths=np.median(mcmc_DM,axis=0),truth_color='C7',
                     hist_kwargs=({'density':True}), levels=(0.99,0.9,0.6,0.3),
                     range=[(-0.5,0.),(0.4,1.),(0.12,0.95)])
-        f = corner.corner(mcmc_SIDM,
+        f1 = corner.corner(mcmc_SIDM,
                     smooth=1.,label_kwargs=({'fontsize':16}),
                     color='C6',truths=np.median(mcmc_SIDM,axis=0),truth_color='C6',
                     hist_kwargs=({'density':True}), levels=(0.99,0.9,0.6,0.3),
-                    range=[(-0.5,0.),(0.4,1.),(0.12,0.95)],fig=f)
+                    range=[(-0.5,0.),(0.4,1.),(0.12,0.95)],fig=f1)
     
         axes = f.axes
         axes[1].text(0.5,0.5,sname,fontsize=16)

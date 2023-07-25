@@ -1197,16 +1197,16 @@ def fit_quadrupoles_2terms_qrfunc_from_map(R,gt,gx,egt,egx,
         
         a, b, q2h = data_model
         
-        if -0.5 < a < 0.2 and 0. < b < 1. and 0. < q2h < 1.:
+        if -0.5 < a < 0.5 and 0. < b < 1. and 0. < q2h < 1.:
             return log_likelihood(data_model, R, profiles, eprofiles)
             
         return -np.inf
     
     # initializing
     
-    pos = np.array([np.random.uniform(-0.1,0.,15),
-                    np.random.uniform(0.6,0.9,15),
-                    np.random.uniform(0.1,0.5,15)]).T
+    pos = np.array([np.random.uniform(-0.15,0.15,15),
+                    np.random.uniform(0.4,0.8,15),
+                    np.random.uniform(0.3,0.7,15)]).T
     
     nwalkers, ndim = pos.shape
     
