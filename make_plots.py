@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 params = {'flat': True, 'H0': 70.0, 'Om0': 0.3, 'Ob0': 0.045, 'sigma8': 0.811, 'ns': 0.96}
 folder = '../profiles3/'
+from stacked import *
 
 def fit_qr(r,q,err_q):
     
@@ -375,16 +376,30 @@ def plt_profile_fitted_final(DM,SIDM,RIN,ROUT,axx3):
 def plt_profile_fitted_final_new(DM,SIDM,RIN,ROUT,axx3):
 
 
-    a_dm, b_dm, q2h_dm = DM.a_2g, DM.b_2g, DM.q2hr_2g
+    # a_dm, b_dm, q2h_dm = DM.a_2g, DM.b_2g, DM.q2hr_2g
     q1h_dm = b_dm*DM.r**a_dm
     e1h_dm   = (1.-q1h_dm)/(1.+q1h_dm)
     e2h_dm   = (1.-q2h_dm)/(1.+q2h_dm)
         
-    a_sidm, b_sidm, q2h_sidm = SIDM.a_2g, SIDM.b_2g, SIDM.q2hr_2g
+    # a_sidm, b_sidm, q2h_sidm = SIDM.a_2g, SIDM.b_2g, SIDM.q2hr_2g
     q1h_sidm = b_sidm*SIDM.r**a_sidm
     e1h_sidm   = (1.-q1h_sidm)/(1.+q1h_sidm)
     e2h_sidm   = (1.-q2h_sidm)/(1.+q2h_sidm)
 
+    Gterms_dm = quadrupoles_from_map_model(M200=10**DM.lM200_ds,c200=DM.c200_ds,
+                                        resolution=2000,
+                                        RIN=100.,ROUT=5000.,
+                                        ndots=20
+                                        )
+
+    Gterms_sidm = quadrupoles_from_map_model(M200=10**SIDM.lM200_ds,c200=SIDM.c200_ds,
+                                        resolution=2000,
+                                        RIN=100.,ROUT=5000.,
+                                        ndots=20
+                                        )
+    G1h_dm = Gterms_dm(a_dm,b_dm)
+    G1h_sidm = Gterms_sidm(a_sidm,b_sidm)
+    
 
     ax,ax1,ax2 = axx3
             
@@ -420,17 +435,12 @@ def plt_profile_fitted_final_new(DM,SIDM,RIN,ROUT,axx3):
     ax1.fill_between(DM.r,DM.GT+DM.e_GT,DM.GT-DM.e_GT,color='C7',alpha=0.4)
     ax1.fill_between(SIDM.r,SIDM.GT+SIDM.e_GT,SIDM.GT-SIDM.e_GT,color='C6',alpha=0.4)
     
-    ax1.plot(DM.r,DM.GT1h+DM.GT2h,'C3',label='1h+2h')
-    ax1.plot(DM.r,DM.GT1h,'C1',label='1h')
-    ax1.plot(DM.r,DM.GT2h,'C8',label='2h')
-    ax1.plot(SIDM.r,SIDM.GT1h+SIDM.GT2h,'C3--')
-    ax1.plot(SIDM.r,SIDM.GT1h,'C1--')
-    ax1.plot(SIDM.r,SIDM.GT2h,'C8--')
-    # ax1.plot(DM.r,DM.GT1hr_fit2+DM.GT2hr_fit2,'C3',label='1h+2h')
-    # ax1.plot(DM.r,DM.GT1hr_fit2,'C1',label='1h')
-    # ax1.plot(DM.r,DM.GT2hr_fit2,'C8',label='2h')
-    # ax1.plot(SIDM.r,SIDM.GT1hr_fit2+SIDM.GT2hr_fit2,'C3--')
-    # ax1.plot(SIDM.r,SIDM.GT1hr_fit2,'C1--')
+    ax1.plot(DM.r,G1h_dm['GT'] + e2h_dm*Gterms_dm.GT_2h,'C3',label='1h+2h')
+    ax1.plot(DM.r,G1h_dm['GT'],'C1',label='1h')
+    ax1.plot(DM.r,e2h_dm*Gterms_dm.GT_2h,'C8',label='2h')
+    ax1.plot(SIDM.r,G1h_sidm['GT'] + e2h_sidm*Gterms_sidm.GT_2h,'C3--')
+    ax1.plot(SIDM.r,G1h_sidm['GT'],'C1--')
+    ax1.plot(SIDM.r,e2h_sidm*Gterms_sidm.GT_2h,'C8--')
     # ax1.plot(SIDM.r,SIDM.GT2hr_fit2,'C8--')
     
     ax1.set_xscale('log')
@@ -452,18 +462,12 @@ def plt_profile_fitted_final_new(DM,SIDM,RIN,ROUT,axx3):
     ax2.fill_between(DM.r,DM.GX+DM.e_GX,DM.GX-DM.e_GX,color='C7',alpha=0.4)
     ax2.fill_between(SIDM.r,SIDM.GX+SIDM.e_GX,SIDM.GX-SIDM.e_GX,color='C6',alpha=0.4)
     
-    ax2.plot(DM.r,DM.GX1h+DM.GX2h,'C3')
-    ax2.plot(DM.r,DM.GX1h,'C1')
-    ax2.plot(DM.r,DM.GX2h,'C8')
-    ax2.plot(SIDM.r,SIDM.GX1h+SIDM.GX2h,'C3--')
-    ax2.plot(SIDM.r,SIDM.GX1h,'C1--')
-    ax2.plot(SIDM.r,SIDM.GX2h,'C8--')
-    # ax2.plot(DM.r,DM.GX1hr_fit2+DM.GX2h_fit2,'C3')
-    # ax2.plot(DM.r,DM.GX1hr_fit2,'C1')
-    # ax2.plot(DM.r,DM.GX2hr_fit2,'C8')
-    # ax2.plot(SIDM.r,SIDM.GX1hr_fit2+SIDM.GX2hr_fit2,'C3--')
-    # ax2.plot(SIDM.r,SIDM.GX1hr_fit2,'C1--')
-    # ax2.plot(SIDM.r,SIDM.GX2hr_fit2,'C8--')
+    ax2.plot(DM.r,G1h_dm['GX'] + e2h_dm*Gterms_dm.GX_2h,'C3',label='1h+2h')
+    ax2.plot(DM.r,G1h_dm['GX'],'C1',label='1h')
+    ax2.plot(DM.r,e2h_dm*Gterms_dm.GX_2h,'C8',label='2h')
+    ax2.plot(SIDM.r,G1h_sidm['GX'] + e2h_sidm*Gterms_sidm.GX_2h,'C3--')
+    ax2.plot(SIDM.r,G1h_sidm['GX'],'C1--')
+    ax2.plot(SIDM.r,e2h_sidm*Gterms_sidm.GX_2h,'C8--')
     
     # ax2.legend(loc=3,frameon=False)
     ax2.set_xlabel('r [$h^{-1}$ Mpc]')
