@@ -195,7 +195,7 @@ for idx, name_tensor in enumerate(typetensor):
     fcomp_x.subplots_adjust(hspace=0,wspace=0)
 
     fcomp_t, ax_comp_t = plt.subplots(2,1, figsize=(10,10),sharex = True)
-    fcomp_t.subplots_adjust(hspace=0,wspace=0)
+    fcomp_t.subplots_adjust(hspace=0,wspace=0)<
 
     fcomp_2g, ax_comp_2g = plt.subplots(2,1, figsize=(10,10),sharex = True)
     fcomp_2g.subplots_adjust(hspace=0,wspace=0)
