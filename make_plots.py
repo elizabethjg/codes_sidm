@@ -24,7 +24,42 @@ def fit_qr(r,q,err_q):
     return qr,a,b
     
         
+def qplot(DM,SIDM,ax):
     
+    
+    def logq(r,alpha,lq0):
+        return lq0 + alpha*r
+
+    err_alpha = np.diff(np.percentile(DM.mcmc_a_2g_fb[3000:], [16, 50, 84]))
+    err_q0 = np.diff(np.percentile(DM.mcmc_a_2g_fb[3000:], [16, 50, 84]))
+    
+    q0    = DM.b_2g_fb
+    alpha = DM.a_2g_fb
+    
+    lq0  = np.log10(q0)
+    elq0 = err_q0/(q0*np.log(10.))    
+    ax.plot(DM.rs,10**(logq(DM.rs,alpha,lq0)),'k')
+    ax.fill_between(DM.rs, 
+                    10**(logq(DM.rs,alpha+err_alpha[1],lq0+elq0[1])), 
+                    10**(logq(DM.rs,alpha-err_alpha[0],lq0-elq0[0])), 
+                    interpolate=True, 
+                    color='C7',alpha=0.3)    
+
+    err_alpha = np.diff(np.percentile(SIDM.mcmc_a_2g_fb[3000:], [16, 50, 84]))
+    err_q0 = np.diff(np.percentile(SIDM.mcmc_a_2g_fb[3000:], [16, 50, 84]))
+    
+    q0    = SIDM.b_2g_fb
+    alpha = SIDM.a_2g_fb
+    
+    lq0  = np.log10(q0)
+    elq0 = err_q0/(q0*np.log(10.))    
+    ax.plot(SIDM.rs,10**(logq(SIDM.rs,alpha,lq0)),'C3--')
+    ax.fill_between(DM.rs, 
+                    10**(logq(DM.rs,alpha+err_alpha[1],lq0+elq0[1])), 
+                    10**(logq(DM.rs,alpha-err_alpha[0],lq0-elq0[0])), 
+                    interpolate=True, 
+                    color='C6',alpha=0.3)    
+
 
 
 def plot_zdist():
@@ -146,24 +181,45 @@ def compare_q(DM,SIDM,ax,j,method='2g'):
                  fmt='C6D',markersize=10,label='SIDM - reduced')
 
     ax1.set_ylim(-0.15,0.15)
-    ax2.plot(j+0.,(np.mean(DM.q2d_it)/np.mean(SIDM.q2d_it))-1,'C4s',label=r'$\langle q \rangle$ - standard',markersize=10)
-    ax2.plot(j+0.1,(np.mean(DM.q2dr_it)/np.mean(SIDM.q2dr_it))-1,'C3s',label=r'$\langle q \rangle$ - reduced',markersize=10)
+    # ax2.plot(j+0.,(np.mean(DM.q2d_it)/np.mean(SIDM.q2d_it))-1,'C4D',label=r'$\langle q \rangle$ - standard',markersize=10)
     ax2.errorbar(j+0.2,(eval('DM.q1h_'+method)/eval('SIDM.q1h_'+method))-1,
                  yerr=e_ratio_1h,
                  fmt='C1o',markersize=10,label='$q_{1h}$')
     ax2.errorbar(j+0.3,(eval('DM.q2h_'+method)/eval('SIDM.q2h_'+method))-1,
                  yerr=e_ratio_2h,
                  fmt='C8o',markersize=10,label='$q_{2h}$')
+    ax2.errorbar(j+0.1,(np.mean(DM.q2dr_it)/np.mean(SIDM.q2dr_it))-1,yerr=0.01,fmt='C3D',label=r'$\langle q \rangle$ - particle distribution',markersize=10)
+    ax2.errorbar(j+0.1,(np.mean(DM.qs[-1])/np.mean(SIDM.qs[-1]))-1,yerr=0.01,fmt='ks',label=r'$q(2 Mpc h^{-1})$ - stacked particle distribution',markersize=10)
     
     ax2.set_ylim(-0.3,0.3)
                  
     # ax2.plot(j+0.2,(DM.q1h_gt/SIDM.q1h_gt)-1,'C1o',label='1h',markersize=10)
     # ax2.plot(j+0.3,(DM.q2h_gt/SIDM.q2h_gt)-1,'C8o',label='2h',markersize=10)
     ax1.set_ylabel(r'$q_{1h} / \langle q \rangle - 1$')
-    ax2.set_ylabel(r'$q_{CDM}/q_{SIDM} - 1$')
+    ax2.set_ylabel(r'$CDM/SIDM - 1$')
 
 
-def compare_qr(DM,SIDM,ax,j,method='2g'):    
+def stacked_particle(DM,SIDM,ax,samp):
+    
+    qr, a_dm, b_dm = fit_qr(DM.rs,DM.qs,DM.err_qs)
+    qr, a_sidm, b_sidm = fit_qr(SIDM.rs,SIDM.qs,SIDM.err_qs)
+    # ax.axhline(np.mean(DM.q2dr_it),color='C7',ls='--')
+    # ax.axhline(np.mean(SIDM.q2dr_it),color='C6',ls='--')
+    ax.fill_between(DM.rs,DM.qs+DM.err_qs,DM.qs-DM.err_qs,color='C7',alpha=0.4)
+    ax.fill_between(SIDM.rs,SIDM.qs+SIDM.err_qs,SIDM.qs-SIDM.err_qs,color='C6',alpha=0.4)
+    ax.plot(DM.rs,qr(DM.rs,a_dm,b_dm),'k',label=r'$\alpha = $'+f'{np.round(a_dm,3)}, $q_0 = ${np.round(b_dm,2)}')
+    ax.plot(SIDM.rs,qr(SIDM.rs,a_sidm,b_sidm),'C3',label=r'$\alpha = $'+f'{np.round(a_sidm,3)}, $q_0 = ${np.round(b_sidm,2)}')
+    ax.set_xscale('log')
+    ax.text(0.2,0.85,samp)
+    ax.legend(frameon=False,loc=1)
+    ax.set_xticks([0.2,0.5,1.0,2.0])
+    ax.set_xticklabels(['0.2','0.5','1.0','2.0'])
+    # ax.set_yscale('log')
+    ax.set_xlabel('$r[h^{-1} Mpc]$')
+    
+
+
+def compare_qr(DM,SIDM,ax,j,method='2g_fb'):    
     
     ax1,ax2 = ax
     
@@ -194,31 +250,33 @@ def compare_qr(DM,SIDM,ax,j,method='2g'):
                  yerr=np.array([eb_1h_sidm]).T,
                  fmt='C6D',markersize=10,label='SIDM - b')
 
-    ax1.set_ylim(-0.5,0.5)
+    ax1.set_ylim(-0.8,0.5)
     
-    ax2.plot(j+0.,(a_dm/a_sidm)-1,'C4s',label=r'$a$',markersize=10)
-    ax2.plot(j+0.1,(b_dm/b_sidm)-1,'C3s',label=r'$b$',markersize=10)
     ax2.errorbar(j+0.2,(eval('DM.a_'+method)/eval('SIDM.a_'+method))-1,
                  yerr=e_ratio_a,
-                 fmt='C1o',markersize=10,label='$a$')
+                 fmt='C9o',markersize=10,label=r'$\alpha$')
     ax2.errorbar(j+0.3,(eval('DM.b_'+method)/eval('SIDM.b_'+method))-1,
                  yerr=e_ratio_b,
-                 fmt='C9o',markersize=10,label='$b$')
+                 fmt='C1o',markersize=10,label=r'$q_0$')
     ax2.errorbar(j+0.3,(eval('DM.q2hr_'+method)/eval('SIDM.q2hr_'+method))-1,
                  yerr=e_ratio_b,
                  fmt='C8o',markersize=10,label='$q2h$')
+    ax2.errorbar(j+0.,(a_dm/a_sidm)-1,yerr=0.01,fmt='C7s',label=r'$\alpha$ - stacked particle distribution',markersize=10)
+    ax2.errorbar(j+0.1,(b_dm/b_sidm)-1,yerr=0.01,fmt='ks',label=r'$q_0$ - stacked particle distribution',markersize=10)
     
-    ax2.set_ylim(-0.5,0.5)
+    ax2.set_ylim(-1.2,0.5)
                  
     # ax2.plot(j+0.2,(DM.q1h_gt/SIDM.q1h_gt)-1,'C1o',label='1h',markersize=10)
     # ax2.plot(j+0.3,(DM.q2h_gt/SIDM.q2h_gt)-1,'C8o',label='2h',markersize=10)
     ax1.set_ylabel(r'$q_{1h} / \langle q \rangle - 1$')
-    ax2.set_ylabel(r'$q_{CDM}/q_{SIDM} - 1$')
+    ax2.set_ylabel(r'$CDM/SIDM - 1$')
+    
+    return [b_dm,a_dm,b_sidm,a_sidm]
 
 
 def corner_result(DM,SIDM,sname,name_tensor):
 
-    for method in ['gt','gx','2g']:
+    for method in ['2g']:
 
         mcmc_DM = np.array([eval('DM.mcmc_q1h_'+method)[3000:],eval('DM.mcmc_q2h_'+method)[3000:]]).T
         mcmc_SIDM = np.array([eval('SIDM.mcmc_q1h_'+method)[3000:],eval('SIDM.mcmc_q2h_'+method)[3000:]]).T
@@ -227,54 +285,54 @@ def corner_result(DM,SIDM,sname,name_tensor):
         f = corner.corner(mcmc_DM,labels=['$q_{1h}$','$q_{2h}$'],
                     smooth=1.,label_kwargs=({'fontsize':16}),
                     color='C7',truths=np.median(mcmc_DM,axis=0),truth_color='C7',
-                    hist_kwargs=({'density':True}), levels=(0.99,0.9,0.6,0.3),
-                    range=[(0.,1.),(0.,1.)])
+                    hist_kwargs=({'density':True}), levels=(0.85,0.6,0.3))#,
+                    # range=[(0.55,0.75),(0.5,0.9)])
         f = corner.corner(mcmc_SIDM,
                     smooth=1.,label_kwargs=({'fontsize':16}),
                     color='C6',truths=np.median(mcmc_SIDM,axis=0),truth_color='C6',
-                    hist_kwargs=({'density':True}), levels=(0.99,0.9,0.6,0.3),
-                    range=[(0.,1.),(0.,1.)],fig=f)
+                    hist_kwargs=({'density':True}), levels=(0.85,0.6,0.3),fig=f)#,
+                    # range=[(0.55,0.75),(0.5,0.9)],fig=f)
     
         axes = f.axes
         axes[1].text(0.5,0.5,sname,fontsize=16)
-        # f.savefig('../final_plots/corner_'+sname+'_'+name_tensor+'_'+method+'.pdf',bbox_inches='tight')
+        f.savefig('../final_plots/corner_'+sname+'_'+name_tensor+'_'+method+'.pdf',bbox_inches='tight')
         f.savefig('../final_plots/corner_'+sname+'_'+name_tensor+'_'+method+'.png',bbox_inches='tight')
         
         ##########
-        mcmc_DM = np.array([eval('DM.mcmc_a_'+method)[3000:],eval('DM.mcmc_b_'+method)[3000:],eval('DM.mcmc_q2h_'+method)[3000:]]).T
-        mcmc_SIDM = np.array([eval('SIDM.mcmc_a_'+method)[3000:],eval('SIDM.mcmc_b_'+method)[3000:],eval('SIDM.mcmc_q2h_'+method)[3000:]]).T
+        mcmc_DM = np.array([eval('DM.mcmc_a_'+method+'_fb')[3000:],eval('DM.mcmc_b_'+method+'_fb')[3000:],eval('DM.mcmc_q2hr_'+method+'_fb')[3000:]]).T
+        mcmc_SIDM = np.array([eval('SIDM.mcmc_a_'+method+'_fb')[3000:],eval('SIDM.mcmc_b_'+method+'_fb')[3000:],eval('SIDM.mcmc_q2hr_'+method+'_fb')[3000:]]).T
 
-        f1 = corner.corner(mcmc_DM,labels=['$a$','$b$','$q_{2h}$'],
+        f1 = corner.corner(mcmc_DM,labels=[r'$\alpha$',r'$q_0$','$q_{2h}$'],
                     smooth=1.,label_kwargs=({'fontsize':16}),
                     color='C7',truths=np.median(mcmc_DM,axis=0),truth_color='C7',
-                    hist_kwargs=({'density':True}), levels=(0.99,0.9,0.6,0.3),
-                    range=[(-0.5,0.),(0.4,1.),(0.12,0.95)])
+                    hist_kwargs=({'density':True}), levels=(0.85,0.6,0.3))#,
+                    # range=[(-0.2,0.05),(0.4,0.75),(0.5,0.9)])
         f1 = corner.corner(mcmc_SIDM,
                     smooth=1.,label_kwargs=({'fontsize':16}),
                     color='C6',truths=np.median(mcmc_SIDM,axis=0),truth_color='C6',
-                    hist_kwargs=({'density':True}), levels=(0.99,0.9,0.6,0.3),
-                    range=[(-0.5,0.),(0.4,1.),(0.12,0.95)],fig=f1)
+                    hist_kwargs=({'density':True}), levels=(0.85,0.6,0.3),fig=f1)#,
+                    # range=[(-0.2,0.05),(0.45,0.75),(0.5,0.9)],fig=f1)
     
-        axes = f.axes
+        axes = f1.axes
         axes[1].text(0.5,0.5,sname,fontsize=16)
-        # f.savefig('../final_plots/corner_'+sname+'_'+name_tensor+'_r_'+method+'.pdf',bbox_inches='tight')
-        f.savefig('../final_plots/corner_'+sname+'_'+name_tensor+'_r_'+method+'.png',bbox_inches='tight')
+        f1.savefig('../final_plots/corner_'+sname+'_'+name_tensor+'_r_'+method+'.pdf',bbox_inches='tight')
+        f1.savefig('../final_plots/corner_'+sname+'_'+name_tensor+'_r_'+method+'.png',bbox_inches='tight')
 
     ##########
-    mcmc_DM_ds = np.array([DM.mcmc_ds_lM[3000:],DM.mcmc_ds_c200[3000:]]).T
-    mcmc_SIDM_ds = np.array([SIDM.mcmc_ds_lM[3000:],SIDM.mcmc_ds_c200[3000:]]).T
+    mcmc_DM_ds = np.array([DM.mcmc_ds_lM[1500:],DM.mcmc_ds_c200[1500:]]).T
+    mcmc_SIDM_ds = np.array([SIDM.mcmc_ds_lM[1500:],SIDM.mcmc_ds_c200[1500:]]).T
 
 
     f = corner.corner(mcmc_DM_ds,labels=['$\log M_{200}$','$c_{200}$'],
-                  smooth=1.,label_kwargs=({'fontsize':16}),
+                  smooth=3.,label_kwargs=({'fontsize':16}),
                   color='C7',truths=np.median(mcmc_DM_ds,axis=0),truth_color='C7',
-                  hist_kwargs=({'density':True}), levels=(0.99,0.9,0.6,0.3),
-                  range=[(12,15),(3.5,8.2)])
+                  hist_kwargs=({'density':True}), levels=(0.85,0.6,0.3))#,
+                  # range=[(13,14.4),(4.,7.5)])
     f = corner.corner(mcmc_SIDM_ds,
-                  smooth=1.,label_kwargs=({'fontsize':16}),
+                  smooth=3.,label_kwargs=({'fontsize':16}),
                   color='C6',truths=np.median(mcmc_SIDM_ds,axis=0),truth_color='C6',
-                  hist_kwargs=({'density':True}), levels=(0.99,0.9,0.6,0.3),
-                  range=[(12,15),(3.5,8.2)],fig=f)
+                  hist_kwargs=({'density':True}), levels=(0.85,0.6,0.3),fig=f)#,
+                  # range=[(13,14.4),(4.,7.5)],fig=f)
 
     axes = f.axes
     axes[1].text(0.5,0.5,sname,fontsize=16)
@@ -283,35 +341,36 @@ def corner_result(DM,SIDM,sname,name_tensor):
     
     
  
-def plt_profile_fitted_final(DM,SIDM,RIN,ROUT,axx3):
+def plt_profile_fitted_final(DM,SIDM,RIN,ROUT,axx3,jdx):
 
     ax,ax1,ax2 = axx3
-            
+    
     ##############    
-
-    ax.plot(DM.r,DM.DS_T,'C7',label='CDM')
-    # ax.plot(rplot,DS1h,'C1',label='1h')
-    # ax.plot(rplot,DS2h,'C8',label='2h')
-    ax.plot(DM.r,DM.DS_fit,'C3')
+    gl = 2
+    ax.plot(DM.r,DM.DS_T,'C7')
+    ax.plot(DM.r,DM.DS1h_fit,'C1')
+    ax.plot(DM.r,DM.DS2h_fit,'C8')
+    ax.plot(DM.r,DM.DS_fit,'C3',
+           label = r'$\chi^2_{red} = $'+f'{np.round(chi_red(DM.DS_fit,DM.DS_T,DM.e_DS_T,gl),2)}')
     ax.fill_between(DM.r,DM.DS_T+DM.e_DS_T,DM.DS_T-DM.e_DS_T,color='C7',alpha=0.4)
-    ax.plot(SIDM.r,SIDM.DS_T,'C6--',label='SIDM')
-    # ax.plot(rplot,DS1h,'C1',label='1h')
-    # ax.plot(rplot,DS2h,'C8',label='2h')
-    ax.plot(SIDM.r,SIDM.DS_fit,'C3--')
+    ax.plot(SIDM.r,SIDM.DS_T,'C6--')
+    ax.plot(SIDM.r,SIDM.DS1h_fit,'C1--')
+    ax.plot(SIDM.r,SIDM.DS2h_fit,'C8--')
+    ax.plot(SIDM.r,SIDM.DS_fit,'C3--',
+            label = r'$\chi^2_{red} = $'+f'{np.round(chi_red(SIDM.DS_fit,SIDM.DS_T,SIDM.e_DS_T,gl),2)}')
     ax.fill_between(SIDM.r,SIDM.DS_T+SIDM.e_DS_T,SIDM.DS_T-SIDM.e_DS_T,color='C6',alpha=0.4)
     ax.set_xscale('log')
     ax.set_yscale('log')
-    ax.set_ylabel(r'$\Delta\Sigma [h M_\odot/pc^2]$',labelpad=2)
+    if jdx == 0 and jdx == 2:
+        ax.set_ylabel(r'$\Delta\Sigma [h M_\odot/pc^2]$',labelpad=0.1)
     ax.set_xlabel('r [$h^{-1}$ Mpc]')
     ax.set_ylim(0.5,200)
     ax.set_xlim(0.1,5)
-    ax.xaxis.set_ticks([0.1,1,5])
-    ax.set_xticklabels([0.1,1,5])
+    ax.xaxis.set_ticks([0.1,1,4])
+    ax.set_xticklabels([0.1,1,4])
     ax.yaxis.set_ticks([1,10,100])
     ax.set_yticklabels([1,10,100])
-    ax.axvline(RIN/1000.,color='k',ls=':')
-    ax.axvline(ROUT/1000.,color='k',ls=':')
-    # ax.legend(loc=3,frameon=False,ncol=2)
+    ax.legend(loc=3,frameon=False,fontsize=10)
     
     
     ax1.plot(DM.r,DM.GT,'C7')
@@ -319,69 +378,62 @@ def plt_profile_fitted_final(DM,SIDM,RIN,ROUT,axx3):
     ax1.fill_between(DM.r,DM.GT+DM.e_GT,DM.GT-DM.e_GT,color='C7',alpha=0.4)
     ax1.fill_between(SIDM.r,SIDM.GT+SIDM.e_GT,SIDM.GT-SIDM.e_GT,color='C6',alpha=0.4)
     
-    ax1.plot(DM.r,DM.GT1h+DM.GT2h,'C3',label='1h+2h')
-    ax1.plot(DM.r,DM.GT1h,'C1',label='1h')
-    ax1.plot(DM.r,DM.GT2h,'C8',label='2h')
-    ax1.plot(SIDM.r,SIDM.GT1h+SIDM.GT2h,'C3--')
-    ax1.plot(SIDM.r,SIDM.GT1h,'C1--')
-    ax1.plot(SIDM.r,SIDM.GT2h,'C8--')
-    # ax1.plot(DM.r,DM.GT1h_fit2+DM.GT2h_fit2,'C3',label='1h+2h')
-    # ax1.plot(DM.r,DM.GT1h_fit2,'C1',label='1h')
-    # ax1.plot(DM.r,DM.GT2h_fit2,'C8',label='2h')
-    # ax1.plot(SIDM.r,SIDM.GT1h_fit2+SIDM.GT2h_fit2,'C3--')
-    # ax1.plot(SIDM.r,SIDM.GT1h_fit2,'C1--')
-    # ax1.plot(SIDM.r,SIDM.GT2h_fit2,'C8--')
+    ax1.plot(DM.r,DM.GT1h_fit2+DM.GT2h_fit2,'C3',
+             label = r'$\chi^2_{red} = $'+f'{np.round(chi_red(DM.GT1h_fit2+DM.GT2h_fit2,DM.GT,DM.e_GT,gl),2)}')
+    ax1.plot(DM.r,DM.GT1h_fit2,'C1')
+    ax1.plot(DM.r,DM.GT2h_fit2,'C8')
+    ax1.plot(SIDM.r,SIDM.GT1h_fit2+SIDM.GT2h_fit2,'C3--',
+             label = r'$\chi^2_{red} = $'+f'{np.round(chi_red(SIDM.GT1h_fit2+SIDM.GT2h_fit2,SIDM.GT,SIDM.e_GT,gl),2)}')
+    ax1.plot(SIDM.r,SIDM.GT1h_fit2,'C1--')
+    ax1.plot(SIDM.r,SIDM.GT2h_fit2,'C8--')
     
     ax1.set_xscale('log')
     ax1.set_yscale('log')
     ax1.set_xlabel('r [$h^{-1}$ Mpc]')
-    ax1.set_ylabel(r'$\Gamma_T [h M_\odot/pc^2]$',labelpad=1.2)
+    if jdx == 0:
+        ax1.set_ylabel(r'$\Gamma_T [h M_\odot/pc^2]$',labelpad=0.1,fontsize=10)
     ax1.set_ylim(0.5,100)
     ax1.set_xlim(0.1,5)
-    ax1.xaxis.set_ticks([0.1,1,5])
-    ax1.set_xticklabels([0.1,1,5])
+    ax1.xaxis.set_ticks([0.1,1,3])
+    ax1.set_xticklabels([0.1,1,3])
     ax1.yaxis.set_ticks([1,10,100])
     ax1.set_yticklabels([1,10,100])
-    ax1.axvline(RIN/1000.,color='k',ls=':')
-    ax1.axvline(ROUT/1000.,color='k',ls=':')
-        
+    ax1.legend(loc=1,frameon=False,fontsize=10)
+    
     ax2.plot([0,10],[0,0],'k')
-    ax2.plot(DM.r,DM.GX,'C7',label='standard')
-    ax2.plot(SIDM.r,SIDM.GX,'C6--',label='reduced')    
+    ax2.plot(DM.r,DM.GX,'C7')
+    ax2.plot(SIDM.r,SIDM.GX,'C6--')    
     ax2.fill_between(DM.r,DM.GX+DM.e_GX,DM.GX-DM.e_GX,color='C7',alpha=0.4)
     ax2.fill_between(SIDM.r,SIDM.GX+SIDM.e_GX,SIDM.GX-SIDM.e_GX,color='C6',alpha=0.4)
-    
-    ax2.plot(DM.r,DM.GX1h+DM.GX2h,'C3')
-    ax2.plot(DM.r,DM.GX1h,'C1')
-    ax2.plot(DM.r,DM.GX2h,'C8')
-    ax2.plot(SIDM.r,SIDM.GX1h+SIDM.GX2h,'C3--')
-    ax2.plot(SIDM.r,SIDM.GX1h,'C1--')
-    ax2.plot(SIDM.r,SIDM.GX2h,'C8--')
-    # ax2.plot(DM.r,DM.GX1h_fit2+DM.GX2h_fit2,'C3')
-    # ax2.plot(DM.r,DM.GX1h_fit2,'C1')
-    # ax2.plot(DM.r,DM.GX2h_fit2,'C8')
-    # ax2.plot(SIDM.r,SIDM.GX1h_fit2+SIDM.GX2h_fit2,'C3--')
-    # ax2.plot(SIDM.r,SIDM.GX1h_fit2,'C1--')
-    # ax2.plot(SIDM.r,SIDM.GX2h_fit2,'C8--')
+    ax2.plot(DM.r,DM.GX1h_fit2+DM.GX2h_fit2,'C3',
+             label = r'$\chi^2_{red} = $'+f'{np.round(chi_red(DM.GX1h_fit2+DM.GX2h_fit2,DM.GX,DM.e_GX,gl),2)}')
+    ax2.plot(DM.r,DM.GX1h_fit2,'C1')
+    ax2.plot(DM.r,DM.GX2h_fit2,'C8')
+    ax2.plot(SIDM.r,SIDM.GX1h_fit2+SIDM.GX2h_fit2,'C3--',
+            label = r'$\chi^2_{red} = $'+f'{np.round(chi_red(SIDM.GX1h_fit2+SIDM.GX2h_fit2,SIDM.GX,SIDM.e_GX,gl),2)}')
+    ax2.plot(SIDM.r,SIDM.GX1h_fit2,'C1--')
+    ax2.plot(SIDM.r,SIDM.GX2h_fit2,'C8--')
     
     # ax2.legend(loc=3,frameon=False)
     ax2.set_xlabel('r [$h^{-1}$ Mpc]')
-    ax2.set_ylabel(r'$\Gamma_\times [h M_\odot/pc^2]$',labelpad=1.2)
+    if jdx == 0:
+        ax2.set_ylabel(r'$\Gamma_\times [h M_\odot/pc^2]$',labelpad=0.1,fontsize=10)
     ax2.set_xscale('log')
     ax2.set_xlim(0.1,5)
-    ax2.set_ylim(-16,17)
-    ax2.xaxis.set_ticks([0.1,1,5])
-    ax2.set_xticklabels([0.1,1,5])
+    ax2.set_ylim(-6,16)
+    ax2.xaxis.set_ticks([0.1,1,3])
+    ax2.set_xticklabels([0.1,1,3])
+    ax2.legend(loc=1,frameon=False,fontsize=10)
 
-def plt_profile_fitted_final_new(DM,SIDM,RIN,ROUT,axx3):
+def plt_profile_fitted_final_new(DM,SIDM,RIN,ROUT,axx3,jdx):
 
 
-    # a_dm, b_dm, q2h_dm = DM.a_2g, DM.b_2g, DM.q2hr_2g
+    a_dm, b_dm, q2h_dm = DM.a_2g_fb, DM.b_2g_fb, DM.q2hr_2g_fb
     q1h_dm = b_dm*DM.r**a_dm
     e1h_dm   = (1.-q1h_dm)/(1.+q1h_dm)
     e2h_dm   = (1.-q2h_dm)/(1.+q2h_dm)
         
-    # a_sidm, b_sidm, q2h_sidm = SIDM.a_2g, SIDM.b_2g, SIDM.q2hr_2g
+    a_sidm, b_sidm, q2h_sidm = SIDM.a_2g_fb, SIDM.b_2g_fb, SIDM.q2hr_2g_fb
     q1h_sidm = b_sidm*SIDM.r**a_sidm
     e1h_sidm   = (1.-q1h_sidm)/(1.+q1h_sidm)
     e2h_sidm   = (1.-q2h_sidm)/(1.+q2h_sidm)
@@ -401,79 +453,110 @@ def plt_profile_fitted_final_new(DM,SIDM,RIN,ROUT,axx3):
     G1h_sidm = Gterms_sidm(a_sidm,b_sidm)
     
 
-    ax,ax1,ax2 = axx3
+    ax1,ax2 = axx3
             
-    ##############    
-
-    ax.plot(DM.r,DM.DS_T,'C7',label='CDM')
-    # ax.plot(rplot,DS1h,'C1',label='1h')
-    # ax.plot(rplot,DS2h,'C8',label='2h')
-    ax.plot(DM.r,DM.DS_fit,'C3')
-    ax.fill_between(DM.r,DM.DS_T+DM.e_DS_T,DM.DS_T-DM.e_DS_T,color='C7',alpha=0.4)
-    ax.plot(SIDM.r,SIDM.DS_T,'C6--',label='SIDM')
-    # ax.plot(rplot,DS1h,'C1',label='1h')
-    # ax.plot(rplot,DS2h,'C8',label='2h')
-    ax.plot(SIDM.r,SIDM.DS_fit,'C3--')
-    ax.fill_between(SIDM.r,SIDM.DS_T+SIDM.e_DS_T,SIDM.DS_T-SIDM.e_DS_T,color='C6',alpha=0.4)
-    ax.set_xscale('log')
-    ax.set_yscale('log')
-    ax.set_ylabel(r'$\Delta\Sigma [h M_\odot/pc^2]$',labelpad=2)
-    ax.set_xlabel('r [$h^{-1}$ Mpc]')
-    ax.set_ylim(0.5,200)
-    ax.set_xlim(0.1,5)
-    ax.xaxis.set_ticks([0.1,1,5])
-    ax.set_xticklabels([0.1,1,5])
-    ax.yaxis.set_ticks([1,10,100])
-    ax.set_yticklabels([1,10,100])
-    ax.axvline(RIN/1000.,color='k',ls=':')
-    ax.axvline(ROUT/1000.,color='k',ls=':')
-    # ax.legend(loc=3,frameon=False,ncol=2)
-    
-    
+    ##############        
+    gl = 3
+    model_GT_dm = G1h_dm['GT'] + e2h_dm*Gterms_dm.GT_2h
+    model_GT_sidm = G1h_sidm['GT'] + e2h_sidm*Gterms_sidm.GT_2h
     ax1.plot(DM.r,DM.GT,'C7')
     ax1.plot(SIDM.r,SIDM.GT,'C6--')    
     ax1.fill_between(DM.r,DM.GT+DM.e_GT,DM.GT-DM.e_GT,color='C7',alpha=0.4)
     ax1.fill_between(SIDM.r,SIDM.GT+SIDM.e_GT,SIDM.GT-SIDM.e_GT,color='C6',alpha=0.4)
-    
-    ax1.plot(DM.r,G1h_dm['GT'] + e2h_dm*Gterms_dm.GT_2h,'C3',label='1h+2h')
-    ax1.plot(DM.r,G1h_dm['GT'],'C1',label='1h')
-    ax1.plot(DM.r,e2h_dm*Gterms_dm.GT_2h,'C8',label='2h')
-    ax1.plot(SIDM.r,G1h_sidm['GT'] + e2h_sidm*Gterms_sidm.GT_2h,'C3--')
+    ax1.plot(DM.r,G1h_dm['GT'] + e2h_dm*Gterms_dm.GT_2h,'C3',
+             label = r'$\chi^2_{red} = $'+f'{np.round(chi_red(model_GT_dm,DM.GT,DM.e_GT,gl),2)}')
+    ax1.plot(DM.r,G1h_dm['GT'],'C1')
+    ax1.plot(DM.r,e2h_dm*Gterms_dm.GT_2h,'C8')
+    ax1.plot(SIDM.r,G1h_sidm['GT'] + e2h_sidm*Gterms_sidm.GT_2h,'C3--',
+             label = r'$\chi^2_{red} = $'+f'{np.round(chi_red(model_GT_sidm,SIDM.GT,SIDM.e_GT,gl),2)}')
     ax1.plot(SIDM.r,G1h_sidm['GT'],'C1--')
     ax1.plot(SIDM.r,e2h_sidm*Gterms_sidm.GT_2h,'C8--')
-    # ax1.plot(SIDM.r,SIDM.GT2hr_fit2,'C8--')
-    
     ax1.set_xscale('log')
     ax1.set_yscale('log')
     ax1.set_xlabel('r [$h^{-1}$ Mpc]')
-    ax1.set_ylabel(r'$\Gamma_T [h M_\odot/pc^2]$',labelpad=1.2)
+    if jdx == 0:
+        ax1.set_ylabel(r'$\Gamma_T [h M_\odot/pc^2]$',labelpad=0.1,fontsize=10)
     ax1.set_ylim(0.5,100)
     ax1.set_xlim(0.1,5)
-    ax1.xaxis.set_ticks([0.1,1,5])
-    ax1.set_xticklabels([0.1,1,5])
+    ax1.xaxis.set_ticks([0.1,1,4])
+    ax1.set_xticklabels([0.1,1,4])
     ax1.yaxis.set_ticks([1,10,100])
     ax1.set_yticklabels([1,10,100])
-    ax1.axvline(RIN/1000.,color='k',ls=':')
-    ax1.axvline(ROUT/1000.,color='k',ls=':')
-        
+    ax1.legend(loc=1,frameon=False,fontsize=10)
+    
+    model_GX_dm = G1h_dm['GX'] + e2h_dm*Gterms_dm.GX_2h
+    model_GX_sidm = G1h_sidm['GX'] + e2h_sidm*Gterms_sidm.GX_2h
     ax2.plot([0,10],[0,0],'k')
-    ax2.plot(DM.r,DM.GX,'C7',label='standard')
-    ax2.plot(SIDM.r,SIDM.GX,'C6--',label='reduced')    
+    ax2.plot(DM.r,DM.GX,'C7')
+    ax2.plot(SIDM.r,SIDM.GX,'C6--')    
     ax2.fill_between(DM.r,DM.GX+DM.e_GX,DM.GX-DM.e_GX,color='C7',alpha=0.4)
     ax2.fill_between(SIDM.r,SIDM.GX+SIDM.e_GX,SIDM.GX-SIDM.e_GX,color='C6',alpha=0.4)
     
-    ax2.plot(DM.r,G1h_dm['GX'] + e2h_dm*Gterms_dm.GX_2h,'C3',label='1h+2h')
-    ax2.plot(DM.r,G1h_dm['GX'],'C1',label='1h')
-    ax2.plot(DM.r,e2h_dm*Gterms_dm.GX_2h,'C8',label='2h')
-    ax2.plot(SIDM.r,G1h_sidm['GX'] + e2h_sidm*Gterms_sidm.GX_2h,'C3--')
+    ax2.plot(DM.r,G1h_dm['GX'] + e2h_dm*Gterms_dm.GX_2h,'C3',
+             label = r'$\chi^2_{red} = $'+f'{np.round(chi_red(model_GX_dm,DM.GX,DM.e_GX,gl),2)}')
+    ax2.plot(DM.r,G1h_dm['GX'],'C1')
+    ax2.plot(DM.r,e2h_dm*Gterms_dm.GX_2h,'C8')
+    ax2.plot(SIDM.r,G1h_sidm['GX'] + e2h_sidm*Gterms_sidm.GX_2h,'C3--',
+             label = r'$\chi^2_{red} = $'+f'{np.round(chi_red(model_GX_sidm,SIDM.GX,SIDM.e_GX,gl),2)}')
     ax2.plot(SIDM.r,G1h_sidm['GX'],'C1--')
     ax2.plot(SIDM.r,e2h_sidm*Gterms_sidm.GX_2h,'C8--')
     
     # ax2.legend(loc=3,frameon=False)
     ax2.set_xlabel('r [$h^{-1}$ Mpc]')
-    ax2.set_ylabel(r'$\Gamma_\times [h M_\odot/pc^2]$',labelpad=1.2)
+    if jdx == 0:
+        ax2.set_ylabel(r'$\Gamma_\times [h M_\odot/pc^2]$',labelpad=0.1,fontsize=10)
     ax2.set_xscale('log')
     ax2.set_xlim(0.1,5)
-    ax2.set_ylim(-16,17)
-    ax2.xaxis.set_ticks([0.1,1,5])
-    ax2.set_xticklabels([0.1,1,5])
+    ax2.set_ylim(-6,16)
+    ax2.xaxis.set_ticks([0.1,1,4])
+    ax2.set_xticklabels([0.1,1,4])
+    ax2.legend(loc=1,frameon=False,fontsize=10)
+
+
+def make_radial_plot():
+
+    
+    Gterms = quadrupoles_from_map_model(M200=10**14,c200=5.,
+                                        resolution=2000,
+                                        RIN=100.,ROUT=5000.,
+                                        ndots=20
+                                        )
+    q0 = 0.6
+    G1h = Gterms(-0.1,q0)
+    e = (1. - q0)/(1. + q0)
+    
+    GT_func,GX_func = GAMMA_components(Gterms.R,0.,ellip=e,M200 = 10**14,c200=5,cosmo_params=params)   
+    
+    fig, ax = plt.subplots(2,2, figsize=(12,4),sharex = True,gridspec_kw={'height_ratios': [4,2]})    
+    fig.subplots_adjust(hspace=0)
+    
+    ax[0,0].plot(Gterms.R,GT_func,'C9',label='$q = 0.6$',lw=2)
+    ax[0,0].plot(Gterms.R,G1h['GT'],'C8',label=r'$q_0 = 0.6$, $\alpha = -0.1$',lw=2)
+    ax[0,1].plot(Gterms.R,G1h['GX'],'C8',label=r'$q_0 = 0.6$, $\alpha = -0.1$',lw=2)
+    ax[0,1].plot(Gterms.R,GX_func,'C9',label='$q = 0.6$',lw=2)
+    
+    ax[0,1].plot(Gterms.R,np.zeros(len(Gterms.R)),'C7')
+    ax[1,0].plot(Gterms.R,np.zeros(len(Gterms.R)),'C7')
+    ax[1,1].plot(Gterms.R,np.zeros(len(Gterms.R)),'C7')
+
+    ax[1,0].plot(Gterms.R,G1h['GT']-GT_func,'k--',lw=2)
+    ax[1,1].plot(Gterms.R,G1h['GX']-GX_func,'k--',lw=2)
+    
+    ax[0,0].set_xscale('log')
+    ax[0,0].set_yscale('log')
+    
+    ax[0,0].legend(frameon=False)
+    
+    ax[1,0].set_xlabel('r [$h^{-1}$ Mpc]')
+    ax[1,1].set_xlabel('r [$h^{-1}$ Mpc]')
+    ax[0,1].set_ylabel(r'$\Gamma_\times [h M_\odot/pc^2]$')
+    ax[0,0].set_ylabel(r'$\Gamma_T [h M_\odot/pc^2]$')
+    ax[1,1].set_ylabel(r'Difference')
+    ax[1,0].set_ylabel(r'Difference')
+    ax[1,1].xaxis.set_ticks([0.1,1,3])
+    ax[1,1].set_xticklabels([0.1,1,3])
+    
+    fig.savefig('../final_plots/comparison_radial.pdf',bbox_inches='tight')
+
+
+

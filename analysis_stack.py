@@ -112,41 +112,43 @@ class pack():
       self.q2dr_it      = np.concatenate((self.main.b2Dr_it_xy/self.main.a2Dr_it_xy,self.main.b2Dr_it_zx/self.main.a2Dr_it_zx,self.main.b2Dr_it_yz/self.main.a2Dr_it_yz))
 
 # Globales
-typetensor = ['standard', 'reduced']
+# typetensor = ['standard', 'reduced']
+typetensor = ['reduced']
 folders_list = ["total", "relajados", \
                 "relajados_cerca", "relajados_lejos", \
                 "relajados_masivos", "relajados_no_masivos"]
 
 lhs = ["Total", "Relaxed", \
-                "Denser", "Isolated", \
-                "Higher-mass", "Lower-mass"]
+                "Clustered", "Isolated", \
+                "Massive", "Lower-mass"]
 
 # La carpeta donde estan guarados los objetos
 input_folder  = "./arreglos/"      
 
 ti = time.time()
 
-q_1h_T_dm = np.array([])
-q_1h_X_dm = np.array([])
-q_2h_T_dm = np.array([])
-q_2h_X_dm = np.array([])
-q_1h_T_sidm = np.array([])
-q_1h_X_sidm = np.array([])
-q_2h_T_sidm = np.array([])
-q_2h_X_sidm = np.array([])
+lM200_dm = np.array([])
+c200_dm  = np.array([])
+q1h_dm   = np.array([])
+q2h_dm   = np.array([])
+q1hr_dm  = np.array([])
+ar_dm    = np.array([])
+q2hr_dm  = np.array([])
+q_dm     = np.array([])
+q0_dm    = np.array([])
+a_dm     = np.array([])
 
-a_T_dm = np.array([])
-a_X_dm = np.array([])
-b_T_dm = np.array([])
-b_X_dm = np.array([])
-q_2hr_T_dm = np.array([])
-q_2hr_X_dm = np.array([])
-a_T_sidm = np.array([])
-a_X_sidm = np.array([])
-b_T_sidm = np.array([])
-b_X_sidm = np.array([])
-q_2hr_T_sidm = np.array([])
-q_2hr_X_sidm = np.array([])
+lM200_sidm = np.array([])
+c200_sidm  = np.array([])
+q1h_sidm   = np.array([])
+q2h_sidm   = np.array([])
+q1hr_sidm  = np.array([])
+ar_sidm    = np.array([])
+q2hr_sidm  = np.array([])
+q_sidm     = np.array([])
+q0_sidm    = np.array([])
+a_sidm     = np.array([])
+
     
 
 # El primer for es sobre una lista que tiene los tipos de tensores
@@ -154,11 +156,34 @@ q_2hr_X_sidm = np.array([])
 for idx, name_tensor in enumerate(typetensor):
     
     
-    f, ax_all = plt.subplots(6,3, figsize=(14,16),sharex = True)
-    f.subplots_adjust(hspace=0)
+    f, ax_all = plt.subplots(2,4, figsize=(12,5),sharex = True,sharey = True)
+    ax_all = ax_all.flatten()
+    ax_all[2].axis('off')
+    ax_all[3].axis('off')
+    ax_all = np.append(ax_all[:2],ax_all[4:])
+    f.subplots_adjust(hspace=0,wspace=0)
 
-    f2, ax_all2 = plt.subplots(6,3, figsize=(14,16),sharex = True)
-    f2.subplots_adjust(hspace=0)
+    ft, ax_T = plt.subplots(2,6, figsize=(14,5),sharex = True)
+    ax_T = ax_T.T
+    ft.subplots_adjust(hspace=0,wspace=0)
+
+    fx, ax_X = plt.subplots(2,6, figsize=(14,5),sharex = True)
+    ax_X = ax_X.T
+    fx.subplots_adjust(hspace=0,wspace=0)
+
+    fstack, ax_stack = plt.subplots(2,4, figsize=(14,6),sharex = True,sharey = True)
+    ax_stack = ax_stack.flatten()
+    ax_stack[2].axis('off')
+    ax_stack[3].axis('off')
+    ax_stack = np.append(ax_stack[:2],ax_stack[4:])
+    fstack.subplots_adjust(hspace=0,wspace=0)
+    
+    frad, ax_rad = plt.subplots(2,4, figsize=(14,6),sharex = True,sharey = True)
+    ax_rad = ax_rad.flatten()
+    ax_rad[2].axis('off')
+    ax_rad[3].axis('off')
+    ax_rad = np.append(ax_rad[:2],ax_rad[4:])
+    frad.subplots_adjust(hspace=0,wspace=0)
     
     fdist_it, ax_dist_it = plt.subplots(3,2, figsize=(10,8),sharex = True,sharey = True)
     fdist_it.subplots_adjust(hspace=0,wspace=0)
@@ -175,24 +200,14 @@ for idx, name_tensor in enumerate(typetensor):
     fcomp_2g, ax_comp_2g = plt.subplots(2,1, figsize=(10,10),sharex = True)
     fcomp_2g.subplots_adjust(hspace=0,wspace=0)
 
-    fcomp_x2, ax_comp_x2 = plt.subplots(2,1, figsize=(10,10),sharex = True)
-    fcomp_x2.subplots_adjust(hspace=0,wspace=0)
-
-    fcomp_t2, ax_comp_t2 = plt.subplots(2,1, figsize=(10,10),sharex = True)
-    fcomp_t2.subplots_adjust(hspace=0,wspace=0)
-
     fcomp_2g2, ax_comp_2g2 = plt.subplots(2,1, figsize=(10,10),sharex = True)
     fcomp_2g2.subplots_adjust(hspace=0,wspace=0)
 
     for ind in [0,1]:
         ax_comp_x[ind].axhspan(-0.05,0.05,color='C7',alpha=0.1)
         ax_comp_x[ind].plot([0,7],[0,0],'k--')
-        ax_comp_x2[ind].axhspan(-0.05,0.05,color='C7',alpha=0.1)
-        ax_comp_x2[ind].plot([0,7],[0,0],'k--')
         ax_comp_t[ind].axhspan(-0.05,0.05,color='C7',alpha=0.1)
         ax_comp_t[ind].plot([0,7],[0,0],'k--')
-        ax_comp_t2[ind].axhspan(-0.05,0.05,color='C7',alpha=0.1)
-        ax_comp_t2[ind].plot([0,7],[0,0],'k--')
         ax_comp_2g[ind].axhspan(-0.05,0.05,color='C7',alpha=0.1)
         ax_comp_2g[ind].plot([0,7],[0,0],'k--')
         ax_comp_2g2[ind].axhspan(-0.05,0.05,color='C7',alpha=0.1)
@@ -212,36 +227,21 @@ for idx, name_tensor in enumerate(typetensor):
         filename_SIDM = input_folder + "%s_SIDM_%s.npy" % (name_folder, name_tensor)
         # llama a la clase pack que lee el archivo y lo carga
         SIDM = pack(filename_SIDM)
-        
-        q_1h_T_dm = np.append(q_1h_T_dm,DM.q1h_gt)
-        q_1h_X_dm = np.append(q_1h_X_dm,DM.q1h_gx)
-        q_2h_T_dm = np.append(q_2h_T_dm,DM.q2h_gt)
-        q_2h_X_dm = np.append(q_2h_X_dm,DM.q2h_gx)
-        q_1h_T_sidm = np.append(q_1h_T_sidm,SIDM.q1h_gt)
-        q_1h_X_sidm = np.append(q_1h_X_sidm,SIDM.q1h_gx)
-        q_2h_T_sidm = np.append(q_2h_T_sidm,SIDM.q2h_gt)
-        q_2h_X_sidm = np.append(q_2h_X_sidm,SIDM.q2h_gx)
 
-        a_T_dm       = np.append(a_T_dm,DM.a_gt)
-        a_X_dm       = np.append(a_X_dm,DM.a_gx)
-        b_T_dm       = np.append(b_T_dm,DM.b_gt)
-        b_X_dm       = np.append(b_X_dm,DM.b_gx)
-        q_2hr_T_dm   = np.append(q_2hr_T_dm,DM.q2hr_gt)
-        q_2hr_X_dm   = np.append(q_2hr_X_dm,DM.q2hr_gx)
-        a_T_sidm     = np.append(a_T_sidm,SIDM.a_gt)
-        a_X_sidm     = np.append(a_X_sidm,SIDM.a_gx)
-        b_T_sidm     = np.append(b_T_sidm,SIDM.b_gt)
-        b_X_sidm     = np.append(b_X_sidm,SIDM.b_gx)
-        q_2hr_T_sidm = np.append(q_2hr_T_sidm,SIDM.q2hr_gt)
-        q_2hr_X_sidm = np.append(q_2hr_X_sidm,SIDM.q2hr_gx)
+
+        # MAKE PROFILE
+        ax_T[jdx,0].plot(0.11,50,'w,',label=lhs[jdx])
+        ax_X[jdx,0].plot(0.11,50,'w,',label=lhs[jdx])
+        plt_profile_fitted_final(DM,SIDM,0,5000,[ax_all[jdx],ax_T[jdx,0],ax_T[jdx,1]],jdx)
+        # plt_profile_fitted_final_new(DM,SIDM,0,5000,[ax_X[jdx,0],ax_X[jdx,1]],jdx)
+        ax_all[jdx].text(0.5,100,lhs[jdx],fontsize=14)
+        
+        
         
         corner_result(DM,SIDM,lhs[jdx],name_tensor)
-            
-        plt_profile_fitted_final(DM,SIDM,0,5000,ax_all[jdx])
-        ax_all[jdx,0].text(1,100,lhs[jdx],fontsize=14)
-
-        plt_profile_fitted_final_new(DM,SIDM,0,5000,ax_all2[jdx])
-        ax_all2[jdx,0].text(1,100,lhs[jdx],fontsize=14)
+        
+        stacked_particle(DM,SIDM,ax_stack[jdx],lhs[jdx])
+        
                 
         plot_q_dist(DM,SIDM,ax_dist_it[row,col],method='_it')
         ax_dist_it[row,col].text(0.2,4,lhs[jdx],fontsize=14)
@@ -251,27 +251,46 @@ for idx, name_tensor in enumerate(typetensor):
         
         compare_q(DM,SIDM,ax_comp_x,jdx+1,method='gx')
         compare_q(DM,SIDM,ax_comp_t,jdx+1,method='gt')
-        compare_q(DM,SIDM,ax_comp_2g,jdx+1,method='2g')
+        compare_q(DM,SIDM,[ax_comp_2g[0],ax_comp_2g2[0]],jdx+1,method='2g')
 
-        compare_qr(DM,SIDM,ax_comp_x2,jdx+1,method='gx')
-        compare_qr(DM,SIDM,ax_comp_t2,jdx+1,method='gt')
-        compare_qr(DM,SIDM,ax_comp_2g2,jdx+1,method='2g')
+        fit = compare_qr(DM,SIDM,[ax_comp_2g[1],ax_comp_2g2[1]],jdx+1,method='2g_fb')
 
         
         if jdx == 0:
-            ax_comp_x[0].legend(loc=2,frameon=False,fontsize=10)
-            ax_comp_x[1].legend(loc=2,frameon=False,fontsize=10)
-            ax_comp_t[0].legend(loc=2,frameon=False,fontsize=10)
-            ax_comp_t[1].legend(loc=2,frameon=False,fontsize=10)
-            ax_comp_2g[0].legend(loc=2,frameon=False,fontsize=10)
-            ax_comp_2g[1].legend(loc=2,frameon=False,fontsize=10)
+            ax_comp_x[0].legend(loc=2,frameon=False,fontsize=10,ncol=2)
+            ax_comp_x[1].legend(loc=2,frameon=False,fontsize=10,ncol=2)
+            ax_comp_t[0].legend(loc=2,frameon=False,fontsize=10,ncol=2)
+            ax_comp_t[1].legend(loc=2,frameon=False,fontsize=10,ncol=2)
+            ax_comp_2g[0].legend(loc=2,frameon=False,fontsize=10,ncol=2)
+            ax_comp_2g[1].legend(loc=2,frameon=False,fontsize=10,ncol=2)
 
-            ax_comp_x2[0].legend(loc=2,frameon=False,fontsize=10)
-            ax_comp_x2[1].legend(loc=2,frameon=False,fontsize=10)
-            ax_comp_t2[0].legend(loc=2,frameon=False,fontsize=10)
-            ax_comp_t2[1].legend(loc=2,frameon=False,fontsize=10)
-            ax_comp_2g2[0].legend(loc=2,frameon=False,fontsize=10)
-            ax_comp_2g2[1].legend(loc=2,frameon=False,fontsize=10)
+            ax_comp_2g2[0].legend(loc=2,frameon=False,fontsize=10,ncol=2)
+            ax_comp_2g2[1].legend(loc=2,frameon=False,fontsize=10,ncol=2)
+            
+        qplot(DM,SIDM,ax_rad[jdx])
+        
+        lM200_dm = np.append(lM200_dm,DM.lM200_ds)
+        c200_dm  = np.append(c200_dm,DM.c200_ds) 
+        q1h_dm   = np.append(q1h_dm,DM.q1h_2g)  
+        q2h_dm   = np.append(q2h_dm,DM.q2h_2g)    
+        q1hr_dm  = np.append(q1hr_dm,DM.b_2g_fb) 
+        ar_dm    = np.append(ar_dm,DM.a_2g_fb) 
+        q2hr_dm  = np.append(q2hr_dm,DM.q2hr_2g_fb) 
+        q_dm     = np.append(q_dm,np.mean(DM.q2dr_it))
+        q0_dm    = np.append(q0_dm,fit[0])
+        a_dm     = np.append(a_dm ,fit[1])
+        
+        lM200_sidm = np.append(lM200_sidm,SIDM.lM200_ds)
+        c200_sidm  = np.append(c200_sidm,SIDM.c200_ds) 
+        q1h_sidm   = np.append(q1h_sidm,SIDM.q1h_2g)  
+        q2h_sidm   = np.append(q2h_sidm,SIDM.q2h_2g)    
+        q1hr_sidm  = np.append(q1hr_sidm,SIDM.b_2g_fb) 
+        ar_sidm    = np.append(ar_sidm,SIDM.a_2g_fb) 
+        q2hr_sidm  = np.append(q2hr_sidm,SIDM.q2hr_2g_fb)
+        q_sidm     = np.append(q_sidm,np.mean(SIDM.q2dr_it))
+        q0_sidm    = np.append(q0_sidm,fit[2])
+        a_sidm     = np.append(a_sidm ,fit[3])
+            
             
     ax_comp_x[1].set_xticks(np.arange(jdx+1)+1)
     ax_comp_x[1].set_xticklabels(lhs)
@@ -280,32 +299,38 @@ for idx, name_tensor in enumerate(typetensor):
     ax_comp_2g[1].set_xticks(np.arange(jdx+1)+1)
     ax_comp_2g[1].set_xticklabels(lhs)
 
-    ax_comp_x2[1].set_xticks(np.arange(jdx+1)+1)
-    ax_comp_x2[1].set_xticklabels(lhs)
-    ax_comp_t2[1].set_xticks(np.arange(jdx+1)+1)
-    ax_comp_t2[1].set_xticklabels(lhs)
     ax_comp_2g2[1].set_xticks(np.arange(jdx+1)+1)
     ax_comp_2g2[1].set_xticklabels(lhs)
 
 
-    ax_all[0,0].legend(loc=3,frameon=False,fontsize=10)
-    ax_all[0,1].legend(loc=3,frameon=False,fontsize=10)
     ax_dist_it[0,0].legend(loc=3,frameon=False,fontsize=10)
     ax_distr_it[0,0].legend(loc=3,frameon=False,fontsize=10)
 
+    for j in range(len(ax_stack)):
+        if j == 0 or j == 2:
+            ax_stack[j].set_ylabel('q')
+
+        if j !=0:
+            ax_T[j,0].yaxis.set_ticklabels([])
+            ax_X[j,0].yaxis.set_ticklabels([])
+            ax_T[j,1].yaxis.set_ticklabels([])
+            ax_X[j,1].yaxis.set_ticklabels([])
+
+
+    fstack.savefig('../final_plots/stack_'+name_tensor+'.pdf',bbox_inches='tight')
     fdist_it.savefig('../final_plots/dist_'+name_tensor+'.png',bbox_inches='tight')
     fdistr_it.savefig('../final_plots/dist_'+name_tensor+'_r.png',bbox_inches='tight')
 
-    f.savefig('../final_plots/profile2_'+name_tensor+'.png',bbox_inches='tight')
-    f2.savefig('../final_plots/profile2_'+name_tensor+'_v2.png',bbox_inches='tight')
-    # fcomp_2g.savefig('../final_plots/compare_'+name_tensor+'_v2.pdf',bbox_inches='tight')
+    f.savefig('../final_plots/profile2_'+name_tensor+'.pdf',bbox_inches='tight')
+    ft.savefig('../final_plots/profile_'+name_tensor+'_T.pdf',bbox_inches='tight')
+    fx.savefig('../final_plots/profile_'+name_tensor+'_X.pdf',bbox_inches='tight')
     fcomp_2g.savefig('../final_plots/compare_'+name_tensor+'.png',bbox_inches='tight')
     fcomp_t.savefig('../final_plots/compare_'+name_tensor+'_t.png',bbox_inches='tight')
     fcomp_x.savefig('../final_plots/compare_'+name_tensor+'_x.png',bbox_inches='tight')
 
-    fcomp_2g2.savefig('../final_plots/compare_'+name_tensor+'_v2.png',bbox_inches='tight')
-    fcomp_t2.savefig('../final_plots/compare_'+name_tensor+'_t_v2.png',bbox_inches='tight')
-    fcomp_x2.savefig('../final_plots/compare_'+name_tensor+'_x_v2.png',bbox_inches='tight')
+    fcomp_2g2.savefig('../final_plots/compare_'+name_tensor+'_v2.pdf',bbox_inches='tight')
+    
+    
 
     
 tf = time.time()
