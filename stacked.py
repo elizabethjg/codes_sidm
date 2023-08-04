@@ -389,8 +389,9 @@ def make_shape_profile_parallel(main_file,path,haloids,reduced = False, iterativ
     ncores = len(hids_splitted)
     
     rlims = np.linspace(0.2,2,nbins)
-    b_profile = np.zeros(nbins)
-    a_profile = np.zeros(nbins)
+    b_profile  = np.zeros(nbins)
+    a_profile  = np.zeros(nbins)
+    fi_profile = np.zeros(nbins)
     count = np.zeros(nbins)
     T2D   = np.zeros((nbins,2,2))
     
@@ -423,8 +424,9 @@ def make_shape_profile_parallel(main_file,path,haloids,reduced = False, iterativ
       j = np.flip(np.argsort(w2d))
       a_profile[i] = np.sqrt(w2d[j][0])
       b_profile[i] = np.sqrt(w2d[j][1])
-
-    return rlims, a_profile, b_profile
+      fi_profile[i] = np.arctan(v2d[j][1]/v2d[j][0])
+      
+    return rlims, a_profile, b_profile, fi_profile
     
 
 def stack_halos_2DH(main_file,path,haloids,reduced = False, iterative = False, resolution=1000):
