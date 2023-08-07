@@ -380,7 +380,7 @@ def make_shape_profile(main_file,path,haloids,rlims,reduced,iterative):
 def make_shape_profile_unpack(minput):
 	return make_shape_profile(*minput)
 
-def make_shape_profile_parallel(main_file,path,haloids,reduced = False, iterative = False, nbins=10, ncores=10):
+def make_shape_profile_parallel(main_file,path,haloids,reduced = False, iterative = False, rmin=0.2, rmax=2.0, nbins=10, ncores=10):
 
     if ncores > len(haloids):
         ncores = len(haloids)
@@ -388,13 +388,13 @@ def make_shape_profile_parallel(main_file,path,haloids,reduced = False, iterativ
     hids_splitted = np.array_split(haloids,ncores)
     ncores = len(hids_splitted)
     
-    rlims = np.linspace(0.2,2,nbins)
+    rlims = np.linspace(rmin,rmax,nbins)
     b_profile  = np.zeros(nbins)
     a_profile  = np.zeros(nbins)
     fi_profile = np.zeros(nbins)
     count = np.zeros(nbins)
     T2D   = np.zeros((nbins,2,2))
-    
+
     list_mfile      = [main_file]*ncores
     list_path       = [path]*ncores
     list_rlims      = [rlims]*ncores
@@ -422,12 +422,11 @@ def make_shape_profile_parallel(main_file,path,haloids,reduced = False, iterativ
       w2d, v2d = np.linalg.eig(T2D[i])
        
       j = np.flip(np.argsort(w2d))
-      a_profile[i] = np.sqrt(w2d[j][0])
-      b_profile[i] = np.sqrt(w2d[j][1])
-      fi_profile[i] = np.arctan(v2d[j][1]/v2d[j][0])
-      
-    return rlims, a_profile, b_profile, fi_profile
+      a_profile[i]  = np.sqrt(w2d[j][0])
+      b_profile[i]  = np.sqrt(w2d[j][1])
+      fi_profile[i] = np.arctan2(v2d[j[0]][1], v2d[j[0]][0])
     
+    return rlims, a_profile, b_profile, fi_profile
 
 def stack_halos_2DH(main_file,path,haloids,reduced = False, iterative = False, resolution=1000):
 
