@@ -96,13 +96,19 @@ class pack():
       self.rs              = np.load(f)
       self.qs              = np.load(f)
       self.err_qs          = np.load(f)
+      self.fi              = np.load(f)
+      self.err_fi          = np.load(f)
+      self.qs_all          = np.load(f)
+      self.err_qs_all      = np.load(f)
+      self.fi_all          = np.load(f)
+      self.err_fi_all      = np.load(f)
       self.a_2g_fb         = np.load(f)
       self.b_2g_fb         = np.load(f)
       self.q2hr_2g_fb      = np.load(f)
       self.mcmc_a_2g_fb    = np.load(f)
       self.mcmc_b_2g_fb    = np.load(f)
       self.mcmc_q2hr_2g_fb = np.load(f)
-      self.main         = pickle.loads(np.load(f, allow_pickle=True).item())
+      self.main            = pickle.loads(np.load(f, allow_pickle=True).item())
       f.close()
 
       # guardo estos atributos extras para graficarlos
@@ -148,8 +154,6 @@ q2hr_sidm  = np.array([])
 q_sidm     = np.array([])
 q0_sidm    = np.array([])
 a_sidm     = np.array([])
-
-    
 
 # El primer for es sobre una lista que tiene los tipos de tensores
 # standard o reducido
