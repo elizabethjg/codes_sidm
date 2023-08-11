@@ -118,7 +118,7 @@ class pack():
       self.q2dr_it      = np.concatenate((self.main.b2Dr_it_xy/self.main.a2Dr_it_xy,self.main.b2Dr_it_zx/self.main.a2Dr_it_zx,self.main.b2Dr_it_yz/self.main.a2Dr_it_yz))
 
 # Globales
-# typetensor = ['standard', 'reduced']
+# typetensor = ['reduced','standard']
 typetensor = ['reduced']
 folders_list = ["total", "relajados", \
                 "relajados_cerca", "relajados_lejos", \
@@ -157,8 +157,25 @@ a_sidm     = np.array([])
 
 # El primer for es sobre una lista que tiene los tipos de tensores
 # standard o reducido
+
+Rvir = np.array([830.5873,821.9827,862.4454,813.7005,1079.2272,669.0606])*2.5*1.e-3
+
+
 for idx, name_tensor in enumerate(typetensor):
     
+    fres, ax_res = plt.subplots(2,4, figsize=(15,8),sharex = True,sharey = True)
+    ax_res = ax_res.flatten()
+    ax_res[2].axis('off')
+    ax_res[3].axis('off')
+    ax_res = np.append(ax_res[:2],ax_res[4:])
+    fres.subplots_adjust(hspace=0,wspace=0)
+    
+    frad, ax_rad = plt.subplots(2,4, figsize=(14,6),sharex = True,sharey = True)
+    ax_rad = ax_rad.flatten()
+    ax_rad[2].axis('off')
+    ax_rad[3].axis('off')
+    ax_rad = np.append(ax_rad[:2],ax_rad[4:])
+    frad.subplots_adjust(hspace=0,wspace=0)
     
     f, ax_all = plt.subplots(2,4, figsize=(12,5),sharex = True,sharey = True)
     ax_all = ax_all.flatten()
@@ -181,14 +198,7 @@ for idx, name_tensor in enumerate(typetensor):
     ax_stack[3].axis('off')
     ax_stack = np.append(ax_stack[:2],ax_stack[4:])
     fstack.subplots_adjust(hspace=0,wspace=0)
-    
-    frad, ax_rad = plt.subplots(2,4, figsize=(14,6),sharex = True,sharey = True)
-    ax_rad = ax_rad.flatten()
-    ax_rad[2].axis('off')
-    ax_rad[3].axis('off')
-    ax_rad = np.append(ax_rad[:2],ax_rad[4:])
-    frad.subplots_adjust(hspace=0,wspace=0)
-    
+
     fdist_it, ax_dist_it = plt.subplots(3,2, figsize=(10,8),sharex = True,sharey = True)
     fdist_it.subplots_adjust(hspace=0,wspace=0)
 
@@ -199,7 +209,7 @@ for idx, name_tensor in enumerate(typetensor):
     fcomp_x.subplots_adjust(hspace=0,wspace=0)
 
     fcomp_t, ax_comp_t = plt.subplots(2,1, figsize=(10,10),sharex = True)
-    fcomp_t.subplots_adjust(hspace=0,wspace=0)<
+    fcomp_t.subplots_adjust(hspace=0,wspace=0)
 
     fcomp_2g, ax_comp_2g = plt.subplots(2,1, figsize=(10,10),sharex = True)
     fcomp_2g.subplots_adjust(hspace=0,wspace=0)
@@ -240,12 +250,11 @@ for idx, name_tensor in enumerate(typetensor):
         # plt_profile_fitted_final_new(DM,SIDM,0,5000,[ax_X[jdx,0],ax_X[jdx,1]],jdx)
         ax_all[jdx].text(0.5,100,lhs[jdx],fontsize=14)
         
-        
-        
         corner_result(DM,SIDM,lhs[jdx],name_tensor)
         
         stacked_particle(DM,SIDM,ax_stack[jdx],lhs[jdx])
         
+        stacked_lens_fit(DM,SIDM,ax_res[jdx],lhs[jdx],jdx,Rvir[jdx])
                 
         plot_q_dist(DM,SIDM,ax_dist_it[row,col],method='_it')
         ax_dist_it[row,col].text(0.2,4,lhs[jdx],fontsize=14)
@@ -258,9 +267,14 @@ for idx, name_tensor in enumerate(typetensor):
         compare_q(DM,SIDM,[ax_comp_2g[0],ax_comp_2g2[0]],jdx+1,method='2g')
 
         fit = compare_qr(DM,SIDM,[ax_comp_2g[1],ax_comp_2g2[1]],jdx+1,method='2g_fb')
-
+        qplot(DM,SIDM,ax_rad[jdx],lhs[jdx])
         
         if jdx == 0:
+            if idx == 0:
+                ax_rad[0].legend(frameon=False)
+                ax_res[0].legend(frameon=False,loc=1,ncol=2)
+                
+            
             ax_comp_x[0].legend(loc=2,frameon=False,fontsize=10,ncol=2)
             ax_comp_x[1].legend(loc=2,frameon=False,fontsize=10,ncol=2)
             ax_comp_t[0].legend(loc=2,frameon=False,fontsize=10,ncol=2)
@@ -271,7 +285,6 @@ for idx, name_tensor in enumerate(typetensor):
             ax_comp_2g2[0].legend(loc=2,frameon=False,fontsize=10,ncol=2)
             ax_comp_2g2[1].legend(loc=2,frameon=False,fontsize=10,ncol=2)
             
-        qplot(DM,SIDM,ax_rad[jdx])
         
         lM200_dm = np.append(lM200_dm,DM.lM200_ds)
         c200_dm  = np.append(c200_dm,DM.c200_ds) 
@@ -313,6 +326,11 @@ for idx, name_tensor in enumerate(typetensor):
     for j in range(len(ax_stack)):
         if j == 0 or j == 2:
             ax_stack[j].set_ylabel('q')
+            ax_res[j].set_ylabel('q')
+            ax_rad[j].set_ylabel('$q_{CDM}/q_{SIDM} - 1$')
+            ax_all[j].set_ylabel(r'$\Delta\Sigma [h M_\odot/pc^2]$',labelpad=0.1)
+            # ax_rad[j].set_ylabel('$\phi$')
+            # ax_rad[j].set_ylim(-2,2)
 
         if j !=0:
             ax_T[j,0].yaxis.set_ticklabels([])
@@ -321,7 +339,7 @@ for idx, name_tensor in enumerate(typetensor):
             ax_X[j,1].yaxis.set_ticklabels([])
 
 
-    fstack.savefig('../final_plots/stack_'+name_tensor+'.pdf',bbox_inches='tight')
+
     fdist_it.savefig('../final_plots/dist_'+name_tensor+'.png',bbox_inches='tight')
     fdistr_it.savefig('../final_plots/dist_'+name_tensor+'_r.png',bbox_inches='tight')
 
@@ -333,8 +351,11 @@ for idx, name_tensor in enumerate(typetensor):
     fcomp_x.savefig('../final_plots/compare_'+name_tensor+'_x.png',bbox_inches='tight')
 
     fcomp_2g2.savefig('../final_plots/compare_'+name_tensor+'_v2.pdf',bbox_inches='tight')
-    
-    
+
+
+    fstack.savefig('../final_plots/stack_'+name_tensor+'.pdf',bbox_inches='tight')    
+    frad.savefig('../final_plots/radial_q'+name_tensor+'.pdf',bbox_inches='tight')    
+    fres.savefig('../final_plots/result_q'+name_tensor+'.pdf',bbox_inches='tight')    
 
     
 tf = time.time()

@@ -12,6 +12,17 @@ params = {'flat': True, 'H0': 70.0, 'Om0': 0.3, 'Ob0': 0.045, 'sigma8': 0.811, '
 folder = '../profiles3/'
 from stacked import *
 
+
+def q_comparison_it(DM,SIDM,ax):
+
+    plt.figure(figsize=(6,4))
+    plt.plot(DM.q2dr,DM.q2dr_it,'C3o',alpha=0.1)
+    # plt.plot(SIDM.q2dr,SIDM.q2dr_it,'C1o',alpha=0.1)
+    plt.plot([0.5,1],[0.5,1],'C7--')
+    plt.axis([0.65,1,0.45,1])
+    plt.xlabel('$q$')
+    plt.ylabel('$q_{it}$')
+
 def fit_qr(r,q,err_q):
     
     def qr(r,a,b):
@@ -24,41 +35,42 @@ def fit_qr(r,q,err_q):
     return qr,a,b
     
         
-def qplot(DM,SIDM,ax):
+def qplot(DM,SIDM,ax,samp):
     
-    
-    def logq(r,alpha,lq0):
-        return lq0 + alpha*r
 
-    err_alpha = np.diff(np.percentile(DM.mcmc_a_2g_fb[3000:], [16, 50, 84]))
-    err_q0 = np.diff(np.percentile(DM.mcmc_a_2g_fb[3000:], [16, 50, 84]))
-    
-    q0    = DM.b_2g_fb
-    alpha = DM.a_2g_fb
-    
-    lq0  = np.log10(q0)
-    elq0 = err_q0/(q0*np.log(10.))    
-    ax.plot(DM.rs,10**(logq(DM.rs,alpha,lq0)),'k')
-    ax.fill_between(DM.rs, 
-                    10**(logq(DM.rs,alpha+err_alpha[1],lq0+elq0[1])), 
-                    10**(logq(DM.rs,alpha-err_alpha[0],lq0-elq0[0])), 
-                    interpolate=True, 
-                    color='C7',alpha=0.3)    
 
-    err_alpha = np.diff(np.percentile(SIDM.mcmc_a_2g_fb[3000:], [16, 50, 84]))
-    err_q0 = np.diff(np.percentile(SIDM.mcmc_a_2g_fb[3000:], [16, 50, 84]))
+
+    eq_ratio   = np.sqrt((DM.err_qs_all/SIDM.qs_all)**2 + ((DM.qs_all/(SIDM.qs_all**2))*SIDM.err_qs_all)**2)
+    eq_ratio_b = np.sqrt((DM.err_qs_all/SIDM.qs)**2 + ((DM.qs_all/(SIDM.qs**2))*SIDM.err_qs)**2)
+
+
+    ax.plot(DM.rs,np.zeros(len(DM.rs)),'C7')    
+    ax.fill_between(DM.rs,
+                    (DM.qs/SIDM.qs-1)+eq_ratio_b,
+                    (DM.qs/SIDM.qs-1)-eq_ratio_b,
+                    color='C2',alpha=0.3)
+    ax.plot(DM.rs,DM.qs/SIDM.qs-1,'C2--',label='bound particles')
     
-    q0    = SIDM.b_2g_fb
-    alpha = SIDM.a_2g_fb
+    ax.fill_between(DM.rs,
+                    (DM.qs_all/SIDM.qs_all-1)+eq_ratio,
+                    (DM.qs_all/SIDM.qs_all-1)-eq_ratio,
+                    color='C4',alpha=0.3)
+    ax.plot(DM.rs,DM.qs_all/SIDM.qs_all-1,'C4',label='all particles')
+
+
+    # ax.plot(DM.rs,np.rad2deg(DM.fi_all),'k',label='DM - all')
+    # ax.plot(DM.rs,np.rad2deg(DM.fi),'k--',label='DM - bound')
+    # ax.plot(DM.rs,np.rad2deg(SIDM.fi_all),'C6',label='SIDM - all')
+    # ax.plot(DM.rs,np.rad2deg(SIDM.fi),'C6--',label='SIDM - bound')
+
     
-    lq0  = np.log10(q0)
-    elq0 = err_q0/(q0*np.log(10.))    
-    ax.plot(SIDM.rs,10**(logq(SIDM.rs,alpha,lq0)),'C3--')
-    ax.fill_between(DM.rs, 
-                    10**(logq(DM.rs,alpha+err_alpha[1],lq0+elq0[1])), 
-                    10**(logq(DM.rs,alpha-err_alpha[0],lq0-elq0[0])), 
-                    interpolate=True, 
-                    color='C6',alpha=0.3)    
+    ax.text(0.3,0.03,samp)
+    
+    ax.set_xscale('log')
+    ax.set_xticks([0.2,0.5,1.0,4.0])
+    ax.set_xticklabels(['0.2','0.5','1.0','4.0'])
+    ax.set_xlabel('$r[h^{-1} Mpc]$')
+
 
 
 
@@ -184,12 +196,12 @@ def compare_q(DM,SIDM,ax,j,method='2g'):
     # ax2.plot(j+0.,(np.mean(DM.q2d_it)/np.mean(SIDM.q2d_it))-1,'C4D',label=r'$\langle q \rangle$ - standard',markersize=10)
     ax2.errorbar(j+0.2,(eval('DM.q1h_'+method)/eval('SIDM.q1h_'+method))-1,
                  yerr=e_ratio_1h,
-                 fmt='C1o',markersize=10,label='$q_{1h}$')
+                 fmt='C2o',markersize=10,label='$q_{1h}$')
     ax2.errorbar(j+0.3,(eval('DM.q2h_'+method)/eval('SIDM.q2h_'+method))-1,
                  yerr=e_ratio_2h,
-                 fmt='C8o',markersize=10,label='$q_{2h}$')
+                 fmt='C4o',markersize=10,label='$q_{2h}$')
     ax2.errorbar(j+0.1,(np.mean(DM.q2dr_it)/np.mean(SIDM.q2dr_it))-1,yerr=0.01,fmt='C3D',label=r'$\langle q \rangle$ - particle distribution',markersize=10)
-    ax2.errorbar(j+0.1,(np.mean(DM.qs[-1])/np.mean(SIDM.qs[-1]))-1,yerr=0.01,fmt='ks',label=r'$q(2 Mpc h^{-1})$ - stacked particle distribution',markersize=10)
+    # ax2.errorbar(j+0.1,(np.mean(DM.qs[-1])/np.mean(SIDM.qs[-1]))-1,yerr=0.01,fmt='ks',label=r'$q(2 Mpc h^{-1})$ - stacked particle distribution',markersize=10)
     
     ax2.set_ylim(-0.3,0.3)
                  
@@ -201,22 +213,120 @@ def compare_q(DM,SIDM,ax,j,method='2g'):
 
 def stacked_particle(DM,SIDM,ax,samp):
     
-    qr, a_dm, b_dm = fit_qr(DM.rs,DM.qs,DM.err_qs)
-    qr, a_sidm, b_sidm = fit_qr(SIDM.rs,SIDM.qs,SIDM.err_qs)
-    # ax.axhline(np.mean(DM.q2dr_it),color='C7',ls='--')
-    # ax.axhline(np.mean(SIDM.q2dr_it),color='C6',ls='--')
-    ax.fill_between(DM.rs,DM.qs+DM.err_qs,DM.qs-DM.err_qs,color='C7',alpha=0.4)
-    ax.fill_between(SIDM.rs,SIDM.qs+SIDM.err_qs,SIDM.qs-SIDM.err_qs,color='C6',alpha=0.4)
-    ax.plot(DM.rs,qr(DM.rs,a_dm,b_dm),'k',label=r'$\alpha = $'+f'{np.round(a_dm,3)}, $q_0 = ${np.round(b_dm,2)}')
-    ax.plot(SIDM.rs,qr(SIDM.rs,a_sidm,b_sidm),'C3',label=r'$\alpha = $'+f'{np.round(a_sidm,3)}, $q_0 = ${np.round(b_sidm,2)}')
+    mr = DM.rs <= 1.0
+    qr, a_dm, b_dm = fit_qr(DM.rs[mr],DM.qs[mr],DM.err_qs[mr])
+    qr, a_sidm, b_sidm = fit_qr(SIDM.rs[mr],SIDM.qs[mr],SIDM.err_qs[mr])
+    ax.fill_between(DM.rs[mr],(DM.qs+DM.err_qs)[mr],(DM.qs-DM.err_qs)[mr],color='C7',alpha=0.4)
+    ax.fill_between(SIDM.rs[mr],(SIDM.qs+SIDM.err_qs)[mr],(SIDM.qs-SIDM.err_qs)[mr],color='C6',alpha=0.4)
+    ax.plot(DM.rs[mr],qr(DM.rs[mr],a_dm,b_dm),'k',label=r'$\alpha = $'+f'{np.round(a_dm,3)}, $q_0 = ${np.round(b_dm,2)}')
+    ax.plot(SIDM.rs[mr],qr(SIDM.rs[mr],a_sidm,b_sidm),'C3',label=r'$\alpha = $'+f'{np.round(a_sidm,3)}, $q_0 = ${np.round(b_sidm,2)}')
     ax.set_xscale('log')
     ax.text(0.2,0.85,samp)
     ax.legend(frameon=False,loc=1)
-    ax.set_xticks([0.2,0.5,1.0,2.0])
-    ax.set_xticklabels(['0.2','0.5','1.0','2.0'])
-    # ax.set_yscale('log')
+    ax.set_xticks([0.3,0.5,1.0])
+    ax.set_xticklabels(['0.3','0.5','1.0'])
     ax.set_xlabel('$r[h^{-1} Mpc]$')
     
+def stacked_lens_fit(DM,SIDM,ax,samp,j,Rvir):
+    
+    def logq(r,alpha,lq0):
+        return lq0 + alpha*np.log10(r)
+
+    err_alpha = np.diff(np.percentile(DM.mcmc_a_2g_fb[3000:], [16, 50, 84]))
+    err_q0    = np.diff(np.percentile(DM.mcmc_a_2g_fb[3000:], [16, 50, 84]))
+    err_q2h_dm   = np.diff(np.percentile(DM.mcmc_q2hr_2g_fb[3000:], [16, 50, 84]))
+    
+    q0    = DM.b_2g_fb
+    alpha = DM.a_2g_fb
+    
+    lq0  = np.log10(q0)
+    elq0 = err_q0/(q0*np.log(10.))
+    
+    label_dm = r'CDM: $\alpha = '+str(np.round(alpha,3))+', q_0 = '+str(np.round(q0,3))+', q_{2h} = '+str(np.round(DM.q2hr_2g_fb,2))+'$'
+    
+    
+    mr = DM.rs <= Rvir    
+    ax.plot(DM.rs[mr],10**(logq(DM.rs[mr],alpha,lq0)),'k',
+            label='CDM')
+    ax.plot(DM.rs[~mr],10**(logq(DM.rs[~mr],alpha,lq0)),'k',alpha=0.5)
+    
+    
+    ax.fill_between(DM.rs[mr], 
+                    10**(logq(DM.rs[mr],alpha+err_alpha[1],lq0+elq0[1])), 
+                    10**(logq(DM.rs[mr],alpha-err_alpha[0],lq0-elq0[0])), 
+                    interpolate=True, 
+                    color=f'C7',alpha=0.3)    
+    ax.fill_between(DM.rs[~mr], 
+                    10**(logq(DM.rs[~mr],alpha+err_alpha[1],lq0+elq0[1])), 
+                    10**(logq(DM.rs[~mr],alpha-err_alpha[0],lq0-elq0[0])), 
+                    interpolate=True, 
+                    color=f'C7',alpha=0.1)    
+
+    ax.fill_between(SIDM.rs[~mr],
+                    np.ones(len(DM.rs[~mr]))*(DM.q2hr_2g_fb+err_q2h_dm[1]),
+                    np.ones(len(DM.rs[~mr]))*(DM.q2hr_2g_fb-err_q2h_dm[0]),
+                    interpolate=True, 
+                    color=f'C7',alpha=0.3) 
+    ax.fill_between(SIDM.rs[mr],
+                    np.ones(len(DM.rs[mr]))*(DM.q2hr_2g_fb+err_q2h_dm[1]),
+                    np.ones(len(DM.rs[mr]))*(DM.q2hr_2g_fb-err_q2h_dm[0]),
+                    interpolate=True, 
+                    color=f'C7',alpha=0.1) 
+
+
+    err_alpha = np.diff(np.percentile(SIDM.mcmc_a_2g_fb[3000:], [16, 50, 84]))
+    err_q0 = np.diff(np.percentile(SIDM.mcmc_a_2g_fb[3000:], [16, 50, 84]))
+    err_q2h_sidm   = np.diff(np.percentile(SIDM.mcmc_q2hr_2g_fb[3000:], [16, 50, 84]))
+    
+    q0    = SIDM.b_2g_fb
+    alpha = SIDM.a_2g_fb
+    
+    lq0  = np.log10(q0)
+    elq0 = err_q0/(q0*np.log(10.))    
+    
+    label_sidm = r'SIDM: $\alpha = '+str(np.round(alpha,3))+', q_0 = '+str(np.round(q0,3))+', q_{2h} = '+str(np.round(SIDM.q2hr_2g_fb,2))+'$'
+    
+    ax.plot(SIDM.rs[mr],10**(logq(SIDM.rs[mr],alpha,lq0)),f'C3',label='SIDM')
+    ax.plot(SIDM.rs[~mr],10**(logq(SIDM.rs[~mr],alpha,lq0)),f'C3',alpha=0.5)
+    
+    ax.plot(SIDM.rs[~mr],np.ones(len(SIDM.rs[~mr]))*(DM.q2hr_2g_fb),f'k:',label='$q_{2h}$')
+    ax.plot(SIDM.rs[mr],np.ones(len(SIDM.rs[mr]))*(DM.q2hr_2g_fb),f'k:',alpha=0.5)
+    
+    ax.plot(SIDM.rs[~mr],np.ones(len(SIDM.rs[~mr]))*(SIDM.q2hr_2g_fb),f'C3:')
+    ax.plot(SIDM.rs[mr],np.ones(len(SIDM.rs[mr]))*(SIDM.q2hr_2g_fb),f'C3:',alpha=0.5)
+    
+    
+    ax.fill_between(DM.rs[mr], 
+                    10**(logq(DM.rs[mr],alpha+err_alpha[1],lq0+elq0[1])), 
+                    10**(logq(DM.rs[mr],alpha-err_alpha[0],lq0-elq0[0])), 
+                    interpolate=True, 
+                    color=f'C6',alpha=0.3) 
+    ax.fill_between(DM.rs[~mr], 
+                    10**(logq(DM.rs[~mr],alpha+err_alpha[1],lq0+elq0[1])), 
+                    10**(logq(DM.rs[~mr],alpha-err_alpha[0],lq0-elq0[0])), 
+                    interpolate=True, 
+                    color=f'C6',alpha=0.1) 
+                    
+    ax.fill_between(SIDM.rs[~mr],
+                    np.ones(len(SIDM.rs[~mr]))*(SIDM.q2hr_2g_fb+err_q2h_sidm[1]),
+                    np.ones(len(SIDM.rs[~mr]))*(SIDM.q2hr_2g_fb-err_q2h_sidm[0]),
+                    interpolate=True, 
+                    color=f'C6',alpha=0.3) 
+    ax.fill_between(SIDM.rs[mr],
+                    np.ones(len(SIDM.rs[mr]))*(SIDM.q2hr_2g_fb+err_q2h_sidm[1]),
+                    np.ones(len(SIDM.rs[mr]))*(SIDM.q2hr_2g_fb-err_q2h_sidm[0]),
+                    interpolate=True, 
+                    color=f'C6',alpha=0.1) 
+    
+    ax.text(0.18,0.85,samp)                
+    ax.text(0.18,0.47,label_dm,fontsize=10)
+    ax.text(0.18,0.43,label_sidm,fontsize=10)      
+    ax.set_xscale('log')
+    ax.set_ylim(0.42,0.89)
+    ax.set_xticks([0.2,0.5,1.0,2.0,4.])
+    ax.set_xticklabels(['0.2','0.5','1.0','2.0','4.0'])
+    ax.set_xlabel('$r[h^{-1} Mpc]$')
+
 
 
 def compare_qr(DM,SIDM,ax,j,method='2g_fb'):    
@@ -257,10 +367,10 @@ def compare_qr(DM,SIDM,ax,j,method='2g_fb'):
                  fmt='C9o',markersize=10,label=r'$\alpha$')
     ax2.errorbar(j+0.3,(eval('DM.b_'+method)/eval('SIDM.b_'+method))-1,
                  yerr=e_ratio_b,
-                 fmt='C1o',markersize=10,label=r'$q_0$')
+                 fmt='C2o',markersize=10,label=r'$q_0$')
     ax2.errorbar(j+0.3,(eval('DM.q2hr_'+method)/eval('SIDM.q2hr_'+method))-1,
                  yerr=e_ratio_b,
-                 fmt='C8o',markersize=10,label='$q2h$')
+                 fmt='C4o',markersize=10,label='$q2h$')
     ax2.errorbar(j+0.,(a_dm/a_sidm)-1,yerr=0.01,fmt='C7s',label=r'$\alpha$ - stacked particle distribution',markersize=10)
     ax2.errorbar(j+0.1,(b_dm/b_sidm)-1,yerr=0.01,fmt='ks',label=r'$q_0$ - stacked particle distribution',markersize=10)
     
@@ -366,8 +476,8 @@ def plt_profile_fitted_final(DM,SIDM,RIN,ROUT,axx3,jdx):
     ax.set_xlabel('r [$h^{-1}$ Mpc]')
     ax.set_ylim(0.5,200)
     ax.set_xlim(0.1,5)
-    ax.xaxis.set_ticks([0.1,1,4])
-    ax.set_xticklabels([0.1,1,4])
+    ax.xaxis.set_ticks([0.1,1,3])
+    ax.set_xticklabels([0.1,1,3])
     ax.yaxis.set_ticks([1,10,100])
     ax.set_yticklabels([1,10,100])
     ax.legend(loc=3,frameon=False,fontsize=10)
@@ -527,34 +637,34 @@ def make_radial_plot():
     
     GT_func,GX_func = GAMMA_components(Gterms.R,0.,ellip=e,M200 = 10**14,c200=5,cosmo_params=params)   
     
-    fig, ax = plt.subplots(2,2, figsize=(12,4),sharex = True,gridspec_kw={'height_ratios': [4,2]})    
-    fig.subplots_adjust(hspace=0)
-    
-    ax[0,0].plot(Gterms.R,GT_func,'C9',label='$q = 0.6$',lw=2)
-    ax[0,0].plot(Gterms.R,G1h['GT'],'C8',label=r'$q_0 = 0.6$, $\alpha = -0.1$',lw=2)
-    ax[0,1].plot(Gterms.R,G1h['GX'],'C8',label=r'$q_0 = 0.6$, $\alpha = -0.1$',lw=2)
-    ax[0,1].plot(Gterms.R,GX_func,'C9',label='$q = 0.6$',lw=2)
-    
-    ax[0,1].plot(Gterms.R,np.zeros(len(Gterms.R)),'C7')
-    ax[1,0].plot(Gterms.R,np.zeros(len(Gterms.R)),'C7')
-    ax[1,1].plot(Gterms.R,np.zeros(len(Gterms.R)),'C7')
+    fig, ax = plt.subplots(4,1, figsize=(6,8),sharex = True,gridspec_kw={'height_ratios': [4,2,4,2]})    
 
-    ax[1,0].plot(Gterms.R,G1h['GT']-GT_func,'k--',lw=2)
-    ax[1,1].plot(Gterms.R,G1h['GX']-GX_func,'k--',lw=2)
+    fig.subplots_adjust(hspace=0,wspace=0)
     
-    ax[0,0].set_xscale('log')
-    ax[0,0].set_yscale('log')
+    ax[0].plot(Gterms.R,GT_func,'C4',label='$q = 0.6$',lw=2)
+    ax[0].plot(Gterms.R,G1h['GT'],'C2',label=r'$q_0 = 0.6$, $\alpha = -0.1$',lw=2)
+    ax[2].plot(Gterms.R,G1h['GX'],'C2',label=r'$q_0 = 0.6$, $\alpha = -0.1$',lw=2)
+    ax[2].plot(Gterms.R,GX_func,'C4',label='$q = 0.6$',lw=2)
     
-    ax[0,0].legend(frameon=False)
+    ax[2].plot(Gterms.R,np.zeros(len(Gterms.R)),'C7')
+    ax[1].plot(Gterms.R,np.zeros(len(Gterms.R)),'C7')
+    ax[3].plot(Gterms.R,np.zeros(len(Gterms.R)),'C7')
+
+    ax[1].plot(Gterms.R,G1h['GT']-GT_func,'k--',lw=2)
+    ax[3].plot(Gterms.R,G1h['GX']-GX_func,'k--',lw=2)
     
-    ax[1,0].set_xlabel('r [$h^{-1}$ Mpc]')
-    ax[1,1].set_xlabel('r [$h^{-1}$ Mpc]')
-    ax[0,1].set_ylabel(r'$\Gamma_\times [h M_\odot/pc^2]$')
-    ax[0,0].set_ylabel(r'$\Gamma_T [h M_\odot/pc^2]$')
-    ax[1,1].set_ylabel(r'Difference')
-    ax[1,0].set_ylabel(r'Difference')
-    ax[1,1].xaxis.set_ticks([0.1,1,3])
-    ax[1,1].set_xticklabels([0.1,1,3])
+    ax[0].set_xscale('log')
+    ax[0].set_yscale('log')
+    
+    ax[0].legend(frameon=False)
+    
+    ax[3].set_xlabel('r [$h^{-1}$ Mpc]')
+    ax[0].set_ylabel(r'$\Gamma_\times [h M_\odot/pc^2]$')
+    ax[2].set_ylabel(r'$\Gamma_T [h M_\odot/pc^2]$')
+    ax[1].set_ylabel(r'Difference')
+    ax[3].set_ylabel(r'Difference')
+    ax[3].xaxis.set_ticks([0.1,1,3])
+    ax[3].set_xticklabels([0.1,1,3])
     
     fig.savefig('../final_plots/comparison_radial.pdf',bbox_inches='tight')
 
