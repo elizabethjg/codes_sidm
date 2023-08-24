@@ -158,7 +158,7 @@ a_sidm     = np.array([])
 # El primer for es sobre una lista que tiene los tipos de tensores
 # standard o reducido
 
-Rvir = np.array([830.5873,821.9827,862.4454,813.7005,1079.2272,669.0606])*2.5*1.e-3
+Rvir = np.array([830.5873,821.9827,862.4454,813.7005,1079.2272,669.0606])*1.e-3
 
 
 for idx, name_tensor in enumerate(typetensor):
