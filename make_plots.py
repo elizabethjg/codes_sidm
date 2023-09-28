@@ -687,9 +687,9 @@ def make_3D_plot(j):
 
     allp = h5py.File(path_all+'halo_'+str(j)+'.hdf5','r') 
     
-    Xp = np.array(halo['X']) - allp.attrs['x0 center']
-    Yp = np.array(halo['Y']) - allp.attrs['y0 center']
-    Zp = np.array(halo['Z']) - allp.attrs['z0 center']
+    Xp = np.array(allp['X']) - allp.attrs['x0 center']
+    Yp = np.array(allp['Y']) - allp.attrs['y0 center']
+    Zp = np.array(allp['Z']) - allp.attrs['z0 center']
 
     print('Making plot...')
     fig = plt.figure()
