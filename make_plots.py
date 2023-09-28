@@ -676,7 +676,7 @@ def make_3D_plot(j):
     import h5py
     
     path_all = '/mnt/projects/lensing/SIDM_project/cuadrados/SIDM_10/'
-    path_halo = '/mnt/projects/lensing/SIDM_project/Lentes/Eli_Agus/snapshot_050/rockstar/SIDM/'
+    path_halo = '/mnt/projects/lensing/SIDM_project/Lentes/Eli_Agus/snapshot_050/rockstar/SIDM1/'
     
     halo = h5py.File(path_halo+'halo_'+str(j)+'.hdf5','r') 
     
