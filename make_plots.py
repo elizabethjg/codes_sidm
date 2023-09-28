@@ -2,10 +2,10 @@ import sys
 sys.path.append('/home/elizabeth/lens_codes_v3.7')
 import pylab
 from astropy.io import fits
-import corner
+# import corner
 from matplotlib import cm
-from binned_plots import make_plot2
-from models_profiles import *
+# from binned_plots import make_plot2
+# from models_profiles import *
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 params = {'flat': True, 'H0': 70.0, 'Om0': 0.3, 'Ob0': 0.045, 'sigma8': 0.811, 'ns': 0.96}
