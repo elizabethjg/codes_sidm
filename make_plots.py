@@ -675,8 +675,8 @@ def make_3D_plot(j):
     
     import h5py
     
-    path_all = '/mnt/projects/lensing/SIDM_project/cuadrados/CDM_10/'
-    path_halo = '/mnt/projects/lensing/SIDM_project/Lentes/Eli_Agus/snapshot_050/rockstar/CDM/'
+    path_all = '/mnt/projects/lensing/SIDM_project/cuadrados/SIDM_10/'
+    path_halo = '/mnt/projects/lensing/SIDM_project/Lentes/Eli_Agus/snapshot_050/rockstar/SIDM/'
     
     halo = h5py.File(path_halo+'halo_'+str(j)+'.hdf5','r') 
     
@@ -699,7 +699,7 @@ def make_3D_plot(j):
     ax.set_xlabel('X [Mpc]')
     ax.set_ylabel('Y [Mpc]')
     ax.set_zlabel('Z [Mpc]')
-    fig.savefig('../particles_halo_'+str(j)+'.png',bbox_inches='tight')
+    fig.savefig('../particles_halo_SIDM_'+str(j)+'.png',bbox_inches='tight')
     
 make_3D_plot(12)
 
