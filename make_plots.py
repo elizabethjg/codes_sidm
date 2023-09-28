@@ -670,3 +670,36 @@ def make_radial_plot():
 
 
 
+def make_3D_plot(j):
+    
+    
+    import h5py
+    
+    path_all = '/mnt/projects/lensing/SIDM_project/cuadrados/CDM_10/'
+    path_halo = '/mnt/projects/lensing/SIDM_project/Lentes/Eli_Agus/snapshot_050/rockstar/CDM/'
+    
+    halo = h5py.File(path_halo+'halo_'+str(j)+'.hdf5','r') 
+    
+    X = np.array(halo['X']) - halo.attrs['x0']
+    Y = np.array(halo['Y']) - halo.attrs['y0']
+    Z = np.array(halo['Z']) - halo.attrs['z0']
+
+
+    allp = h5py.File(path_all+'halo_'+str(j)+'.hdf5','r') 
+    
+    Xp = np.array(halo['X']) - allp.attrs['x0 center']
+    Yp = np.array(halo['Y']) - allp.attrs['y0 center']
+    Zp = np.array(halo['Z']) - allp.attrs['z0 center']
+
+    
+    fig = plt.figure()
+    ax = fig.add_subplot(projection='3d')
+    ax.plot(Xp,Yp,Zp,'k,',alpha=0.2)
+    ax.plot(X,Y,Z,'C1,',alpha=0.2)
+    ax.set_xlabel('X [Mpc]')
+    ax.set_xlabel('Y [Mpc]')
+    ax.set_xlabel('Z [Mpc]')
+    fig.savefig('../particles_halo_'+str(j)+'.png',bbox_inches='tight')
+    
+make_3D_plot(12)
+
