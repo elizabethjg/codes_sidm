@@ -691,7 +691,7 @@ def make_3D_plot(j):
     Yp = np.array(halo['Y']) - allp.attrs['y0 center']
     Zp = np.array(halo['Z']) - allp.attrs['z0 center']
 
-    
+    print('Making plot...')
     fig = plt.figure()
     ax = fig.add_subplot(projection='3d')
     ax.plot(Xp,Yp,Zp,'k,',alpha=0.2)
