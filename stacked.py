@@ -236,7 +236,7 @@ def fit_Delta_Sigma_core_2h(R,zmean,ds,eds,ncores):
         
         
         DS_1h = Delta_Sigma_NFW_cored_parallel(R,zmean,M200 = 10**lM200,1./bm1,c200=c200,ncores=ncores)
-        DS_2h = Delta_Sigma_NFW_2h_parallel(R,zmean,M200 = 10**lM200,c200=5,cosmo_params=params,terms='2h',ncores=ncores,limint=500e3)
+        DS_2h = Delta_Sigma_NFW_2h_parallel(R,zmean,M200 = 10**lM200,c200=5,cosmo_params=params,terms='2h',ncores=ncores,limint=100e3)
         
         DS = DS_1h + DS_2h
         
@@ -1161,7 +1161,7 @@ class fit_profiles_with_core():
         self.DS1hc_fit   = Delta_Sigma_NFW_cored_parallel(r,z,M200 = 10**logM200,1./bm1,c200=c200,ncores=ncores)
         self.DS2hc_fit   = Delta_Sigma_NFW_2h_parallel(r,z,M200 = 10**logM200,c200=c200,cosmo_params=params,terms='2h',ncores=ncores)
         
-        self.DS_fit     = self.DS1h_fit + self.DS2h_fit
+        self.DSc_fit     = self.DS1h_fit + self.DS2h_fit
         self.lM200c_ds = logM200
         self.c200c_ds  = c200
         self.bm1_ds   = bm1
@@ -1186,14 +1186,14 @@ class fit_profiles_with_core():
         e1h = (1. - q1h)/(1. + q1h)
         e2h = (1. - q2h)/(1. + q2h)
         
-        self.q1h_2g      = q1h
-        self.q2h_2g      = q2h
-        self.mcmc_q1h_2g = mcmc_q1h
-        self.mcmc_q2h_2g = mcmc_q2h
-        self.GT1h_fit2   = e1h*GT_func
-        self.GX1h_fit2   = e1h*GX_func
-        self.GT2h_fit2   = e2h*GT_2h_func
-        self.GX2h_fit2   = e2h*GX_2h_func
+        self.q1hc_2g      = q1h
+        self.q2hc_2g      = q2h
+        self.mcmc_q1hc_2g = mcmc_q1h
+        self.mcmc_q2hc_2g = mcmc_q2h
+        self.GT1hc_fit2   = e1h*GT_func
+        self.GX1hc_fit2   = e1h*GX_func
+        self.GT2hc_fit2   = e2h*GT_2h_func
+        self.GX2hc_fit2   = e2h*GX_2h_func
         
 
 
