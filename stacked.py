@@ -226,6 +226,60 @@ def fit_Delta_Sigma_2h(R,zmean,ds,eds,ncores):
     
     return lM,c200,mcmc_out_DS[0],mcmc_out_DS[1]
 
+def fit_Delta_Sigma_core_2h(R,zmean,ds,eds,ncores):
+    
+    print('fitting Delta_Sigma')
+    
+    def log_likelihood_DS(data_model, R, ds, eds):
+    
+        lM200, c200, bm1 = data_model
+        
+        
+        DS_1h = Delta_Sigma_NFW_cored_parallel(R,zmean,M200 = 10**lM200,1./bm1,c200=c200,ncores=ncores)
+        DS_2h = Delta_Sigma_NFW_2h_parallel(R,zmean,M200 = 10**lM200,c200=5,cosmo_params=params,terms='2h',ncores=ncores,limint=500e3)
+        
+        DS = DS_1h + DS_2h
+        
+        sigma2 = eds**2
+        
+        L = -0.5 * np.sum((DS - ds)**2 / sigma2 + np.log(2.*np.pi*sigma2))
+
+        return L
+    
+    def log_probability_DS(data_model, R, profiles, iCOV):
+        
+        lM200, c200, bm1 = data_model
+        
+        if 12.5 < lM200 < 16.0 and 1 < c200 < 7 and 0 < bm1 < 3:
+            return log_likelihood_DS(data_model, R, profiles, iCOV)
+            
+        return -np.inf
+        
+    # initializing
+
+    t1 = time.time()
+    pos = np.array([np.random.uniform(12.5,15.5,15),
+                    np.random.uniform(5,10,15),
+                    np.random.uniform(0,2,15)]).T
+    nwalkers, ndim = pos.shape
+    
+    sampler_DS = emcee.EnsembleSampler(nwalkers, ndim, log_probability_DS, 
+                                    args=(R,ds,eds))
+                                    
+    sampler_DS.run_mcmc(pos, 500, progress=True)
+    
+    mcmc_out_DS = sampler_DS.get_chain(flat=True).T
+    lM     = np.percentile(mcmc_out_DS[0][1500:], [16, 50, 84])
+    c200   = np.percentile(mcmc_out_DS[1][1500:], [16, 50, 84])
+    bm1    = np.percentile(mcmc_out_DS[2][1500:], [16, 50, 84])
+    t2 = time.time()
+    
+    print('TIME DS')    
+    print((t2-t1)/60.)
+    
+    return lM,c200,bm1,mcmc_out_DS[0],mcmc_out_DS[1],mcmc_out_DS[2]
+
+
 def rotate_for_halo(j,path,main,reduced=False,iterative=False):
     
         halo = h5py.File(path+'halo_'+str(j)+'.hdf5','r')       
@@ -1080,6 +1134,67 @@ class fit_profiles():
             
             self.GT1hr   = e1h*GT_func
             self.GT2hr   = e2h*GT_2h_func
+
+class fit_profiles_with_core():
+
+    def __init__(self,z,r,S,eS,
+                 S2,eS2,DS_T,eDS_T,
+                 GT,eGT,GX,eGX,
+                 twohalo = True,
+                 ncores = 36):
+        
+        # COMPUTE PROFILES
+        
+            
+        ##################
+        # FIT SHEAR PROFILE
+    
+        lM,cfit,bm1_fit,mcmc_ds_lM,mcmc_ds_c200,mcmc_ds_bm1 = fit_Delta_Sigma_core_2h(r,z,DS_T,eDS_T,ncores)
+
+        e_lM200 = np.diff(lM)
+        e_c200  = np.diff(cfit)
+        e_bm1  = np.diff(bm1_fit)
+        logM200 = lM[1]
+        c200    = cfit[1]
+        bm1     = bm1_fit[1]
+
+        self.DS1hc_fit   = Delta_Sigma_NFW_cored_parallel(r,z,M200 = 10**logM200,1./bm1,c200=c200,ncores=ncores)
+        self.DS2hc_fit   = Delta_Sigma_NFW_2h_parallel(r,z,M200 = 10**logM200,c200=c200,cosmo_params=params,terms='2h',ncores=ncores)
+        
+        self.DS_fit     = self.DS1h_fit + self.DS2h_fit
+        self.lM200c_ds = logM200
+        self.c200c_ds  = c200
+        self.bm1_ds   = bm1
+        self.e_c200c_ds  = e_c200
+        self.e_lM200c_ds  = e_lM200
+        self.e_bm1_ds  = e_bm1
+        self.mcmc_ds_lMc  = mcmc_ds_lM
+        self.mcmc_ds_c200c  = mcmc_ds_c200
+        self.mcmc_ds_bm1  = mcmc_ds_bm1
+        
+        
+        ##################        
+        # FIT SHEAR QUADRUPOLE PROFILES
+        
+        GT_func,GX_func = GAMMA_components(r,z,ellip=1.,M200 = 10**logM200,c200=c200,b=1./bm1,terms='1h',pname='NFW-core')
+        GT_2h_func,GX_2h_func = GAMMA_components(r,z,ellip=1.,M200 = 10**logM200,c200=c200,cosmo_params=params,terms='2h')            
+        
+        # FIT THEM TOGETHER
+                
+        q1h,q2h,mcmc_q1h,mcmc_q2h = fit_quadrupoles_2terms(r,GT,GX,eGT,eGX,GT_func,GX_func,GT_2h_func,GX_2h_func,'both')
+        
+        e1h = (1. - q1h)/(1. + q1h)
+        e2h = (1. - q2h)/(1. + q2h)
+        
+        self.q1h_2g      = q1h
+        self.q2h_2g      = q2h
+        self.mcmc_q1h_2g = mcmc_q1h
+        self.mcmc_q2h_2g = mcmc_q2h
+        self.GT1h_fit2   = e1h*GT_func
+        self.GX1h_fit2   = e1h*GX_func
+        self.GT2h_fit2   = e2h*GT_2h_func
+        self.GX2h_fit2   = e2h*GX_2h_func
+        
 
 
 class quadrupoles_from_map_model:
