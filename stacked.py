@@ -1203,7 +1203,9 @@ class quadrupoles_from_map_model:
     def __init__(self,M200,c200,
                 RIN,ROUT,ndots,
                 z=0,resolution=2000,
-                cosmo_params=params):
+                cosmo_params=params,
+                pname='NFW',
+                b=1.e3):
         
         
         # MAKE KAPPA MAP
@@ -1220,8 +1222,10 @@ class quadrupoles_from_map_model:
         self.M200  = M200
         self.c200  = c200
         self.z     = z
+        self.b     = b
         self.params = params
         self.ndots  = ndots
+        self.pname  = pname
 
         xb = xb.flatten()
         yb = yb.flatten()
@@ -1245,7 +1249,12 @@ class quadrupoles_from_map_model:
 
         qr = b*self.r**a
         Rellip = np.sqrt((self.r**2)*(qr*(np.cos(self.theta))**2 + (1./qr)*(np.sin(self.theta))**2))                
-        Sellip = Sigma_NFW_2h(Rellip,self.z,self.M200,self.c200,cosmo_params=self.params)
+        if self.pname == 'NFW':
+            Sellip = Sigma_NFW_2h(Rellip,self.z,self.M200,self.c200,cosmo_params=self.params)
+        elif self.pname == 'NFW-core':
+            Sellip = np.reshape(Sigma_NFW_cored_parallel(Rellip.flatten(),self.z,self.M200,self.b,self.c200),Rellip.shape)
+
+        
 
         kE = Sellip 
         kB = np.zeros(kE.shape)
