@@ -113,10 +113,10 @@ class pack_core():
       self.q2d_it       = np.concatenate((self.main.b2D_it_xy/self.main.a2D_it_xy,self.main.b2D_it_zx/self.main.a2D_it_zx,self.main.b2D_it_yz/self.main.a2D_it_yz))
       self.q2dr_it      = np.concatenate((self.main.b2Dr_it_xy/self.main.a2Dr_it_xy,self.main.b2Dr_it_zx/self.main.a2Dr_it_zx,self.main.b2Dr_it_yz/self.main.a2Dr_it_yz))
 
-main_file  = '/mnt/projects/lensing/SIDM_project/halo_props/projections/full_extend_prop_env_halo_propsv2_rock2_match_cdm_z0_main.csv.bz2'
-main_file1 = '/mnt/projects/lensing/SIDM_project/halo_props/projections/full_extend_prop_env_halo_propsv2_rock2_match_sidm1_z0_main.csv.bz2'
-main  = pd.read_csv(main_file)
-main1 = pd.read_csv(main_file1)
+# main_file  = '/mnt/projects/lensing/SIDM_project/halo_props/projections/full_extend_prop_env_halo_propsv2_rock2_match_cdm_z0_main.csv.bz2'
+# main_file1 = '/mnt/projects/lensing/SIDM_project/halo_props/projections/full_extend_prop_env_halo_propsv2_rock2_match_sidm1_z0_main.csv.bz2'
+# main  = pd.read_csv(main_file)
+# main1 = pd.read_csv(main_file1)
 
 folders_list = ["relajados"]
 typetensor = {'reduced': True}
