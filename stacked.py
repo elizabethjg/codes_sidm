@@ -266,9 +266,9 @@ def fit_Delta_Sigma_core_2h(R,zmean,ds,eds,ncores):
     sampler_DS = emcee.EnsembleSampler(nwalkers, ndim, log_probability_DS, 
                                     args=(R,ds,eds))
 
-    state = sampler.run_mcmc(pos, 100, progress=True)
-    sampler.reset()
-    sampler.run_mcmc(state, 500, progress=True)
+    state = sampler_DS.run_mcmc(pos, 100, progress=True)
+    sampler_DS.reset()
+    sampler_DS.run_mcmc(state, 500, progress=True)
 
     mcmc_out_DS = sampler_DS.get_chain(flat=True).T
     lM     = np.percentile(mcmc_out_DS[0][1500:], [16, 50, 84])
@@ -1163,7 +1163,7 @@ class fit_profiles_with_core():
         self.DS1hc_fit   = Delta_Sigma_NFW_cored_parallel(r,z,M200 = 10**logM200,b=1./bm1,c200=c200,ncores=ncores)
         self.DS2hc_fit   = Delta_Sigma_NFW_2h_parallel(r,z,M200 = 10**logM200,c200=c200,cosmo_params=params,terms='2h',ncores=ncores)
         
-        self.DSc_fit     = self.DS1h_fit + self.DS2h_fit
+        self.DSc_fit     = self.DS1hc_fit + self.DS2hc_fit
         self.lM200c_ds = logM200
         self.c200c_ds  = c200
         self.bm1_ds   = bm1
@@ -1174,7 +1174,6 @@ class fit_profiles_with_core():
         self.mcmc_ds_c200c  = mcmc_ds_c200
         self.mcmc_ds_bm1  = mcmc_ds_bm1
         
-        
         ##################        
         # FIT SHEAR QUADRUPOLE PROFILES
         GTc_func,GXc_func = GAMMA_components(r,z,ellip=1.,M200 = 10**logM200,c200=c200,b=1./bm1,terms='1h',pname='NFW-core')        
@@ -1182,7 +1181,7 @@ class fit_profiles_with_core():
         
         # FIT THEM TOGETHER
                 
-        q1h,q2h,mcmc_q1h,mcmc_q2h = fit_quadrupoles_2terms(r,GT,GX,eGT,eGX,GT_func,GX_func,GT_2h_func,GX_2h_func,'both')
+        q1h,q2h,mcmc_q1h,mcmc_q2h = fit_quadrupoles_2terms(r,GT,GX,eGT,eGX,GTc_func,GXc_func,GTc_2h_func,GXc_2h_func,'both')
         
         e1h = (1. - q1h)/(1. + q1h)
         e2h = (1. - q2h)/(1. + q2h)
@@ -1191,10 +1190,10 @@ class fit_profiles_with_core():
         self.q2hc_2g      = q2h
         self.mcmc_q1hc_2g = mcmc_q1h
         self.mcmc_q2hc_2g = mcmc_q2h
-        self.GT1hc_fit2   = e1h*GT_func
-        self.GX1hc_fit2   = e1h*GX_func
-        self.GT2hc_fit2   = e2h*GT_2h_func
-        self.GX2hc_fit2   = e2h*GX_2h_func
+        self.GT1hc_fit2   = e1h*GTc_func
+        self.GX1hc_fit2   = e1h*GXc_func
+        self.GT2hc_fit2   = e2h*GTc_2h_func
+        self.GX2hc_fit2   = e2h*GXc_2h_func
         
 
 
