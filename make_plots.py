@@ -659,8 +659,8 @@ def make_radial_plot():
     ax[0].legend(frameon=False)
     
     ax[3].set_xlabel('r [$h^{-1}$ Mpc]')
-    ax[0].set_ylabel(r'$\Gamma_\times [h M_\odot/pc^2]$')
-    ax[2].set_ylabel(r'$\Gamma_T [h M_\odot/pc^2]$')
+    ax[2].set_ylabel(r'$\Gamma_\times [h M_\odot/pc^2]$')
+    ax[0].set_ylabel(r'$\Gamma_T [h M_\odot/pc^2]$')
     ax[1].set_ylabel(r'Difference')
     ax[3].set_ylabel(r'Difference')
     ax[3].xaxis.set_ticks([0.1,1,3])
