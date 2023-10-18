@@ -257,8 +257,14 @@ SIDM = pack(filename_SIDM)
 
 ######### MCMC plot
 
-mcmc_DM = np.array([DMc.mcmc_ds_lMc[:1500],DMc.mcmc_ds_c200c[:1500],DMc.mcmc_ds_bm1[:1500]]).T
-mcmc_SIDM = np.array([SIDMc.mcmc_ds_lMc[:1500],SIDMc.mcmc_ds_c200c[:1500],SIDMc.mcmc_ds_bm1[:1500]]).T
+c200_dmc = DMc.mcmc_ds_c200c[:1500]
+c200_sidmc = SIDMc.mcmc_ds_c200c[:1500]
+
+mdm = c200_dmc < 15.
+msidm = c200_sidmc < 15.
+
+mcmc_DM = np.array([DMc.mcmc_ds_lMc[:1500][mdm],DMc.mcmc_ds_c200c[:1500][mdm],DMc.mcmc_ds_bm1[:1500][mdm]]).T
+mcmc_SIDM = np.array([SIDMc.mcmc_ds_lMc[:1500][msidm],SIDMc.mcmc_ds_c200c[:1500][msidm],SIDMc.mcmc_ds_bm1[:1500][msidm]]).T
 
 
 f1 = corner.corner(mcmc_DM,labels=[r'$\log M_{200}$',r'$c_{200}$','$1/b$'],

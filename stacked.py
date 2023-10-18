@@ -250,7 +250,7 @@ def fit_Delta_Sigma_core_2h(R,zmean,ds,eds,ncores):
         
         lM200, c200, bm1 = data_model
         
-        if 12.5 < lM200 < 16.0 and 1 < c200 < 7 and 0 < bm1 < 3:
+        if 12.5 < lM200 < 16.0 and 1 < c200 < 10 and 0 < bm1 < 3:
             return log_likelihood_DS(data_model, R, profiles, iCOV)
             
         return -np.inf
@@ -259,7 +259,7 @@ def fit_Delta_Sigma_core_2h(R,zmean,ds,eds,ncores):
 
     t1 = time.time()
     pos = np.array([np.random.uniform(13.0,14.0,15),
-                    np.random.uniform(5,10,15),
+                    np.random.uniform(4,8,15),
                     np.random.uniform(0,0.5,15)]).T
     nwalkers, ndim = pos.shape
     
