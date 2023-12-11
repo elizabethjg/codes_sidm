@@ -177,18 +177,22 @@ for idx, name_tensor in enumerate(typetensor):
     ax_rad = np.append(ax_rad[:2],ax_rad[4:])
     frad.subplots_adjust(hspace=0,wspace=0)
     
-    f, ax_all = plt.subplots(2,4, figsize=(12,5),sharex = True,sharey = True)
-    ax_all = ax_all.flatten()
+    f, ax_all0 = plt.subplots(4,4, figsize=(12,8),sharex = True,gridspec_kw={'height_ratios': [4,2,4,2]})
+    ax_all = np.append(ax_all0[0],ax_all0[2]).flatten()
+    ax_all2 = np.append(ax_all0[1],ax_all0[3]).flatten()
     ax_all[2].axis('off')
     ax_all[3].axis('off')
+    ax_all2[2].axis('off')
+    ax_all2[3].axis('off')
     ax_all = np.append(ax_all[:2],ax_all[4:])
+    ax_all2 = np.append(ax_all2[:2],ax_all2[4:])
     f.subplots_adjust(hspace=0,wspace=0)
 
-    ft, ax_T = plt.subplots(2,6, figsize=(14,5),sharex = True)
+    ft, ax_T = plt.subplots(4,6, figsize=(14,8),sharex = True,gridspec_kw={'height_ratios': [4,2,4,2]})
     ax_T = ax_T.T
     ft.subplots_adjust(hspace=0,wspace=0)
 
-    fx, ax_X = plt.subplots(2,6, figsize=(14,5),sharex = True)
+    fx, ax_X = plt.subplots(4,6, figsize=(14,8),sharex = True,gridspec_kw={'height_ratios': [4,2,4,2]})
     ax_X = ax_X.T
     fx.subplots_adjust(hspace=0,wspace=0)
 
@@ -246,8 +250,8 @@ for idx, name_tensor in enumerate(typetensor):
         # MAKE PROFILE
         ax_T[jdx,0].plot(0.11,50,'w,',label=lhs[jdx])
         ax_X[jdx,0].plot(0.11,50,'w,',label=lhs[jdx])
-        plt_profile_fitted_final(DM,SIDM,0,5000,[ax_all[jdx],ax_T[jdx,0],ax_T[jdx,1]],jdx)
-        # plt_profile_fitted_final_new(DM,SIDM,0,5000,[ax_X[jdx,0],ax_X[jdx,1]],jdx)
+        plt_profile_fitted_final(DM,SIDM,0,5000,[ax_all[jdx],ax_T[jdx,0],ax_T[jdx,2]],[ax_all2[jdx],ax_T[jdx,1],ax_T[jdx,3]],jdx)
+        plt_profile_fitted_final_new(DM,SIDM,0,5000,[ax_X[jdx,0],ax_X[jdx,2]],[ax_X[jdx,1],ax_X[jdx,3]],jdx)
         ax_all[jdx].text(0.5,100,lhs[jdx],fontsize=14)
         
         corner_result(DM,SIDM,lhs[jdx],name_tensor)
@@ -329,14 +333,17 @@ for idx, name_tensor in enumerate(typetensor):
             ax_res[j].set_ylabel('q')
             ax_rad[j].set_ylabel('$q_{CDM}/q_{SIDM} - 1$')
             ax_all[j].set_ylabel(r'$\Delta\Sigma [h M_\odot/pc^2]$',labelpad=0.1)
+            ax_all2[j].set_ylabel(r'$\Delta\Sigma - \Delta\Sigma_{model}$',labelpad=0.1)
             # ax_rad[j].set_ylabel('$\phi$')
             # ax_rad[j].set_ylim(-2,2)
 
         if j !=0:
-            ax_T[j,0].yaxis.set_ticklabels([])
-            ax_X[j,0].yaxis.set_ticklabels([])
-            ax_T[j,1].yaxis.set_ticklabels([])
-            ax_X[j,1].yaxis.set_ticklabels([])
+            if j !=2:
+                ax_all[j].yaxis.set_ticklabels([])
+                ax_all2[j].yaxis.set_ticklabels([])
+            for ni in range(4):
+                ax_T[j,ni].yaxis.set_ticklabels([])
+                ax_X[j,ni].yaxis.set_ticklabels([])
 
 
 

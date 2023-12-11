@@ -280,28 +280,42 @@ f1 = corner.corner(mcmc_SIDM,
 
 axes = f1.axes
 axes[1].text(0.5,0.5,sname,fontsize=16)
+
 f1.savefig('../final_plots/corner_core.pdf',bbox_inches='tight')
 
 ######### GAMMA components
-fig, ax = plt.subplots(2,2, figsize=(8,8),sharex = True)    
+fig, ax = plt.subplots(4,2, figsize=(8,8),sharex = True,gridspec_kw={'height_ratios': [4,2,4,2]})    
 
-fig.subplots_adjust(hspace=0,wspace=0)
+fig.subplots_adjust(hspace=0)
 
 ax[0,0].fill_between(DM.r,DM.GT+DM.e_GT,DM.GT-DM.e_GT,color='C7',alpha=0.4)
 ax[0,0].plot(DM.r,DM.GT1h_fit2+DM.GT2h_fit2,'C4',label=r'NFW',lw=2)
 ax[0,0].plot(DM.r,DMc.GT1hc_fit2+DMc.GT2hc_fit2,'C2',label=r'NFW with core',lw=2)
+ax[1,0].plot(SIDM.r,SIDM.r*0,'C7')
+ax[1,0].plot(DM.r,DM.GT - (DM.GT1h_fit2+DM.GT2h_fit2),'C4--',label=r'NFW',lw=2)
+ax[1,0].plot(DM.r,DM.GT - (DMc.GT1hc_fit2+DMc.GT2hc_fit2),'C2--',label=r'NFW with core',lw=2)
+
 
 ax[0,1].fill_between(SIDM.r,SIDM.GT+SIDM.e_GT,SIDM.GT-SIDM.e_GT,color='C7',alpha=0.4)
 ax[0,1].plot(SIDM.r,SIDM.GT1h_fit2+SIDM.GT2h_fit2,'C4',label=r'$q_0 = 0.6$, $\alpha = -0.1$',lw=2)
 ax[0,1].plot(SIDM.r,SIDMc.GT1hc_fit2+SIDMc.GT2hc_fit2,'C2',label=r'$q_0 = 0.6$, $\alpha = -0.1$',lw=2)
+ax[1,1].plot(SIDM.r,SIDM.r*0,'C7')
+ax[1,1].plot(SIDM.r,SIDM.GT - (SIDM.GT1h_fit2+SIDM.GT2h_fit2),'C4--',label=r'$q_0 = 0.6$, $\alpha = -0.1$',lw=2)
+ax[1,1].plot(SIDM.r,SIDM.GT - (SIDMc.GT1hc_fit2+SIDMc.GT2hc_fit2),'C2--',label=r'$q_0 = 0.6$, $\alpha = -0.1$',lw=2)
 
-ax[1,0].fill_between(DM.r,DM.GX+DM.e_GX,DM.GX-DM.e_GX,color='C7',alpha=0.4)
-ax[1,0].plot(DM.r,DM.GX1h_fit2+DM.GX2h_fit2,'C4',label=r'$q_0 = 0.6$, $\alpha = -0.1$',lw=2)
-ax[1,0].plot(DM.r,DMc.GX1hc_fit2+DMc.GX2hc_fit2,'C2',label=r'$q_0 = 0.6$, $\alpha = -0.1$',lw=2)
+ax[2,0].fill_between(DM.r,DM.GX+DM.e_GX,DM.GX-DM.e_GX,color='C7',alpha=0.4)
+ax[2,0].plot(DM.r,DM.GX1h_fit2+DM.GX2h_fit2,'C4',label=r'$q_0 = 0.6$, $\alpha = -0.1$',lw=2)
+ax[2,0].plot(DM.r,DMc.GX1hc_fit2+DMc.GX2hc_fit2,'C2',label=r'$q_0 = 0.6$, $\alpha = -0.1$',lw=2)
+ax[3,0].plot(SIDM.r,SIDM.r*0,'C7')
+ax[3,0].plot(DM.r,DM.GX - (DM.GX1h_fit2+DM.GX2h_fit2),'C4--',label=r'$q_0 = 0.6$, $\alpha = -0.1$',lw=2)
+ax[3,0].plot(DM.r,DMc.GX - (DMc.GX1hc_fit2+DMc.GX2hc_fit2),'C2--',label=r'$q_0 = 0.6$, $\alpha = -0.1$',lw=2)
    
-ax[1,1].fill_between(SIDM.r,SIDM.GX+SIDM.e_GX,SIDM.GX-SIDM.e_GX,color='C7',alpha=0.4)
-ax[1,1].plot(SIDM.r,SIDM.GX1h_fit2+SIDM.GX2h_fit2,'C4',label=r'$q_0 = 0.6$, $\alpha = -0.1$',lw=2)
-ax[1,1].plot(SIDM.r,SIDMc.GX1hc_fit2+SIDMc.GX2hc_fit2,'C2',label=r'$q_0 = 0.6$, $\alpha = -0.1$',lw=2)
+ax[2,1].fill_between(SIDM.r,SIDM.GX+SIDM.e_GX,SIDM.GX-SIDM.e_GX,color='C7',alpha=0.4)
+ax[2,1].plot(SIDM.r,SIDM.GX1h_fit2+SIDM.GX2h_fit2,'C4',label=r'$q_0 = 0.6$, $\alpha = -0.1$',lw=2)
+ax[2,1].plot(SIDM.r,SIDMc.GX1hc_fit2+SIDMc.GX2hc_fit2,'C2',label=r'$q_0 = 0.6$, $\alpha = -0.1$',lw=2)
+ax[3,1].plot(SIDM.r,SIDM.r*0,'C7')
+ax[3,1].plot(SIDM.r,SIDM.GX - (SIDM.GX1h_fit2+SIDM.GX2h_fit2),'C4--',label=r'$q_0 = 0.6$, $\alpha = -0.1$',lw=2)
+ax[3,1].plot(SIDM.r,SIDMc.GX - (SIDMc.GX1hc_fit2+SIDMc.GX2hc_fit2),'C2--',label=r'$q_0 = 0.6$, $\alpha = -0.1$',lw=2)
 
 
 ax[0,1].set_xscale('log')
@@ -310,10 +324,21 @@ ax[0,1].set_yscale('log')
 
 ax[0,0].legend(frameon=False)
 
-ax[1,0].set_xlabel('r [$h^{-1}$ Mpc]')
-ax[1,1].set_xlabel('r [$h^{-1}$ Mpc]')
-ax[1,0].set_ylabel(r'$\Gamma_\times [h M_\odot/pc^2]$')
+ax[1,0].set_ylim(-1.8,2.1)
+ax[1,1].set_ylim(-1.8,2.1)
+
+ax[2,0].set_ylim(-4,8)
+ax[2,1].set_ylim(-4,8)
+
+ax[3,0].set_ylim(-4,2.3)
+ax[3,1].set_ylim(-4,2.3)
+
+ax[3,0].set_xlabel('r [$h^{-1}$ Mpc]')
+ax[3,1].set_xlabel('r [$h^{-1}$ Mpc]')
+ax[2,0].set_ylabel(r'$\Gamma_\times [h M_\odot/pc^2]$')
 ax[0,0].set_ylabel(r'$\Gamma_T [h M_\odot/pc^2]$')
+ax[1,0].set_ylabel('Data - Model')
+ax[3,0].set_ylabel('Data - Model')
 ax[1,0].xaxis.set_ticks([0.1,1,3])
 
 
@@ -329,14 +354,23 @@ plt.hist(DMc.mcmc_q2hc_2g[:3000],100,histtype='step')
 plt.hist(DM.mcmc_q2h_2g[:3000],100,histtype='step')
 print('DM q1h',np.median(DMc.mcmc_q1hc_2g[:3000])/np.median(DM.mcmc_q1h_2g[:3000]))
 print('DM q2h',np.median(DMc.mcmc_q2hc_2g[:3000])/np.median(DM.mcmc_q2h_2g[:3000]))
+print('DM lM200',10**(np.median(DMc.mcmc_ds_lMc[:1500])-np.median(DM.mcmc_ds_lM[:1500])))
+print('DM c200',np.median(DMc.mcmc_ds_c200c[:1500])/np.median(DM.mcmc_ds_c200[:1500]))
 
 plt.figure()
 plt.hist(SIDMc.mcmc_q1hc_2g[:3000],100,histtype='step')
 plt.hist(SIDM.mcmc_q1h_2g[:3000],100,histtype='step')
 plt.hist(SIDMc.mcmc_q2hc_2g[:3000],100,histtype='step')
 plt.hist(SIDM.mcmc_q2h_2g[:3000],100,histtype='step')
+
+
+
 print('SIDM q1h',np.median(SIDMc.mcmc_q1hc_2g[:3000])/np.median(SIDM.mcmc_q1h_2g[:3000]))
 print('SIDM q2h',np.median(SIDMc.mcmc_q2hc_2g[:3000])/np.median(SIDM.mcmc_q2h_2g[:3000]))
+print('SIDM lM200',10**(np.median(SIDMc.mcmc_ds_lMc[:1500])-np.median(SIDM.mcmc_ds_lM[:1500])))
+print('SIDM c200',np.median(SIDMc.mcmc_ds_c200c[:1500])/np.median(SIDM.mcmc_ds_c200[:1500]))
+
+
 
 ######### GAMMA with radial variation
 
@@ -369,6 +403,16 @@ Gterms_sidm = quadrupoles_from_map_model(M200=10**SIDM.lM200_ds,c200=SIDM.c200_d
 G1h_sidm = Gterms_sidm(SIDM.a_2g_fb,SIDM.b_2g_fb)
 
 
+mt  = G1h_dm['GT'] + e2h_dm*Gterms_dm.GT_2h
+mtc = G1hc_dm['GT'] + e2h_dm*Gtermsc_dm.GT_2h
+chi_red(mt,DM.GT,DM.e_GT,2)
+chi_red(mtc,DM.GT,DM.e_GT,2)
+
+mx  = G1h_dm['GX'] + e2h_dm*Gterms_dm.GX_2h
+mxc = G1hc_dm['GX'] + e2h_dm*Gtermsc_dm.GX_2h
+print(chi_red(mx,DM.GX,DM.e_GX,2))
+print(chi_red(mxc,DM.GX,DM.e_GX,2))
+
 fig, ax = plt.subplots(2,2, figsize=(8,8),sharex = True)    
 
 e2h_sidm   = (1.-SIDM.q2hr_2g_fb)/(1.+SIDM.q2hr_2g_fb)
@@ -379,25 +423,25 @@ fig.subplots_adjust(hspace=0,wspace=0)
 ax[0,0].fill_between(DM.r,DM.GT+DM.e_GT,DM.GT-DM.e_GT,color='C7',alpha=0.4)
 ax[0,0].plot(DM.r,G1h_dm['GT'] + e2h_dm*Gterms_dm.GT_2h,'C4',label=r'NFW',lw=2)
 ax[0,0].plot(DM.r,G1hc_dm['GT'] + e2h_dm*Gtermsc_dm.GT_2h,'C2',label=r'NFW with core',lw=2)
-
+ax[0,0].legend(frameon=False)
 ax[0,1].fill_between(SIDM.r,SIDM.GT+SIDM.e_GT,SIDM.GT-SIDM.e_GT,color='C7',alpha=0.4)
 ax[0,1].plot(DM.r,G1h_sidm['GT'] + e2h_sidm*Gterms_sidm.GT_2h,'C4',label=r'NFW',lw=2)
 ax[0,1].plot(DM.r,G1hc_sidm['GT'] + e2h_sidm*Gtermsc_sidm.GT_2h,'C2',label=r'NFW with core',lw=2)
 
 ax[1,0].fill_between(DM.r,DM.GX+DM.e_GX,DM.GX-DM.e_GX,color='C7',alpha=0.4)
-ax[1,0].plot(DM.r,G1h_dm['GX'] + e2h_dm*GXerms_dm.GX_2h,'C4',label=r'NFW',lw=2)
-ax[1,0].plot(DM.r,G1hc_dm['GX'] + e2h_dm*GXermsc_dm.GX_2h,'C2',label=r'NFW with core',lw=2)
+ax[1,0].plot(DM.r,G1h_dm['GX'] + e2h_dm*Gterms_dm.GX_2h,'C4',label=r'NFW',lw=2)
+ax[1,0].plot(DM.r,G1hc_dm['GX'] + e2h_dm*Gtermsc_dm.GX_2h,'C2',label=r'NFW with core',lw=2)
    
 ax[1,1].fill_between(SIDM.r,SIDM.GX+SIDM.e_GX,SIDM.GX-SIDM.e_GX,color='C7',alpha=0.4)
-ax[1,1].plot(DM.r,G1h_sidm['GX'] + e2h_sidm*GXerms_sidm.GX_2h,'C4',label=r'NFW',lw=2)
-ax[1,1].plot(DM.r,G1hc_sidm['GX'] + e2h_sidm*GXermsc_sidm.GX_2h,'C2',label=r'NFW with core',lw=2)
+ax[1,1].plot(DM.r,G1h_sidm['GX'] + e2h_sidm*Gterms_sidm.GX_2h,'C4',label=r'NFW',lw=2)
+ax[1,1].plot(DM.r,G1hc_sidm['GX'] + e2h_sidm*Gtermsc_sidm.GX_2h,'C2',label=r'NFW with core',lw=2)
 
 
 ax[0,1].set_xscale('log')
 ax[0,0].set_yscale('log')
 ax[0,1].set_yscale('log')
 
-ax[0,0].legend(frameon=False)
+
 
 ax[1,0].set_xlabel('r [$h^{-1}$ Mpc]')
 ax[1,1].set_xlabel('r [$h^{-1}$ Mpc]')

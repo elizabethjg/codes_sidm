@@ -451,9 +451,10 @@ def corner_result(DM,SIDM,sname,name_tensor):
     
     
  
-def plt_profile_fitted_final(DM,SIDM,RIN,ROUT,axx3,jdx):
+def plt_profile_fitted_final(DM,SIDM,RIN,ROUT,axx3,axd3,jdx):
 
     ax,ax1,ax2 = axx3
+    axd,axd1,axd2 = axd3
     
     ##############    
     gl = 2
@@ -471,17 +472,26 @@ def plt_profile_fitted_final(DM,SIDM,RIN,ROUT,axx3,jdx):
     ax.fill_between(SIDM.r,SIDM.DS_T+SIDM.e_DS_T,SIDM.DS_T-SIDM.e_DS_T,color='C6',alpha=0.4)
     ax.set_xscale('log')
     ax.set_yscale('log')
-    if jdx == 0 and jdx == 2:
-        ax.set_ylabel(r'$\Delta\Sigma [h M_\odot/pc^2]$',labelpad=0.1)
-    ax.set_xlabel('r [$h^{-1}$ Mpc]')
     ax.set_ylim(0.5,200)
     ax.set_xlim(0.1,5)
     ax.xaxis.set_ticks([0.1,1,3])
     ax.set_xticklabels([0.1,1,3])
-    ax.yaxis.set_ticks([1,10,100])
-    ax.set_yticklabels([1,10,100])
+    ax.yaxis.set_ticks([1,10,250])
+    ax.set_yticklabels([1,10,250])
     ax.legend(loc=3,frameon=False,fontsize=10)
     
+    axd.plot(DM.r,DM.DS_T-DM.DS_fit,'C7')
+    axd.fill_between(DM.r,DM.DS_T+DM.e_DS_T-DM.DS_fit,DM.DS_T-DM.e_DS_T-DM.DS_fit,color='C7',alpha=0.4)
+    axd.plot(SIDM.r,SIDM.DS_T-SIDM.DS_fit,'C6--')
+    axd.fill_between(SIDM.r,SIDM.DS_T+SIDM.e_DS_T-SIDM.DS_fit,SIDM.DS_T-SIDM.e_DS_T-SIDM.DS_fit,color='C6',alpha=0.4)
+    axd.plot(DM.r,DM.DS_T*0.,'k--')
+    axd.set_xscale('log')
+    axd.set_ylim(-13,12)
+    axd.set_xlim(0.1,5)
+    axd.xaxis.set_ticks([0.1,1,3])
+    axd.set_xticklabels([0.1,1,3])
+    axd.set_xlabel('r [$h^{-1}$ Mpc]')
+
     
     ax1.plot(DM.r,DM.GT,'C7')
     ax1.plot(SIDM.r,SIDM.GT,'C6--')    
@@ -510,6 +520,17 @@ def plt_profile_fitted_final(DM,SIDM,RIN,ROUT,axx3,jdx):
     ax1.set_yticklabels([1,10,100])
     ax1.legend(loc=1,frameon=False,fontsize=10)
     
+    axd1.plot(DM.r,DM.GT-(DM.GT1h_fit2+DM.GT2h_fit2),'C7')
+    axd1.plot(SIDM.r,SIDM.GT-(SIDM.GT1h_fit2+SIDM.GT2h_fit2),'C6--')    
+    axd1.fill_between(DM.r,DM.GT+DM.e_GT-(DM.GT1h_fit2+DM.GT2h_fit2),DM.GT-DM.e_GT-(DM.GT1h_fit2+DM.GT2h_fit2),color='C7',alpha=0.4)
+    axd1.fill_between(DM.r,SIDM.GT+SIDM.e_GT-(SIDM.GT1h_fit2+SIDM.GT2h_fit2),SIDM.GT-SIDM.e_GT-(SIDM.GT1h_fit2+SIDM.GT2h_fit2),color='C7',alpha=0.4)
+    axd1.plot(DM.r,DM.DS_T*0.,'k--')
+    axd1.set_ylim(-7,7)
+    axd1.set_xscale('log')
+    axd1.set_xlabel('r [$h^{-1}$ Mpc]')
+    if jdx == 1:
+        axd1.set_ylabel(r'$\Gamma_T - \Gamma_{T,model}$',labelpad=0.1,fontsize=10)
+    
     ax2.plot([0,10],[0,0],'k')
     ax2.plot(DM.r,DM.GX,'C7')
     ax2.plot(SIDM.r,SIDM.GX,'C6--')    
@@ -535,7 +556,19 @@ def plt_profile_fitted_final(DM,SIDM,RIN,ROUT,axx3,jdx):
     ax2.set_xticklabels([0.1,1,3])
     ax2.legend(loc=1,frameon=False,fontsize=10)
 
-def plt_profile_fitted_final_new(DM,SIDM,RIN,ROUT,axx3,jdx):
+    axd2.plot(DM.r,DM.GX-(DM.GX1h_fit2+DM.GX2h_fit2),'C7')
+    axd2.plot(SIDM.r,SIDM.GX-(SIDM.GX1h_fit2+SIDM.GX2h_fit2),'C6--')    
+    axd2.fill_between(DM.r,DM.GX+DM.e_GX-(DM.GX1h_fit2+DM.GX2h_fit2),DM.GX-DM.e_GX-(DM.GX1h_fit2+DM.GX2h_fit2),color='C7',alpha=0.4)
+    axd2.fill_between(DM.r,SIDM.GX+SIDM.e_GX-(SIDM.GX1h_fit2+SIDM.GX2h_fit2),SIDM.GX-SIDM.e_GX-(SIDM.GX1h_fit2+SIDM.GX2h_fit2),color='C7',alpha=0.4)
+    axd2.plot(DM.r,DM.DS_T*0.,'k--')
+    axd2.set_ylim(-7,7)
+    axd2.set_xscale('log')
+    axd2.set_xlabel('r [$h^{-1}$ Mpc]')
+    if jdx == 1:
+        axd1.set_ylabel(r'$\Gamma_\times - \Gamma_{\times,model}$',labelpad=0.1,fontsize=10)
+
+
+def plt_profile_fitted_final_new(DM,SIDM,RIN,ROUT,axx3,axd3,jdx):
 
 
     a_dm, b_dm, q2h_dm = DM.a_2g_fb, DM.b_2g_fb, DM.q2hr_2g_fb
@@ -564,6 +597,7 @@ def plt_profile_fitted_final_new(DM,SIDM,RIN,ROUT,axx3,jdx):
     
 
     ax1,ax2 = axx3
+    axd1,axd2 = axd3
             
     ##############        
     gl = 3
@@ -594,6 +628,18 @@ def plt_profile_fitted_final_new(DM,SIDM,RIN,ROUT,axx3,jdx):
     ax1.set_yticklabels([1,10,100])
     ax1.legend(loc=1,frameon=False,fontsize=10)
     
+    axd1.plot(DM.r,DM.GT-model_GT_dm,'C7')
+    axd1.plot(SIDM.r,SIDM.GT-model_GT_sidm,'C6--')    
+    axd1.fill_between(DM.r,DM.GT+DM.e_GT-model_GT_dm,DM.GT-DM.e_GT-model_GT_dm,color='C7',alpha=0.4)
+    axd1.fill_between(DM.r,SIDM.GT+SIDM.e_GT-model_GT_sidm,SIDM.GT-SIDM.e_GT-model_GT_sidm,color='C7',alpha=0.4)
+    axd1.plot(DM.r,DM.DS_T*0.,'k--')
+    axd1.set_ylim(-7,7)
+    axd1.set_xscale('log')
+    axd1.set_xlabel('r [$h^{-1}$ Mpc]')
+    if jdx == 1:
+        axd1.set_ylabel(r'$\Gamma_T - \Gamma_{T,model}$',labelpad=0.1,fontsize=10)
+
+    
     model_GX_dm = G1h_dm['GX'] + e2h_dm*Gterms_dm.GX_2h
     model_GX_sidm = G1h_sidm['GX'] + e2h_sidm*Gterms_sidm.GX_2h
     ax2.plot([0,10],[0,0],'k')
@@ -621,6 +667,17 @@ def plt_profile_fitted_final_new(DM,SIDM,RIN,ROUT,axx3,jdx):
     ax2.xaxis.set_ticks([0.1,1,4])
     ax2.set_xticklabels([0.1,1,4])
     ax2.legend(loc=1,frameon=False,fontsize=10)
+
+    axd2.plot(DM.r,DM.GX-model_GX_dm,'C7')
+    axd2.plot(SIDM.r,SIDM.GX-model_GX_sidm,'C6--')    
+    axd2.fill_between(DM.r,DM.GX+DM.e_GX-model_GX_dm,DM.GX-DM.e_GX-model_GX_dm,color='C7',alpha=0.4)
+    axd2.fill_between(DM.r,SIDM.GX+SIDM.e_GX-model_GX_sidm,SIDM.GX-SIDM.e_GX-model_GX_sidm,color='C7',alpha=0.4)
+    axd2.plot(DM.r,DM.DS_T*0.,'k--')
+    axd2.set_ylim(-7,7)
+    axd2.set_xscale('log')
+    axd2.set_xlabel('r [$h^{-1}$ Mpc]')
+    if jdx == 0:
+        axd2.set_ylabel(r'$\Gamma_\times - \Gamma_{times,model}$',labelpad=0.1,fontsize=10)
 
 
 def make_radial_plot():
