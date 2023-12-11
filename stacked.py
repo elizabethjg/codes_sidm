@@ -199,7 +199,7 @@ def fit_Delta_Sigma_2h(R,zmean,ds,eds,ncores):
         
         lM200,c200 = data_model
         
-        if 12.5 < lM200 < 16.0 and 1 < c200 < 7:
+        if 12.5 < lM200 < 16.0 and 1 < c200 < 10:
             return log_likelihood_DS(data_model, R, profiles, iCOV)
             
         return -np.inf
@@ -208,7 +208,7 @@ def fit_Delta_Sigma_2h(R,zmean,ds,eds,ncores):
 
     t1 = time.time()
     pos = np.array([np.random.uniform(12.5,15.5,15),
-                    np.random.uniform(1,5,15)]).T
+                    np.random.uniform(4,8,15)]).T
     nwalkers, ndim = pos.shape
     
     sampler_DS = emcee.EnsembleSampler(nwalkers, ndim, log_probability_DS, 
