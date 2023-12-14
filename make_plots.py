@@ -528,7 +528,7 @@ def plt_profile_fitted_final(DM,SIDM,RIN,ROUT,axx3,axd3,jdx):
     axd1.set_ylim(-7,7)
     axd1.set_xscale('log')
     axd1.set_xlabel('r [$h^{-1}$ Mpc]')
-    if jdx == 1:
+    if jdx == 0:
         axd1.set_ylabel(r'$\Gamma_T - \Gamma_{T,model}$',labelpad=0.1,fontsize=10)
     
     ax2.plot([0,10],[0,0],'k')
@@ -564,8 +564,8 @@ def plt_profile_fitted_final(DM,SIDM,RIN,ROUT,axx3,axd3,jdx):
     axd2.set_ylim(-7,7)
     axd2.set_xscale('log')
     axd2.set_xlabel('r [$h^{-1}$ Mpc]')
-    if jdx == 1:
-        axd1.set_ylabel(r'$\Gamma_\times - \Gamma_{\times,model}$',labelpad=0.1,fontsize=10)
+    if jdx == 0:
+        axd2.set_ylabel(r'$\Gamma_\times - \Gamma_{\times,model}$',labelpad=0.1,fontsize=10)
 
 
 def plt_profile_fitted_final_new(DM,SIDM,RIN,ROUT,axx3,axd3,jdx):
@@ -636,7 +636,7 @@ def plt_profile_fitted_final_new(DM,SIDM,RIN,ROUT,axx3,axd3,jdx):
     axd1.set_ylim(-7,7)
     axd1.set_xscale('log')
     axd1.set_xlabel('r [$h^{-1}$ Mpc]')
-    if jdx == 1:
+    if jdx == 0:
         axd1.set_ylabel(r'$\Gamma_T - \Gamma_{T,model}$',labelpad=0.1,fontsize=10)
 
     
@@ -677,7 +677,7 @@ def plt_profile_fitted_final_new(DM,SIDM,RIN,ROUT,axx3,axd3,jdx):
     axd2.set_xscale('log')
     axd2.set_xlabel('r [$h^{-1}$ Mpc]')
     if jdx == 0:
-        axd2.set_ylabel(r'$\Gamma_\times - \Gamma_{times,model}$',labelpad=0.1,fontsize=10)
+        axd2.set_ylabel(r'$\Gamma_\times - \Gamma_{\times,model}$',labelpad=0.1,fontsize=10)
 
 
 def make_radial_plot():
